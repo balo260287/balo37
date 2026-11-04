@@ -20,7 +20,7 @@
 //|   - Kiem tra ky quy, chuan hoa lot/gia theo buoc cua san          |
 //+------------------------------------------------------------------+
 #property copyright "balo37"
-#property version   "1.10"
+#property version   "1.11"
 
 #include <Trade\Trade.mqh>
 
@@ -81,9 +81,62 @@ input int    InpDeviationPoints        = 30;        // Do truot gia cho phep (po
 input ulong  InpMagic                  = 26021987;  // Magic number
 input bool   InpDrawRange              = true;      // Ve range len bieu do
 
+//--- Chan doan
+input group "=== Chan doan ==="
+input bool   InpDebug                  = true;      // In ly do bo qua tung nen ra tab Experts
+input bool   InpTestTrade              = false;     // Vao 1 lenh thu 0.01 lot de kiem tra quyen giao dich
+
 CTrade   trade;
 int      atrHandle = INVALID_HANDLE;
 datetime lastBarTime = 0;
+bool     testTradeDone = false;
+
+//--- Thong ke ly do khong vao lenh
+enum ENUM_REJECT
+  {
+   R_POSITION = 0, R_HOURS, R_MAXTRADES, R_DAYLOSS, R_SPREAD, R_WIDTH, R_TOUCH,
+   R_OUTSIDE, R_VOLUME, R_NOPATTERN, R_GAP, R_RR, R_STOPS, R_LOT, R_SEND, R_COUNT
+  };
+string g_rejName[] =
+  {
+   "Dang co lenh mo", "Ngoai gio giao dich", "Du so lenh trong ngay", "Cham gioi han lo ngay",
+   "Spread qua cao", "Range qua hep/qua rong", "Khong du so lan cham bien",
+   "Nen xuyen ca 2 bien", "Volume nen tin hieu thap", "Khong co Spring/Upthrust",
+   "Gia da vuot SL", "RR thap", "SL/TP qua gan (stops level)", "Lot khong hop le/thieu ky quy",
+   "Loi gui lenh"
+  };
+int    g_rej[R_COUNT];
+int    g_barsChecked = 0;
+int    g_signals     = 0;
+int    g_orders      = 0;
+string g_status      = "Dang cho nen moi...";
+
+void Reject(int r, string detail = "")
+  {
+   g_rej[r]++;
+   g_status = g_rejName[r] + (detail != "" ? " (" + detail + ")" : "");
+   if(InpDebug)
+      PrintFormat("[WY %s] %s", TimeToString(iTime(_Symbol, InpTF, 1)), g_status);
+   ShowStatus();
+  }
+
+void ShowStatus()
+  {
+   if(MQLInfoInteger(MQL_OPTIMIZATION))
+      return;
+   MqlTick tk;
+   double spreadPts = SymbolInfoTick(_Symbol, tk) ? (tk.ask - tk.bid) / _Point : -1;
+   bool allowed = (bool)MQLInfoInteger(MQL_TRADE_ALLOWED) && (bool)TerminalInfoInteger(TERMINAL_TRADE_ALLOWED);
+   Comment(StringFormat("WyckoffGold v1.11  |  %s %s\n"
+                        "Algo Trading: %s\n"
+                        "Spread: %.0f / %d points (digits=%d)\n"
+                        "Nen da xet: %d  |  Tin hieu: %d  |  Lenh da vao: %d\n"
+                        "Trang thai: %s",
+                        _Symbol, EnumToString(InpTF),
+                        allowed ? "BAT" : "TAT -> bam nut Algo Trading tren thanh cong cu!",
+                        spreadPts, InpMaxSpreadPoints, _Digits,
+                        g_barsChecked, g_signals, g_orders, g_status));
+  }
 
 //+------------------------------------------------------------------+
 int OnInit()
@@ -127,6 +180,7 @@ int OnInit()
       PrintFormat("Canh bao: EA duoc thiet ke cho vang, dang chay tren %s", _Symbol);
 
    atrHandle = iATR(_Symbol, InpTF, InpATRPeriod);
+   ArrayInitialize(g_rej, 0);
    if(atrHandle == INVALID_HANDLE)
      {
       Print("Khong tao duoc ATR, loi ", GetLastError());
@@ -136,6 +190,9 @@ int OnInit()
    trade.SetDeviationInPoints(InpDeviationPoints);
    trade.SetTypeFillingBySymbol(_Symbol);
    trade.SetMarginMode();
+   PrintFormat("WyckoffGold khoi dong: %s %s, digits=%d, point=%g, spread toi da=%d points",
+               _Symbol, EnumToString(InpTF), _Digits, _Point, InpMaxSpreadPoints);
+   ShowStatus();
    return INIT_SUCCEEDED;
   }
 
@@ -145,6 +202,38 @@ void OnDeinit(const int reason)
    if(atrHandle != INVALID_HANDLE)
       IndicatorRelease(atrHandle);
    ObjectsDeleteAll(0, "WY_");
+
+   //--- Tong ket ly do khong vao lenh (rat huu ich khi backtest)
+   PrintFormat("===== WyckoffGold tong ket: %d nen da xet, %d tin hieu, %d lenh =====",
+               g_barsChecked, g_signals, g_orders);
+   for(int i = 0; i < R_COUNT; i++)
+      if(g_rej[i] > 0)
+         PrintFormat("  %-32s : %d", g_rejName[i], g_rej[i]);
+   Comment("");
+  }
+
+//+------------------------------------------------------------------+
+//| Lenh thu: kiem tra EA co quyen va kha nang vao lenh tren tai khoan|
+//+------------------------------------------------------------------+
+void DoTestTrade()
+  {
+   testTradeDone = true;
+   MqlTick tk;
+   if(!SymbolInfoTick(_Symbol, tk))
+      return;
+   double dist = 500 * _Point;
+   double sl = NormPrice(tk.bid - dist);
+   double tp = NormPrice(tk.bid + dist);
+   double lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   CTrade t;
+   t.SetExpertMagicNumber(InpMagic + 1);   // magic rieng, khong anh huong logic chinh
+   t.SetDeviationInPoints(InpDeviationPoints);
+   t.SetTypeFillingBySymbol(_Symbol);
+   if(t.Buy(lot, _Symbol, 0, sl, tp, "WY TEST"))
+      PrintFormat("LENH THU OK: retcode %u %s -> EA vao lenh duoc. Nho dong lenh thu bang tay.",
+                  t.ResultRetcode(), t.ResultRetcodeDescription());
+   else
+      PrintFormat("LENH THU THAT BAI: retcode %u %s", t.ResultRetcode(), t.ResultRetcodeDescription());
   }
 
 //+------------------------------------------------------------------+
@@ -152,22 +241,46 @@ void OnTick()
   {
    ManageBreakeven();
 
+   if(!(bool)MQLInfoInteger(MQL_TRADE_ALLOWED) || !(bool)TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
+     {
+      g_status = "Algo Trading dang TAT -> EA khong the vao lenh";
+      ShowStatus();
+      return;
+     }
+
+   if(InpTestTrade && !testTradeDone)
+      DoTestTrade();
+
    datetime barTime = iTime(_Symbol, InpTF, 0);
    if(barTime == 0 || barTime == lastBarTime)
       return;
 
    //--- Cac bo loc khong thay doi trong nen -> danh dau nen da xu ly
-   if(HasOpenPosition() || !InTradingHours())
+   if(HasOpenPosition())
      {
       lastBarTime = barTime;
+      Reject(R_POSITION);
+      return;
+     }
+   if(!InTradingHours())
+     {
+      lastBarTime = barTime;
+      Reject(R_HOURS);
       return;
      }
    int    entriesToday = 0;
    double pnlToday     = 0;
    GetDayStats(entriesToday, pnlToday);
-   if(entriesToday >= InpMaxTradesPerDay || DailyLossHit(pnlToday))
+   if(entriesToday >= InpMaxTradesPerDay)
      {
       lastBarTime = barTime;
+      Reject(R_MAXTRADES);
+      return;
+     }
+   if(DailyLossHit(pnlToday))
+     {
+      lastBarTime = barTime;
+      Reject(R_DAYLOSS);
       return;
      }
 
@@ -175,13 +288,22 @@ void OnTick()
    if(!SpreadOK())
      {
       if(TimeCurrent() - barTime >= InpEntryWindowSec)
+        {
          lastBarTime = barTime;
+         MqlTick tk;
+         SymbolInfoTick(_Symbol, tk);
+         Reject(R_SPREAD, StringFormat("%.0f > %d points", (tk.ask - tk.bid) / _Point, InpMaxSpreadPoints));
+        }
       return;
      }
 
    //--- CheckSignal tra ve false neu du lieu chua san sang -> thu lai tick sau
    if(CheckSignal())
+     {
       lastBarTime = barTime;
+      g_barsChecked++;
+      ShowStatus();
+     }
   }
 
 //+------------------------------------------------------------------+
@@ -245,14 +367,20 @@ bool CheckSignal()
      }
    double width = rangeHigh - rangeLow;
    if(width < InpMinRangeATR * atr || width > InpMaxRangeATR * atr)
+     {
+      Reject(R_WIDTH, StringFormat("rong %.1f ATR, can %.1f-%.1f", width / atr, InpMinRangeATR, InpMaxRangeATR));
       return true; // khong phai vung di ngang
+     }
 
    //--- Dem so lan gia cham 2 bien (moi lan rieng biet) -> xac nhan range that
    double tol = InpTouchTolATR * atr;
    int touchHigh = CountTouches(r, 2, last, rangeHigh, tol, true);
    int touchLow  = CountTouches(r, 2, last, rangeLow,  tol, false);
    if(touchHigh < InpMinTouches || touchLow < InpMinTouches)
+     {
+      Reject(R_TOUCH, StringFormat("dinh %d, day %d, can %d", touchHigh, touchLow, InpMinTouches));
       return true;
+     }
 
    if(InpDrawRange)
       DrawRange(r[last].time, r[0].time, rangeHigh, rangeLow);
@@ -263,11 +391,17 @@ bool CheckSignal()
    double c = r[1].close;
    double barRange = h - l;
    if(barRange <= 0)
+     {
+      Reject(R_NOPATTERN, "nen khong co bien do");
       return true;
+     }
 
    //--- Nen xuyen ca 2 bien -> mo ho, bo qua
    if(h > rangeHigh && l < rangeLow)
+     {
+      Reject(R_OUTSIDE);
       return true;
+     }
 
    //--- Volume (tick volume) so voi trung binh
    double volSum = 0;
@@ -276,7 +410,10 @@ bool CheckSignal()
    double volAvg = volSum / InpVolMAPeriod;
    double vol    = (double)r[1].tick_volume;
    if(volAvg <= 0 || vol < InpVolMult * volAvg)
+     {
+      Reject(R_VOLUME, StringFormat("%.2f x TB, can %.2f", volAvg > 0 ? vol / volAvg : 0.0, InpVolMult));
       return true;
+     }
 
    //--- SPRING -> BUY
    double penLow = rangeLow - l;
@@ -288,6 +425,7 @@ bool CheckSignal()
       (c - l) / barRange >= InpCloseStrength)
      {
       double sl = l - InpSLBufferATR * atr;
+      g_signals++;
       OpenTrade(ORDER_TYPE_BUY, sl, rangeHigh, "Spring");
       return true;
      }
@@ -302,9 +440,11 @@ bool CheckSignal()
       (h - c) / barRange >= InpCloseStrength)
      {
       double sl = h + InpSLBufferATR * atr;
+      g_signals++;
       OpenTrade(ORDER_TYPE_SELL, sl, rangeLow, "Upthrust");
       return true;
      }
+   Reject(R_NOPATTERN, "range hop le nhung nen chua tao Spring/Upthrust");
    return true;
   }
 
@@ -340,12 +480,12 @@ void OpenTrade(ENUM_ORDER_TYPE type, double sl, double rangeTarget, string tag)
    double reward = isBuy ? tp - entry : entry - tp;
    if(risk <= 0)
      {
-      PrintFormat("%s bo qua: gia vao %.2f da vuot SL %.2f", tag, entry, sl);
+      Reject(R_GAP, StringFormat("%s: gia vao %.2f, SL %.2f", tag, entry, sl));
       return;
      }
    if(reward <= 0 || reward / risk < InpMinRR)
      {
-      PrintFormat("%s bo qua: RR=%.2f < %.2f", tag, reward / risk, InpMinRR);
+      Reject(R_RR, StringFormat("%s: RR=%.2f < %.2f", tag, reward / risk, InpMinRR));
       return;
      }
 
@@ -355,22 +495,30 @@ void OpenTrade(ENUM_ORDER_TYPE type, double sl, double rangeTarget, string tag)
    double tpDist  = isBuy ? tp - tk.bid : tk.ask - tp;
    if(slDist <= minDist || tpDist <= minDist)
      {
-      PrintFormat("%s bo qua: SL/TP qua gan gia (stops level)", tag);
+      Reject(R_STOPS, tag);
       return;
      }
 
    double lot = CalcLot(type, entry, sl);
    if(lot <= 0)
+     {
+      Reject(R_LOT, tag);
       return;
+     }
 
    bool ok = isBuy ? trade.Buy(lot, _Symbol, 0, sl, tp, "WY " + tag)
                    : trade.Sell(lot, _Symbol, 0, sl, tp, "WY " + tag);
    uint rc = trade.ResultRetcode();
    if(ok && (rc == TRADE_RETCODE_DONE || rc == TRADE_RETCODE_DONE_PARTIAL || rc == TRADE_RETCODE_PLACED))
+     {
+      g_orders++;
+      g_status = StringFormat("%s: %s %.2f lot, SL=%.2f TP=%.2f", tag, (isBuy ? "BUY" : "SELL"), lot, sl, tp);
       PrintFormat("%s: %s %.2f lot @%.2f, SL=%.2f TP=%.2f, RR=%.2f", tag,
                   (isBuy ? "BUY" : "SELL"), lot, trade.ResultPrice(), sl, tp, reward / risk);
+      ShowStatus();
+     }
    else
-      PrintFormat("Loi vao lenh %s: %u %s", tag, rc, trade.ResultRetcodeDescription());
+      Reject(R_SEND, StringFormat("%s: %u %s", tag, rc, trade.ResultRetcodeDescription()));
   }
 
 //+------------------------------------------------------------------+
