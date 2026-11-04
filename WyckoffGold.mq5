@@ -105,7 +105,7 @@ string g_rejName[] =
    "Gia da vuot SL", "RR thap", "SL/TP qua gan (stops level)", "Lot khong hop le/thieu ky quy",
    "Loi gui lenh"
   };
-int    g_rej[R_COUNT];
+int    g_rej[];
 int    g_barsChecked = 0;
 int    g_signals     = 0;
 int    g_orders      = 0;
@@ -141,6 +141,8 @@ void ShowStatus()
 //+------------------------------------------------------------------+
 int OnInit()
   {
+   ArrayResize(g_rej, R_COUNT);
+   ArrayInitialize(g_rej, 0);
    if(InpRangeBars < 10 || InpVolMAPeriod < 2 || InpATRPeriod < 2 || InpMinTouches < 1)
      {
       Print("Tham so khong hop le: RangeBars>=10, VolMAPeriod>=2, ATRPeriod>=2, MinTouches>=1");
@@ -180,7 +182,6 @@ int OnInit()
       PrintFormat("Canh bao: EA duoc thiet ke cho vang, dang chay tren %s", _Symbol);
 
    atrHandle = iATR(_Symbol, InpTF, InpATRPeriod);
-   ArrayInitialize(g_rej, 0);
    if(atrHandle == INVALID_HANDLE)
      {
       Print("Khong tao duoc ATR, loi ", GetLastError());
@@ -206,7 +207,8 @@ void OnDeinit(const int reason)
    //--- Tong ket ly do khong vao lenh (rat huu ich khi backtest)
    PrintFormat("===== WyckoffGold tong ket: %d nen da xet, %d tin hieu, %d lenh =====",
                g_barsChecked, g_signals, g_orders);
-   for(int i = 0; i < R_COUNT; i++)
+   int n = MathMin(ArraySize(g_rej), ArraySize(g_rejName));
+   for(int i = 0; i < n; i++)
       if(g_rej[i] > 0)
          PrintFormat("  %-32s : %d", g_rejName[i], g_rej[i]);
    Comment("");
