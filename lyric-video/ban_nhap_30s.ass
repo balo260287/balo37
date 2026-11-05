@@ -1,0 +1,33 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 2
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sing,Be Vietnam Pro ExtraBold,104,&H0040E0FF,&H00FFFFFF,&H00501A2E,&H96000000,0,0,0,0,100,100,1,0,1,7,4,5,80,80,0,1
+Style: Next,Be Vietnam Pro,62,&H50FFFFFF,&H50FFFFFF,&H70301020,&H00000000,1,0,0,0,100,100,1,0,1,4,0,5,80,80,0,1
+Style: Title,Be Vietnam Pro ExtraBold,128,&H00FFFFFF,&H00FFFFFF,&H00501A2E,&H96000000,0,0,0,0,100,100,2,0,1,8,5,5,80,80,0,1
+Style: Sub,Be Vietnam Pro,54,&H0040E0FF,&H0040E0FF,&H00501A2E,&H00000000,1,0,0,0,100,100,6,0,1,4,0,5,80,80,0,1
+Style: Tag,Be Vietnam Pro,36,&H30FFFFFF,&H30FFFFFF,&H00301020,&H00000000,1,0,0,0,100,100,8,0,1,2,0,7,60,60,50,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 2,0:00:00.30,0:00:07.40,Title,,0,0,0,,{\pos(960,470)\fad(500,400)\t(0,600,\fscx100\fscy100)\fscx70\fscy70}Sinh nhật anh Ủn
+Dialogue: 2,0:00:01.00,0:00:07.40,Sub,,0,0,0,,{\pos(960,610)\fad(500,400)}CHÍN TUỔI  •  LYRIC VIDEO
+Dialogue: 1,0:00:07.65,0:00:11.65,Sing,,0,0,0,,{\pos(960,540)\fad(180,160)\fscx92\fscy92\t(0,220,\fscx100\fscy100)}{\k35}{\kf25}Hôm {\kf25}nay {\kf50}là {\kf50}ngày {\kf150}vui
+Dialogue: 0,0:00:07.65,0:00:11.65,Next,,0,0,0,,{\pos(960,680)\fad(250,160)}Anh Ủn lớn thêm rồi
+Dialogue: 0,0:00:07.65,0:00:23.65,Tag,,0,0,0,,{\fad(300,300)}ĐOẠN 1
+Dialogue: 1,0:00:11.65,0:00:15.65,Sing,,0,0,0,,{\pos(960,540)\fad(180,160)\fscx92\fscy92\t(0,220,\fscx100\fscy100)}{\k35}{\kf25}Anh {\kf25}Ủn {\kf50}lớn {\kf50}thêm {\kf150}rồi
+Dialogue: 0,0:00:11.65,0:00:15.65,Next,,0,0,0,,{\pos(960,680)\fad(250,160)}Chín cây nến lung linh sáng
+Dialogue: 1,0:00:15.65,0:00:19.65,Sing,,0,0,0,,{\pos(960,540)\fad(180,160)\fscx92\fscy92\t(0,220,\fscx100\fscy100)}{\k35}{\kf25}Chín {\kf25}cây {\kf25}nến {\kf25}lung {\kf50}linh {\kf150}sáng
+Dialogue: 0,0:00:15.65,0:00:19.65,Next,,0,0,0,,{\pos(960,680)\fad(250,160)}Rạng rỡ nụ cười tươi!
+Dialogue: 1,0:00:19.65,0:00:23.65,Sing,,0,0,0,,{\pos(960,540)\fad(180,160)\fscx92\fscy92\t(0,220,\fscx100\fscy100)}{\k35}{\kf25}Rạng {\kf25}rỡ {\kf50}nụ {\kf50}cười {\kf150}tươi!
+Dialogue: 0,0:00:19.65,0:00:23.65,Next,,0,0,0,,{\pos(960,680)\fad(250,160)}Ủn ơi Ủn à ơi
+Dialogue: 1,0:00:23.65,0:00:27.65,Sing,,0,0,0,,{\pos(960,540)\fad(180,160)\fscx92\fscy92\t(0,220,\fscx100\fscy100)}{\k35}{\kf25}Ủn {\kf25}ơi {\kf50}Ủn {\kf50}à {\kf150}ơi
+Dialogue: 0,0:00:23.65,0:00:27.65,Next,,0,0,0,,{\pos(960,680)\fad(250,160)}Chín tuổi rồi đó nha
+Dialogue: 0,0:00:23.65,0:00:39.65,Tag,,0,0,0,,{\fad(300,300)}ĐOẠN 2
+Dialogue: 1,0:00:27.65,0:00:31.65,Sing,,0,0,0,,{\pos(960,540)\fad(180,160)\fscx92\fscy92\t(0,220,\fscx100\fscy100)}{\k35}{\kf25}Chín {\kf25}tuổi {\kf50}rồi {\kf50}đó {\kf150}nha
+Dialogue: 0,0:00:27.65,0:00:31.65,Next,,0,0,0,,{\pos(960,680)\fad(250,160)}Ăn thật nhiều, cao thật lẹ
