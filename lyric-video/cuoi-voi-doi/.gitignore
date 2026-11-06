@@ -1,2 +1,3 @@
 render.log
 *.ass
+__pycache__/
