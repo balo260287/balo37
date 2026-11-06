@@ -1,0 +1,41 @@
+[Script Info]
+ScriptType: v4.00+
+PlayResX: 1920
+PlayResY: 1080
+WrapStyle: 0
+ScaledBorderAndShadow: yes
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Sing,Be Vietnam Pro ExtraBold,82,&H0060C8FF,&H00F0EAE6,&H00281810,&H8C000000,0,0,0,0,100,100,0.5,0,1,4,3,5,160,160,0,1
+Style: Prev,Be Vietnam Pro,52,&H90F0EAE6,&H90F0EAE6,&HB0281810,&H00000000,1,0,0,0,100,100,0.5,0,1,2,0,5,200,200,0,1
+Style: Title,Be Vietnam Pro ExtraBold,120,&H00F0EAE6,&H00F0EAE6,&H00281810,&H8C000000,0,0,0,0,100,100,3,0,1,5,4,5,80,80,0,1
+Style: Sub,Be Vietnam Pro,44,&H0060C8FF,&H0060C8FF,&H00281810,&H00000000,1,0,0,0,100,100,10,0,1,2,0,5,80,80,0,1
+Style: Tag,Be Vietnam Pro,34,&H50F0EAE6,&H50F0EAE6,&H00281810,&H00000000,1,0,0,0,100,100,8,0,1,2,0,7,70,70,56,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+Dialogue: 2,0:00:00.40,0:00:14.00,Title,,0,0,0,,{\pos(960,500)\fad(1200,700)\blur1}Cười Với Đời Hết Hơi
+Dialogue: 2,0:00:01.20,0:00:14.00,Sub,,0,0,0,,{\pos(960,620)\fad(1200,700)}LYRIC VIDEO
+Dialogue: 1,0:00:22.50,0:00:24.70,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf19}Năm {\kf19}giờ {\kf19}sáng {\kf19}anh {\kf19}tắt {\kf19}báo {\kf19}thức, {\kf19}nhìn {\kf19}điện {\kf52}thoại
+Dialogue: 0,0:00:22.50,0:00:24.70,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Bài tập con chưa làm nằm im trên mặt tủ
+Dialogue: 0,0:00:22.50,0:00:43.80,Tag,,0,0,0,,{\fad(500,500)}ĐOẠN 1
+Dialogue: 1,0:00:24.70,0:00:26.40,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf14}Bài {\kf14}tập {\kf14}con {\kf14}chưa {\kf14}làm {\kf14}nằm {\kf14}im {\kf14}trên {\kf14}mặt {\kf40}tủ
+Dialogue: 0,0:00:24.70,0:00:26.40,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Người ta hỏi: "Một mình nuôi con, có mệt không?"
+Dialogue: 1,0:00:26.40,0:00:29.10,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf23}Người {\kf23}ta {\kf23}hỏi: {\kf23}"Một {\kf23}mình {\kf23}nuôi {\kf23}con, {\kf23}có {\kf23}mệt {\kf63}không?"
+Dialogue: 0,0:00:26.40,0:00:29.10,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Anh cười: "Mệt để mai đi, nó ngậm cơm trong má phồng"
+Dialogue: 1,0:00:29.10,0:00:31.60,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf18}Anh {\kf18}cười: {\kf18}"Mệt {\kf18}để {\kf18}mai {\kf18}đi, {\kf18}nó {\kf18}ngậm {\kf18}cơm {\kf18}trong {\kf18}má {\kf55}phồng"
+Dialogue: 0,0:00:29.10,0:00:31.60,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Bàn tay này từng run khi lần đầu nắm tay em
+Dialogue: 1,0:00:31.60,0:00:35.20,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf28}Bàn {\kf28}tay {\kf28}này {\kf28}từng {\kf28}run {\kf28}khi {\kf28}lần {\kf28}đầu {\kf28}nắm {\kf28}tay {\kf82}em
+Dialogue: 0,0:00:31.60,0:00:35.20,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Giờ chiên trứng, tết tóc, rửa đít, chai đến mức quen
+Dialogue: 1,0:00:35.20,0:00:38.70,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf27}Giờ {\kf27}chiên {\kf27}trứng, {\kf27}tết {\kf27}tóc, {\kf27}rửa {\kf27}đít, {\kf27}chai {\kf27}đến {\kf27}mức {\kf80}quen
+Dialogue: 0,0:00:35.20,0:00:38.70,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Đời tát một cái, anh cười rồi chìa má kia
+Dialogue: 1,0:00:38.70,0:00:40.80,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf18}Đời {\kf18}tát {\kf18}một {\kf18}cái, {\kf18}anh {\kf18}cười {\kf18}rồi {\kf18}chìa {\kf18}má {\kf49}kia
+Dialogue: 0,0:00:38.70,0:00:40.80,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Không phải hiền đâu em, da dày từ dạo chia lìa
+Dialogue: 1,0:00:40.80,0:00:43.50,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf21}Không {\kf21}phải {\kf21}hiền {\kf21}đâu {\kf21}em, {\kf21}da {\kf21}dày {\kf21}từ {\kf21}dạo {\kf21}chia {\kf61}lìa
+Dialogue: 0,0:00:40.80,0:00:43.50,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Có người bảo anh mạnh mẽ, anh chỉ gật đầu
+Dialogue: 1,0:00:43.50,0:00:46.90,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf29}Có {\kf29}người {\kf29}bảo {\kf29}anh {\kf29}mạnh {\kf29}mẽ, {\kf29}anh {\kf29}chỉ {\kf29}gật {\kf80}đầu
+Dialogue: 0,0:00:43.50,0:00:46.90,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Mạnh mẽ là khi chẳng còn ai để tựa vào đâu
+Dialogue: 0,0:00:43.50,0:00:58.80,Tag,,0,0,0,,{\fad(500,500)}TIỀN ĐIỆP KHÚC
+Dialogue: 1,0:00:46.90,0:00:48.80,Sing,,0,0,0,,{\pos(960,540)\fad(350,300)\blur0.6}{\k30}{\kf15}Mạnh {\kf15}mẽ {\kf15}là {\kf15}khi {\kf15}chẳng {\kf15}còn {\kf15}ai {\kf15}để {\kf15}tựa {\kf15}vào {\kf43}đâu
+Dialogue: 0,0:00:46.90,0:00:48.80,Prev,,0,0,0,,{\pos(960,700)\fad(450,300)}Tối về khóa cửa, tắt đèn, đắp chăn cho con
