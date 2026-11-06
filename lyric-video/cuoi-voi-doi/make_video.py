@@ -264,13 +264,13 @@ def main():
     ass = os.path.splitext(a.out)[0] + ".ass"
     write_ass(lines, ass, t0 + dur)
     cut = a.duration is not None and t0 + dur < total
-    vf = f"setpts=PTS+{t0}/TB,ass='{ass}':fontsdir='{FONTS}',setpts=PTS-STARTPTS,fade=t=in:st=0:d=0.8"
+    vf = f"setpts=PTS+{t0}/TB,ass='{ass}':fontsdir='{FONTS}',setpts=PTS-STARTPTS,hqdn3d=3:2:4:3,fade=t=in:st=0:d=0.8"
     af = "afade=t=in:st=0:d=0.5" if t0 else "anull"
     if cut or t0:
         vf += f",fade=t=out:st={dur - 1}:d=1"; af += f",afade=t=out:st={dur - 1}:d=1"
     cmd = ["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS),
            "-i", "-", "-ss", f"{t0:.3f}", "-t", f"{dur:.3f}", "-i", a.audio, "-vf", vf, "-af", af,
-           "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p",
+           "-map", "0:v", "-map", "1:a", "-c:v", "libx264", "-preset", "medium", "-crf", "24", "-pix_fmt", "yuv420p",
            "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart", "-shortest", a.out]
     p = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     bg = Background()
