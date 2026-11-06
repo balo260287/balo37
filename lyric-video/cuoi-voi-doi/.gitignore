@@ -1,1 +1,4 @@
 render.log
+*.ass
+# đang render, sẽ thêm bằng git add -f khi xong
+cuoi_voi_doi_lyric.mp4
