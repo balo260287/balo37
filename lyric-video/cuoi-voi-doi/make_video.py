@@ -43,13 +43,15 @@ def read_timing(path):
             tags = re.findall(r"\[(\d+:\d+(?:[.:]\d+)?)\]", line)
             body = re.sub(r"\[[^\]]*\]", "", line).strip()
             if not tags or not body: continue
-            words = None
+            words, words_end = None, None
             if re.search(r"<\d+:\d+", body):  # LRC nâng cao: <mm:ss.xx>chữ
                 pieces = re.findall(r"<(\d+:\d+(?:\.\d+)?)>([^<]*)", body)
                 words = [(w.strip(), _ts(t)) for t, w in pieces if w.strip()]
+                if pieces and not pieces[-1][1].strip():
+                    words_end = _ts(pieces[-1][0])
                 body = " ".join(w for w, _ in words)
             for t in tags:
-                out.append(dict(start=_ts(t), end=None, text=body, words=words))
+                out.append(dict(start=_ts(t), end=words_end, text=body, words=words))
     out.sort(key=lambda d: d["start"])
     for i, d in enumerate(out):
         nxt = out[i + 1]["start"] if i + 1 < len(out) else d["start"] + 6
@@ -103,7 +105,7 @@ def esc(s):
     return s.replace("{", "(").replace("}", ")")
 
 
-def write_ass(lines, path, duration):
+def write_ass(lines, path, duration, y_sing=540, y_next=700, y_title=500, sing_size=82):
     head = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
@@ -113,7 +115,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Sing,Be Vietnam Pro ExtraBold,82,&H0060C8FF,&H00F0EAE6,&H00281810,&H8C000000,0,0,0,0,100,100,0.5,0,1,4,3,5,160,160,0,1
+Style: Sing,Be Vietnam Pro ExtraBold,{sing_size},&H0060C8FF,&H00F0EAE6,&H00281810,&H8C000000,0,0,0,0,100,100,0.5,0,1,4,3,5,160,160,0,1
 Style: Prev,Be Vietnam Pro,52,&H90F0EAE6,&H90F0EAE6,&HB0281810,&H00000000,1,0,0,0,100,100,0.5,0,1,2,0,5,200,200,0,1
 Style: Title,Be Vietnam Pro ExtraBold,120,&H00F0EAE6,&H00F0EAE6,&H00281810,&H8C000000,0,0,0,0,100,100,3,0,1,5,4,5,80,80,0,1
 Style: Sub,Be Vietnam Pro,44,&H0060C8FF,&H0060C8FF,&H00281810,&H00000000,1,0,0,0,100,100,10,0,1,2,0,5,80,80,0,1
@@ -125,8 +127,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     ev = []
     first = lines[0]["start"] if lines else 8
     tend = max(min(first - .6, 14), 3)
-    ev.append(f"Dialogue: 2,{T(.4)},{T(tend)},Title,,0,0,0,,{{\\pos(960,500)\\fad(1200,700)\\blur1}}{TITLE}")
-    ev.append(f"Dialogue: 2,{T(1.2)},{T(tend)},Sub,,0,0,0,,{{\\pos(960,620)\\fad(1200,700)}}LYRIC VIDEO")
+    ev.append(f"Dialogue: 2,{T(.4)},{T(tend)},Title,,0,0,0,,{{\\pos(960,{y_title})\\fad(1200,700)\\blur1}}{TITLE}")
+    ev.append(f"Dialogue: 2,{T(1.2)},{T(tend)},Sub,,0,0,0,,{{\\pos(960,{y_title + 120})\\fad(1200,700)}}LYRIC VIDEO")
     lead = .3
     for i, L in enumerate(lines):
         st = L["start"] - lead
@@ -139,9 +141,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             parts.append(f"{{\\kf{max(int(round((e - s) * 100)), 1)}}}{esc(w)} ")
             cur = max(e, cur)
         ev.append(f"Dialogue: 1,{T(st)},{T(en)},Sing,,0,0,0,,"
-                  r"{\pos(960,540)\fad(350,300)\blur0.6}" + "".join(parts).rstrip())
+                  f"{{\\pos(960,{y_sing})\\fad(350,300)\\blur0.6}}" + "".join(parts).rstrip())
         if i + 1 < len(lines) and lines[i + 1]["start"] - lead - en < 1:
-            ev.append(f"Dialogue: 0,{T(st)},{T(en)},Prev,,0,0,0,,{{\\pos(960,700)\\fad(450,300)}}{esc(lines[i + 1]['text'])}")
+            ev.append(f"Dialogue: 0,{T(st)},{T(en)},Prev,,0,0,0,,{{\\pos(960,{y_next})\\fad(450,300)}}{esc(lines[i + 1]['text'])}")
         if L.get("section") and (i == 0 or lines[i - 1].get("section") != L["section"]):
             send = st
             for k in range(i, len(lines)):
