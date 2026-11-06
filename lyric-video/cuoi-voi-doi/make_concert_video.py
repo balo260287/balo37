@@ -16,6 +16,7 @@ W, H, FPS = 1280, 720, mv.FPS
 MOUTH = (630, 287); CHIN_Y = 335; NECK = (630, 365)
 CH = 610   # chiều cao nhân vật trên khung 720p
 CTOP = 40
+NO_STAND = False   # bản có tay cầm mic thì không vẽ mic đứng
 
 
 def smooth(x, a, b):
@@ -144,8 +145,9 @@ class Concert:
         nod = 3.0 * np.sin(2 * np.pi * ph + .4) * (.4 + .6 * energy)
         breath = .012 * (.5 + .5 * np.sin(t * 2.1))
         c = self.char.render(head, nod, 4.0 * vocal, breath)
-        Mx = cv2.getRotationMatrix2D((self.char.w / 2, self.char.h * .8), sway, 1.0)
-        Mx[0, 2] += W / 2 - self.char.w / 2; Mx[1, 2] += CTOP + bob
+        chh, chw = c.shape[:2]; offy = (chh - self.char.h) / 2
+        Mx = cv2.getRotationMatrix2D((chw / 2, offy + self.char.h * .8), sway, 1.0)
+        Mx[0, 2] += W / 2 - chw / 2; Mx[1, 2] += CTOP - offy + bob
         cw = cv2.warpAffine(c, Mx, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
         a = cw[..., 3:4]
         rim = cv2.GaussianBlur(a, (0, 0), 3)[..., None] - a if a.ndim == 2 else cv2.GaussianBlur(a[..., 0], (0, 0), 3)[..., None] - a
@@ -156,15 +158,17 @@ class Concert:
         # micro cầm/đứng trước miệng
         canvas = (np.clip(img, 0, 1) * 255).astype(np.uint8)
         mx, my = self.char.mouth
+        mx += (chw - self.char.w) / 2; my += offy
         p = Mx @ np.array([mx + 30, my + 44, 1.0])
         px, py = int(p[0]), int(p[1])
-        bx = int(W / 2 + 120)
-        cv2.line(canvas, (bx, 668), (bx, 360), (26, 26, 30), 6, cv2.LINE_AA)
-        cv2.line(canvas, (bx, 360), (px + 12, py + 22), (36, 36, 40), 5, cv2.LINE_AA)
-        for d in (-45, 0, 45): cv2.line(canvas, (bx, 655), (bx + d, 675), (22, 22, 25), 6, cv2.LINE_AA)
-        cv2.ellipse(canvas, (px + 5, py + 11), (9, 22), -30, 0, 360, (30, 30, 35), -1, cv2.LINE_AA)
-        cv2.ellipse(canvas, (px, py), (15, 19), -30, 0, 360, (90, 90, 98), -1, cv2.LINE_AA)
-        cv2.ellipse(canvas, (px - 3, py - 4), (7, 8), -30, 0, 360, (210, 200, 185), -1, cv2.LINE_AA)
+        if not NO_STAND:
+            bx = int(W / 2 + 120)
+            cv2.line(canvas, (bx, 668), (bx, 360), (26, 26, 30), 6, cv2.LINE_AA)
+            cv2.line(canvas, (bx, 360), (px + 12, py + 22), (36, 36, 40), 5, cv2.LINE_AA)
+            for d in (-45, 0, 45): cv2.line(canvas, (bx, 655), (bx + d, 675), (22, 22, 25), 6, cv2.LINE_AA)
+            cv2.ellipse(canvas, (px + 5, py + 11), (9, 22), -30, 0, 360, (30, 30, 35), -1, cv2.LINE_AA)
+            cv2.ellipse(canvas, (px, py), (15, 19), -30, 0, 360, (90, 90, 98), -1, cv2.LINE_AA)
+            cv2.ellipse(canvas, (px - 3, py - 4), (7, 8), -30, 0, 360, (210, 200, 185), -1, cv2.LINE_AA)
         img = canvas.astype(np.float32) / 255
 
         off = int(t * 18) % W
