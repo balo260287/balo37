@@ -86,12 +86,15 @@ int OnInit()
    trade.SetExpertMagicNumber(InpMagic);
    trade.SetDeviationInPoints(30);
    trade.SetTypeFillingBySymbol(_Symbol);
+   EventSetTimer(60);   // ghi file trang thai moi phut (cho script tu dong ngu)
+   WriteStatus();
    return INIT_SUCCEEDED;
   }
 
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
+   EventKillTimer();
    if(atrHandle != INVALID_HANDLE)
       IndicatorRelease(atrHandle);
    ObjectsDeleteAll(0, "WY_");
@@ -311,6 +314,30 @@ void ManageBreakeven()
             trade.PositionModify(ticket, open, tp);
         }
      }
+  }
+
+//+------------------------------------------------------------------+
+void OnTimer()
+  {
+   WriteStatus();
+  }
+
+//+------------------------------------------------------------------+
+//| Ghi so lenh dang mo (TOAN TAI KHOAN) ra file chung cua MT5.      |
+//| Script tu-dong-pc\ngu.ps1 doc file nay: con lenh thi khong ngu.  |
+//| Vi tri: %APPDATA%\MetaQuotes\Terminal\Common\Files              |
+//+------------------------------------------------------------------+
+void WriteStatus()
+  {
+   if(MQLInfoInteger(MQL_TESTER))
+      return;
+   int h = FileOpen("WyckoffGold_status.txt", FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_COMMON);
+   if(h == INVALID_HANDLE)
+      return;
+   FileWriteString(h, StringFormat("positions=%d\r\norders=%d\r\ntime=%s\r\n",
+                                   PositionsTotal(), OrdersTotal(),
+                                   TimeToString(TimeLocal(), TIME_DATE | TIME_SECONDS)));
+   FileClose(h);
   }
 
 //+------------------------------------------------------------------+
