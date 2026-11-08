@@ -1,0 +1,24 @@
+{
+  "canvas": "9:16",
+  "speakers": {"ke": 1.0, "anh": 1.22, "em": 1.5},
+  "music": "auto",
+  "sfx": true,
+  "caption_y": 0.68,
+  "shots": [
+    {"image": "anh.jpg", "focus": [790, 1000], "zoom": [1.0, 1.1], "dur": 3.0,
+     "caption": "Ra quán với bố mẹ. Mẹ dặn: \"Anh chia bánh cho em nha!\"",
+     "speaker": "ke", "say": "Ra quán với bố mẹ. Mẹ dặn: anh chia bánh cho em nha!"},
+    {"image": "anh.jpg", "focus": [950, 960], "zoom": [1.3, 1.5], "dur": 2.8,
+     "label": "ANH HAI:", "caption": "Để anh thử xem bánh có ngon không đã...",
+     "speaker": "anh", "say": "Để anh thử xem bánh có ngon không đã."},
+    {"image": "anh.jpg", "focus": [560, 930], "zoom": [1.3, 1.5], "dur": 2.6,
+     "label": "EM GÁI:", "caption": "Thử một miếng thôi đó nha anh.",
+     "speaker": "em", "say": "Thử một miếng thôi đó nha anh."},
+    {"video": "clip_ai.mp4", "dur": 4.0,
+     "label": "KẾT QUẢ CHIA BÁNH:", "caption": "Anh 9 phần. Em 1 cái thìa.",
+     "speaker": "ke", "say": "Kết quả chia bánh: anh chín phần, em một cái thìa.", "punch": true},
+    {"image": "anh.jpg", "focus": [560, 930], "zoom": [1.4, 1.5], "dur": 2.6,
+     "label": "EM GÁI:", "caption": "Thôi để em mách mẹ!",
+     "speaker": "em", "say": "Thôi để em mách mẹ!", "punch": true}
+  ]
+}
