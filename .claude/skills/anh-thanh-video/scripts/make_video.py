@@ -164,14 +164,7 @@ def render_image_shot(shot, dur, out, W, H, capf, cy):
 
 
 def render_video_shot(shot, dur, out, W, H, capf, cy):
-    # crop_bottom: cat bo phan day (logo may anh), vd 0.07 = 7%
-    # slowmo: lam cham clip AI ngan, vd 2 = cham gap doi (noi khung hinh cho muot)
-    cb = float(shot.get('crop_bottom', 0))
-    sm = float(shot.get('slowmo', 1))
-    pre = f'crop=iw:ih*{1 - cb:.4f}:0:0,' if cb else ''
-    if sm > 1:
-        pre += f'setpts={sm}*PTS,minterpolate=fps={FPS}:mi_mode=mci:mc_mode=aobmc,'
-    vf = (pre + f'scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},'
+    vf = (f'scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},fps={FPS},'
           f'tpad=stop_mode=clone:stop_duration={dur}' + drawtext(capf, cy, W) + ',format=yuv420p')
     run(['ffmpeg', '-v', 'error', '-y', '-i', shot['video'], '-vf', vf, '-t', f'{dur:.3f}', '-an',
          '-c:v', 'libx264', '-crf', '18', '-r', str(FPS), out])
