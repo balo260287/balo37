@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vở Ô Ly Của Bé</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Be+Vietnam+Pro:wght@400;500;600&family=Dancing+Script:wght@600&display=swap">
+<style>
+/* Layout: a school desk holding one ruled notebook sheet; lessons sit on a shelf of chips above, the pen tray sticks to the top while writing */
+:root{
+  --desk:#e7e9f3; --surface:#ffffff; --fg:#1f2340; --muted:#5b6185; --line:#d3d6e8;
+  --accent:#5b3fc4; --accent-soft:#ebe6fb; --on-accent:#ffffff; --star:#d99a00;
+  --shadow:0 1px 2px rgba(31,35,64,.08), 0 8px 24px rgba(31,35,64,.10);
+  /* the paper itself stays paper in both themes */
+  --paper:#fffefa; --ly:#cfd2f2; --o:#a7addf; --bold:#8189d3; --margin:#e0767d; --model:#2b2f5e; --label:#9a93bd;
+  --f-display:"Baloo 2","Be Vietnam Pro",system-ui,sans-serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --desk:#161929; --surface:#21253a; --fg:#eceefa; --muted:#a5abc9; --line:#373c59;
+    --accent:#ab98ff; --accent-soft:#2e2950; --on-accent:#17132e; --star:#ffc93d;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --desk:#161929; --surface:#21253a; --fg:#eceefa; --muted:#a5abc9; --line:#373c59;
+  --accent:#ab98ff; --accent-soft:#2e2950; --on-accent:#17132e; --star:#ffc93d;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px rgba(0,0,0,.45); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--desk);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--desk)}
+.app{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px;display:flex;flex-direction:column;gap:14px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:800;font-size:30px;line-height:1.05;color:var(--accent);letter-spacing:-.01em}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px}
+.seg button{border:0;background:transparent;border-radius:999px;padding:8px 18px;font-family:var(--f-display);font-weight:600;font-size:17px;color:var(--muted);min-height:42px}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+
+.shelf{display:flex;flex-direction:column;gap:10px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.chip{position:relative;flex:0 0 auto;scroll-snap-align:start;min-width:48px;min-height:48px;padding:6px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-display);font-weight:600;font-size:18px;line-height:1.2;white-space:nowrap}
+.chip.letter{font-size:22px;padding:6px 10px}
+.chip[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.chip .star{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--star);color:#fff;display:grid;place-items:center}
+.chip .star svg{width:12px;height:12px}
+.custom{display:flex;gap:8px;flex-wrap:wrap}
+.custom input{flex:1 1 220px;min-width:0;min-height:44px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface)}
+.custom button{min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--fg);font-weight:600}
+
+.lesson-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lesson-head > div{min-width:0}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.lesson-head h2{margin:2px 0 0;font-family:var(--f-display);font-weight:800;font-size:26px;line-height:1.1;text-wrap:balance}
+.lesson-head p{margin:2px 0 0;color:var(--muted)}
+.score{display:flex;align-items:center;gap:6px;font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums}
+.score svg{width:18px;height:18px;color:var(--star)}
+
+.tray{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow)}
+.group{display:flex;align-items:center;gap:6px}
+.tool{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:42px;min-height:42px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:transparent;font-size:14px;font-weight:500}
+.tool svg{width:20px;height:20px;flex:none}
+.tool[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--fg)}
+.tool.warn{border-color:var(--margin);color:var(--margin)}
+.tool.done{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.swatch{width:34px;height:34px;border-radius:50%;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line);padding:0}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 3px var(--accent)}
+.zoomval{min-width:40px;text-align:center;font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted)}
+.label-s{font-size:13px;color:var(--muted)}
+@media (max-width:560px){ .tool .t{display:none} .tool.done .t, .tool.mode .t{display:inline} }
+
+.sheet{position:relative;width:100%;background:var(--paper);border-radius:6px;box-shadow:var(--shadow);overflow:hidden}
+.sheet canvas{position:absolute;left:0;top:0;display:block}
+#ink{touch-action:none;cursor:crosshair}
+.hand #ink{touch-action:pan-x pan-y pinch-zoom;cursor:grab}
+.erasing #ink{cursor:cell}
+.hint{margin:0;color:var(--muted);font-size:13.5px;max-width:68ch}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--desk);padding:10px 18px;border-radius:999px;font-weight:600;z-index:20;box-shadow:var(--shadow);max-width:calc(100% - 32px);text-align:center}
+@media (prefers-reduced-motion:no-preference){ .toast{animation:pop .25s ease-out} @keyframes pop{from{transform:translate(-50%,8px);opacity:0}} }
+</style>
+</head><body>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <h1>Vở Ô Ly</h1>
+      <p>Luyện viết chữ đẹp cho bé lớp 2 và lớp 4</p>
+    </div>
+    <div class="seg" role="group" aria-label="Chọn lớp">
+      <button id="g2" data-grade="2" aria-pressed="true">Lớp 2</button>
+      <button id="g4" data-grade="4" aria-pressed="false">Lớp 4</button>
+    </div>
+  </header>
+
+  <section class="shelf" aria-label="Chọn bài">
+    <div class="chips" id="chips"></div>
+    <form class="custom" id="customForm">
+      <input id="customText" maxlength="120" placeholder="Bố mẹ tự nhập chữ hoặc câu, ví dụ: Bé ngoan học giỏi" aria-label="Chữ hoặc câu muốn luyện">
+      <button type="submit" id="customBtn">Tạo bài</button>
+    </form>
+  </section>
+
+  <section class="lesson-head">
+    <div>
+      <span class="eyebrow" id="eyebrow"></span>
+      <h2 id="lessonTitle"></h2>
+      <p id="lessonNote"></p>
+    </div>
+    <div class="score" id="score"></div>
+  </section>
+
+  <div class="tray" id="tray">
+    <div class="group">
+      <button class="tool mode" id="modeTrace" aria-pressed="true"><span class="t">Tô theo mẫu</span></button>
+      <button class="tool mode" id="modeSelf" aria-pressed="false"><span class="t">Tự viết</span></button>
+    </div>
+    <div class="group" role="group" aria-label="Màu mực">
+      <button class="swatch" data-color="#5a2db5" aria-label="Mực tím" style="background:#5a2db5"></button>
+      <button class="swatch" data-color="#1c4fb5" aria-label="Mực xanh" style="background:#1c4fb5"></button>
+      <button class="swatch" data-color="#222222" aria-label="Mực đen" style="background:#222222"></button>
+      <button class="swatch" data-color="#c62828" aria-label="Mực đỏ" style="background:#c62828"></button>
+    </div>
+    <div class="group">
+      <button class="tool" id="toolPen" aria-pressed="true" aria-label="Bút"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg><span class="t">Bút</span></button>
+      <button class="tool" id="toolErase" aria-pressed="false" aria-label="Tẩy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 20h12"/><path d="M4.5 15.5l9-9a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L12 18H7z"/></svg><span class="t">Tẩy</span></button>
+      <button class="tool" id="toolHand" aria-pressed="false" aria-label="Cuộn trang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg><span class="t">Cuộn</span></button>
+      <button class="tool" id="sizeBtn" aria-label="Cỡ nét bút"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round"><path d="M4 7h16" stroke-width="1.5"/><path d="M4 12h16" stroke-width="2.5"/><path d="M4 17h16" stroke-width="4"/></svg><span class="t" id="sizeLbl">Nét vừa</span></button>
+    </div>
+    <div class="group">
+      <button class="tool" id="undo" aria-label="Quay lại nét vừa viết"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg><span class="t">Quay lại</span></button>
+      <button class="tool" id="clear" aria-label="Xóa hết trang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg><span class="t" id="clearLbl">Xóa hết</span></button>
+    </div>
+    <div class="group" aria-label="Cỡ ô ly">
+      <button class="tool" id="zoomOut" aria-label="Thu nhỏ ô ly"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+      <span class="zoomval" id="zoomVal"></span>
+      <button class="tool" id="zoomIn" aria-label="Phóng to ô ly"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14M12 5v14"/></svg></button>
+    </div>
+    <button class="tool done" id="doneBtn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg><span class="t">Xong bài</span></button>
+  </div>
+
+  <div class="sheet" id="sheet">
+    <canvas id="bg" aria-hidden="true"></canvas>
+    <canvas id="ink" aria-label="Trang vở để bé viết"></canvas>
+  </div>
+
+  <p class="hint">Dòng có chữ <b>Mẫu</b> ở lề đỏ là chữ mẫu, các dòng bên dưới để bé viết. Cỡ vừa: chữ thường cao 2 ly, chữ hoa cao 5 ly. Cỡ nhỏ: chữ thường cao 1 ly, chữ hoa cao 2,5 ly. Bé viết bằng ngón tay hoặc bút cảm ứng; muốn kéo trang thì bấm <b>Cuộn</b>. Bài viết được lưu lại trên máy này.</p>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const store = {
+    get(k, d){ try{ const v = localStorage.getItem('voly:' + k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+    set(k, v){ try{ localStorage.setItem('voly:' + k, JSON.stringify(v)); }catch(e){} }
+  };
+
+  /* ---------- Bài học ---------- */
+  const G2 = [
+    ['A','Anh em thuận hòa'],['Ă','Ăn chậm nhai kĩ'],['Â','Ân cần chu đáo'],['B','Bạn bè sum họp'],
+    ['C','Chia ngọt sẻ bùi'],['D','Dân giàu nước mạnh'],['Đ','Đẹp trường đẹp lớp'],['E','Em yêu trường em'],
+    ['Ê','Ếch kêu ồm ộp'],['G','Góp sức chung tay'],['H','Hai sương một nắng'],['I','Ích nước lợi nhà'],
+    ['K','Kề vai sát cánh'],['L','Lá lành đùm lá rách'],['M','Miệng nói tay làm'],['N','Nghĩ trước nghĩ sau'],
+    ['O','Ong bay bướm lượn'],['Ô','Ông bà cha mẹ'],['Ơ','Ơn sâu nghĩa nặng'],['P','Phong cảnh hấp dẫn'],
+    ['Q','Quê hương tươi đẹp'],['R','Ríu rít chim ca'],['S','Sáo tắm thì mưa'],['T','Thẳng như ruột ngựa'],
+    ['U','Uống nước nhớ nguồn'],['Ư','Ươm cây gây rừng'],['V','Vượt suối băng rừng'],['X','Xuôi chèo mát mái'],
+    ['Y','Yêu lũy tre làng']
+  ];
+  const G4 = [
+    ['Có công mài sắt', ['Có công mài sắt, có ngày nên kim.']],
+    ['Một cây làm chẳng nên non', ['Một cây làm chẳng nên non', 'Ba cây chụm lại nên hòn núi cao.']],
+    ['Công cha như núi Thái Sơn', ['Công cha như núi Thái Sơn', 'Nghĩa mẹ như nước trong nguồn chảy ra.']],
+    ['Bầu ơi thương lấy bí cùng', ['Bầu ơi thương lấy bí cùng', 'Tuy rằng khác giống nhưng chung một giàn.']],
+    ['Nhiễu điều phủ lấy giá gương', ['Nhiễu điều phủ lấy giá gương', 'Người trong một nước phải thương nhau cùng.']],
+    ['Thương người như thể thương thân', ['Thương người như thể thương thân.']],
+    ['Ăn quả nhớ kẻ trồng cây', ['Ăn quả nhớ kẻ trồng cây.']],
+    ['Đi một ngày đàng', ['Đi một ngày đàng, học một sàng khôn.']],
+    ['Học thầy không tày học bạn', ['Học thầy không tày học bạn.']],
+    ['Tốt gỗ hơn tốt nước sơn', ['Tốt gỗ hơn tốt nước sơn.']]
+  ];
+  const letterPlan = (ch, sentence) => {
+    const p = [{size:'vua', text:ch, rep:true, copies:1}, {size:'nho', text:ch, rep:true, copies:1}];
+    if (sentence) p.push({size:'nho', text:sentence, copies:2});
+    return p;
+  };
+  const linesPlan = (lines, size, copies) => lines.map(t => ({size, text:t, copies}));
+
+  const LESSONS = {
+    2: [
+      {key:'g2-thuong', chip:'a b c', title:'Chữ cái thường', note:'Ôn 29 chữ cái thường', eyebrow:'Khởi động · cỡ vừa', heading:'Tập viết: chữ cái thường',
+       plan: linesPlan(['a ă â b c d đ e ê', 'g h i k l m n o ô', 'ơ p q r s t u ư v x y'], 'vua', 1)},
+      ...G2.map(([ch, s]) => ({key:'g2-' + ch, chip:ch, letter:true, title:'Chữ hoa ' + ch, note:'Câu ứng dụng: ' + s,
+        eyebrow:'Tập viết · cỡ vừa và cỡ nhỏ', heading:'Tập viết: chữ hoa ' + ch, plan: letterPlan(ch, s)}))
+    ],
+    4: [
+      {key:'g4-hoa', chip:'Ôn chữ hoa', title:'Ôn bảng chữ hoa', note:'Viết các chữ hoa cỡ nhỏ cho đều nét', eyebrow:'Khởi động · cỡ nhỏ', heading:'Luyện viết: ôn chữ hoa',
+       plan: linesPlan(['A Ă Â B C D Đ E Ê', 'G H I K L M N O Ô Ơ', 'P Q R S T U Ư V X Y'], 'nho', 2)},
+      ...G4.map(([name, lines], i) => ({key:'g4-' + i, chip:name, title:name, note:lines.join(' / '),
+        eyebrow:'Luyện viết tục ngữ, ca dao · cỡ nhỏ', heading:'Luyện viết chữ đẹp', plan: linesPlan(lines, 'nho', 2)}))
+    ]
+  };
+
+  function customLesson(c){
+    const t = c.text.trim();
+    const short = [...t].length <= 2 && !/\s/.test(t);
+    const lines = t.split(/\s*[\/\n]\s*/).filter(Boolean);
+    return {key:'c-' + c.id, chip: [...t].length > 16 ? [...t].slice(0,15).join('') + '…' : t, custom:true,
+      letter: short, title: short ? 'Chữ ' + t : t, note: 'Bài bố mẹ tự nhập', eyebrow:'Bài tự nhập', heading:'Tập viết',
+      plan: short ? letterPlan(t, null) : linesPlan(lines, c.grade == 2 ? 'vua' : 'nho', 2)};
+  }
+
+  /* ---------- Trạng thái ---------- */
+  const st = {
+    grade: store.get('grade', 2),
+    current: store.get('current', {2:'g2-A', 4:'g4-0'}),
+    mode: store.get('mode', 'trace'),
+    color: store.get('color', '#5a2db5'),
+    width: store.get('width', 1),
+    tool: 'pen',
+    L: store.get('L', 0),
+    customs: store.get('customs', []),
+    done: store.get('done', {})
+  };
+  const WIDTHS = [{w:.2, n:'Nét mảnh'}, {w:.3, n:'Nét vừa'}, {w:.42, n:'Nét đậm'}];
+  const SZ = {vua:{asc:5, desc:3, x:2}, nho:{asc:2.5, desc:1.5, x:1}};
+  const HAND = '"Dancing Script", "Segoe Script", cursive';
+  const BODY = '"Be Vietnam Pro", system-ui, sans-serif';
+  let M = {x:.4, cap:.7};
+  let strokes = [], cur = null, lesson = null, L = 12, W = 0, H = 0, dpr = 1;
+
+  const bg = $('#bg'), ink = $('#ink'), sheet = $('#sheet');
+  const bctx = bg.getContext('2d'), ictx = ink.getContext('2d');
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+  function lessonsFor(g){ return LESSONS[g].concat(st.customs.filter(c => c.grade == g).map(customLesson)); }
+  function findLesson(){
+    const list = lessonsFor(st.grade);
+    return list.find(l => l.key === st.current[st.grade]) || list[0];
+  }
+
+  /* ---------- Giao diện ---------- */
+  const STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
+  function renderChips(){
+    const box = $('#chips'); box.innerHTML = '';
+    lessonsFor(st.grade).forEach(l => {
+      const b = document.createElement('button');
+      b.className = 'chip' + (l.letter ? ' letter' : '');
+      b.textContent = l.chip; b.title = l.title;
+      if (l.key === lesson.key) b.setAttribute('aria-current', 'true');
+      if (st.done[l.key]) { const s = document.createElement('span'); s.className = 'star'; s.innerHTML = STAR; b.appendChild(s); }
+      b.onclick = () => openLesson(l.key);
+      box.appendChild(b);
+    });
+    const a = box.querySelector('[aria-current="true"]');
+    if (a) a.scrollIntoView({block:'nearest', inline:'nearest'});
+  }
+  function renderHead(){
+    $('#eyebrow').textContent = lesson.eyebrow;
+    $('#lessonTitle').textContent = lesson.title;
+    $('#lessonNote').textContent = lesson.note;
+    const all = lessonsFor(st.grade), n = all.filter(l => st.done[l.key]).length;
+    $('#score').innerHTML = STAR + `<span>${n} / ${all.length} bài</span>`;
+    document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.grade == st.grade)));
+  }
+  function renderTray(){
+    $('#modeTrace').setAttribute('aria-pressed', String(st.mode === 'trace'));
+    $('#modeSelf').setAttribute('aria-pressed', String(st.mode === 'self'));
+    document.querySelectorAll('.swatch').forEach(s => s.setAttribute('aria-pressed', String(s.dataset.color === st.color)));
+    $('#toolPen').setAttribute('aria-pressed', String(st.tool === 'pen'));
+    $('#toolErase').setAttribute('aria-pressed', String(st.tool === 'erase'));
+    $('#toolHand').setAttribute('aria-pressed', String(st.tool === 'hand'));
+    $('#sizeLbl').textContent = WIDTHS[st.width].n;
+    $('#zoomVal').textContent = Math.round(L / 12 * 100) + '%';
+    const app = $('#app');
+    app.classList.toggle('hand', st.tool === 'hand');
+    app.classList.toggle('erasing', st.tool === 'erase');
+  }
+
+  function openLesson(key){
+    st.current[st.grade] = key; store.set('current', st.current);
+    lesson = findLesson();
+    strokes = store.get('ink:' + lesson.key, []);
+    renderChips(); renderHead(); layoutAndDraw();
+  }
+
+  /* ---------- Trang vở ---------- */
+  function fontPx(row){
+    const s = SZ[row.size];
+    const upper = row.text === row.text.toUpperCase() && row.text !== row.text.toLowerCase();
+    return row.rep && upper ? s.asc * L / M.cap : s.x * L / M.x;
+  }
+  const fontStr = px => `600 ${px.toFixed(1)}px ${HAND}`;
+
+  function measureFont(){
+    const c = document.createElement('canvas').getContext('2d');
+    c.font = `600 100px ${HAND}`;
+    const x = c.measureText('x').actualBoundingBoxAscent, cap = c.measureText('H').actualBoundingBoxAscent;
+    if (x > 5 && cap > 5) M = {x: x / 100, cap: cap / 100};
+  }
+
+  function wrapText(text, px, maxW){
+    bctx.font = fontStr(px);
+    const words = text.split(' '), out = []; let line = '';
+    words.forEach(w => {
+      const t = line ? line + ' ' + w : w;
+      if (line && bctx.measureText(t).width > maxW) { out.push(line); line = w; } else line = t;
+    });
+    if (line) out.push(line);
+    return out;
+  }
+
+  function layout(){
+    const marginX = 4 * L, startX = marginX + 4 * L, maxW = W - startX - 2 * L;
+    const rows = [];
+    lesson.plan.forEach((it, gi) => {
+      const probe = {size:it.size, text:it.text, rep:it.rep};
+      const px = fontPx(probe);
+      const lines = it.rep ? [it.text] : wrapText(it.text, px, maxW);
+      const mk = (kind, t) => ({kind, size:it.size, text:t, rep:it.rep, px, group:gi});
+      lines.forEach(t => rows.push(mk('model', t)));
+      for (let c = 0; c < it.copies; c++) lines.forEach(t => rows.push(mk('practice', t)));
+    });
+    const U = 4 * L;
+    let cursor = 6.5 * L; // dưới phần ngày tháng và tên bài
+    let prevGroup = -1;
+    rows.forEach(r => {
+      const s = SZ[r.size];
+      if (r.group !== prevGroup && prevGroup !== -1) cursor += 2 * L;
+      r.base = Math.ceil((cursor + s.asc * L) / U) * U;
+      cursor = r.base + s.desc * L;
+      prevGroup = r.group;
+    });
+    return {rows, marginX, startX, height: Math.ceil((cursor + 4 * L) / U) * U};
+  }
+
+  function dateLine(){
+    const d = new Date();
+    const thu = ['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][d.getDay()];
+    return `${thu}, ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`;
+  }
+
+  function layoutAndDraw(){
+    if (!lesson) return;
+    W = Math.floor(sheet.clientWidth);
+    if (!st.L) L = W < 480 ? 11 : W < 820 ? 13 : 15; else L = st.L;
+    const lay = layout();
+    H = lay.height; dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+    sheet.style.height = H + 'px';
+    [bg, ink].forEach(c => { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); c.style.width = W + 'px'; c.style.height = H + 'px'; });
+    bctx.setTransform(dpr, 0, 0, dpr, 0, 0); ictx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawPaper(lay); redrawInk(); renderTray();
+  }
+
+  function drawPaper(lay){
+    const c = bctx, U = 4 * L;
+    c.fillStyle = css('--paper'); c.fillRect(0, 0, W, H);
+    // dòng ly mảnh
+    c.lineWidth = 1; c.strokeStyle = css('--ly'); c.beginPath();
+    for (let y = L; y < H; y += L) { if (Math.round(y / L) % 4) { c.moveTo(0, Math.round(y) + .5); c.lineTo(W, Math.round(y) + .5); } }
+    c.stroke();
+    // đường dọc mỗi ô
+    c.strokeStyle = css('--o'); c.beginPath();
+    for (let x = lay.marginX; x < W; x += U) { c.moveTo(Math.round(x) + .5, 0); c.lineTo(Math.round(x) + .5, H); }
+    c.stroke();
+    // dòng kẻ đậm
+    c.lineWidth = 1.4; c.strokeStyle = css('--bold'); c.beginPath();
+    for (let y = U; y < H; y += U) { c.moveTo(0, Math.round(y)); c.lineTo(W, Math.round(y)); }
+    c.stroke();
+    // lề đỏ
+    c.lineWidth = 1.6; c.strokeStyle = css('--margin'); c.beginPath();
+    c.moveTo(lay.marginX - 3, 0); c.lineTo(lay.marginX - 3, H); c.stroke();
+
+    // ngày tháng và tên bài như vở thật
+    const model = css('--model');
+    c.fillStyle = model; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+    const small = 1 * L / M.x, room = W - lay.marginX - 2 * L;
+    const fit = (text, px, y) => {
+      c.font = fontStr(px); const w = c.measureText(text).width;
+      if (w > room) c.font = fontStr(px * room / w);
+      c.fillText(text, (lay.marginX + W) / 2, y);
+    };
+    fit(dateLine(), Math.min(small, 26), 2.6 * L);
+    fit(lesson.heading, Math.min(small * 1.1, 28), 5.2 * L);
+
+    lay.rows.forEach(r => {
+      c.font = fontStr(r.px); c.textAlign = 'left';
+      const isModel = r.kind === 'model';
+      const ghost = !isModel && st.mode === 'trace';
+      if (isModel || ghost) {
+        c.globalAlpha = isModel ? .92 : .2; c.fillStyle = model;
+        if (r.rep) {
+          const w = c.measureText(r.text).width;
+          const step = Math.max(U, Math.ceil((w + 1.5 * L) / U) * U);
+          for (let x = lay.startX; x + w <= W - L; x += step) c.fillText(r.text, x, r.base);
+        } else c.fillText(r.text, lay.startX, r.base);
+        c.globalAlpha = 1;
+      } else {
+        c.fillStyle = css('--margin'); c.globalAlpha = .55;
+        c.beginPath(); c.arc(lay.startX, r.base, Math.max(2.5, L * .22), 0, Math.PI * 2); c.fill(); c.globalAlpha = 1;
+      }
+      if (isModel) {
+        c.font = `600 ${Math.max(10, Math.min(L * .85, 14))}px ${BODY}`; c.fillStyle = css('--label'); c.textAlign = 'right';
+        c.fillText('Mẫu', lay.marginX - 8, r.base - L * .6);
+      }
+    });
+  }
+
+  /* ---------- Mực ---------- */
+  function setStyle(s){
+    ictx.globalCompositeOperation = s.e ? 'destination-out' : 'source-over';
+    ictx.strokeStyle = ictx.fillStyle = s.e ? '#000' : s.c;
+    ictx.lineWidth = s.w * L; ictx.lineCap = 'round'; ictx.lineJoin = 'round';
+  }
+  function drawStroke(s){
+    const p = s.p; setStyle(s);
+    if (p.length === 1) { ictx.beginPath(); ictx.arc(p[0][0] * L, p[0][1] * L, s.w * L / 2, 0, Math.PI * 2); ictx.fill(); return; }
+    ictx.beginPath(); ictx.moveTo(p[0][0] * L, p[0][1] * L);
+    for (let i = 1; i < p.length - 1; i++) {
+      const mx = (p[i][0] + p[i + 1][0]) / 2 * L, my = (p[i][1] + p[i + 1][1]) / 2 * L;
+      ictx.quadraticCurveTo(p[i][0] * L, p[i][1] * L, mx, my);
+    }
+    const q = p[p.length - 1]; ictx.lineTo(q[0] * L, q[1] * L); ictx.stroke();
+  }
+  function redrawInk(){
+    ictx.save(); ictx.setTransform(1, 0, 0, 1, 0, 0); ictx.clearRect(0, 0, ink.width, ink.height); ictx.restore();
+    strokes.forEach(drawStroke); ictx.globalCompositeOperation = 'source-over';
+  }
+  function pos(e){
+    const r = ink.getBoundingClientRect();
+    return [+((e.clientX - r.left) / L).toFixed(2), +((e.clientY - r.top) / L).toFixed(2)];
+  }
+  function addPoint(pt){
+    const p = cur.p, last = p[p.length - 1];
+    if (Math.hypot(pt[0] - last[0], pt[1] - last[1]) * L < 1.5) return;
+    p.push(pt); setStyle(cur);
+    ictx.beginPath(); ictx.moveTo(last[0] * L, last[1] * L); ictx.lineTo(pt[0] * L, pt[1] * L); ictx.stroke();
+  }
+  ink.addEventListener('pointerdown', e => {
+    if (e.button > 0) return;
+    if (st.tool === 'hand' && e.pointerType !== 'pen') return;
+    e.preventDefault();
+    try { ink.setPointerCapture(e.pointerId); } catch (_) {}
+    const erase = st.tool === 'erase';
+    cur = {id: e.pointerId, c: st.color, w: erase ? 1.5 : WIDTHS[st.width].w, e: erase, p: [pos(e)]};
+    setStyle(cur); ictx.beginPath(); ictx.arc(cur.p[0][0] * L, cur.p[0][1] * L, cur.w * L / 2, 0, Math.PI * 2); ictx.fill();
+  });
+  ink.addEventListener('pointermove', e => {
+    if (!cur || e.pointerId !== cur.id) return;
+    e.preventDefault();
+    const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+    (evs.length ? evs : [e]).forEach(ev => addPoint(pos(ev)));
+  });
+  const end = e => {
+    if (!cur || e.pointerId !== cur.id) return;
+    strokes.push(cur); cur = null; ictx.globalCompositeOperation = 'source-over';
+    redrawInk(); store.set('ink:' + lesson.key, strokes);
+  };
+  ink.addEventListener('pointerup', end);
+  ink.addEventListener('pointercancel', end);
+
+  /* ---------- Nút bấm ---------- */
+  document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
+    st.grade = +b.dataset.grade; store.set('grade', st.grade); openLesson(st.current[st.grade]);
+  });
+  $('#modeTrace').onclick = () => { st.mode = 'trace'; store.set('mode', st.mode); layoutAndDraw(); };
+  $('#modeSelf').onclick = () => { st.mode = 'self'; store.set('mode', st.mode); layoutAndDraw(); };
+  document.querySelectorAll('.swatch').forEach(s => s.onclick = () => {
+    st.color = s.dataset.color; store.set('color', st.color); if (st.tool !== 'pen') st.tool = 'pen'; renderTray();
+  });
+  $('#toolPen').onclick = () => { st.tool = 'pen'; renderTray(); };
+  $('#toolErase').onclick = () => { st.tool = st.tool === 'erase' ? 'pen' : 'erase'; renderTray(); };
+  $('#toolHand').onclick = () => { st.tool = st.tool === 'hand' ? 'pen' : 'hand'; renderTray(); };
+  $('#sizeBtn').onclick = () => { st.width = (st.width + 1) % WIDTHS.length; store.set('width', st.width); if (st.tool === 'erase') st.tool = 'pen'; renderTray(); };
+  $('#undo').onclick = () => { if (!strokes.length) return toast('Chưa có nét nào để quay lại'); strokes.pop(); redrawInk(); store.set('ink:' + lesson.key, strokes); };
+  let clearTimer = 0;
+  $('#clear').onclick = () => {
+    const b = $('#clear');
+    if (!b.classList.contains('warn')) {
+      if (!strokes.length) return toast('Trang đang trống');
+      b.classList.add('warn'); $('#clearLbl').textContent = 'Bấm lần nữa để xóa'; b.querySelector('.t').style.display = 'inline';
+      clearTimeout(clearTimer); clearTimer = setTimeout(resetClear, 3000); return;
+    }
+    strokes = []; redrawInk(); store.set('ink:' + lesson.key, strokes); resetClear(); toast('Đã xóa trang, bé viết lại nhé');
+  };
+  function resetClear(){ const b = $('#clear'); b.classList.remove('warn'); $('#clearLbl').textContent = 'Xóa hết'; b.querySelector('.t').style.display = ''; }
+  const zoom = d => { st.L = Math.max(9, Math.min(24, L + d)); store.set('L', st.L); layoutAndDraw(); };
+  $('#zoomIn').onclick = () => zoom(2);
+  $('#zoomOut').onclick = () => zoom(-2);
+  $('#doneBtn').onclick = () => {
+    const had = st.done[lesson.key];
+    st.done[lesson.key] = true; store.set('done', st.done);
+    renderChips(); renderHead();
+    const all = lessonsFor(st.grade), i = all.findIndex(l => l.key === lesson.key);
+    toast(had ? 'Bài này bé đã được sao rồi. Giỏi lắm!' : 'Giỏi lắm! Bé được thêm 1 ngôi sao' + (all[i + 1] ? '. Sang bài tiếp nhé!' : '.'));
+    if (!had && all[i + 1]) setTimeout(() => openLesson(all[i + 1].key), 1400);
+  };
+  $('#customForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const t = $('#customText').value.trim();
+    if (!t) { toast('Hãy nhập chữ hoặc câu muốn cho bé luyện'); $('#customText').focus(); return; }
+    const c = {id: Date.now().toString(36), text: t, grade: st.grade};
+    st.customs.push(c); st.customs = st.customs.slice(-12); store.set('customs', st.customs);
+    $('#customText').value = '';
+    openLesson('c-' + c.id); toast('Đã tạo bài mới');
+  });
+  document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); $('#undo').click(); } });
+
+  let tt = 0;
+  function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => t.hidden = true, 2600); }
+
+  /* ---------- Khởi động ---------- */
+  let lastW = 0, raf = 0;
+  new ResizeObserver(() => {
+    const w = Math.floor(sheet.clientWidth);
+    if (w === lastW) return; lastW = w;
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(layoutAndDraw);
+  }).observe(sheet);
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => layoutAndDraw());
+
+  lesson = findLesson(); strokes = store.get('ink:' + lesson.key, []);
+  renderChips(); renderHead(); renderTray(); layoutAndDraw();
+  const fontsReady = document.fonts && document.fonts.load
+    ? Promise.all([document.fonts.load(`600 40px "Dancing Script"`, 'Aa Ăă Ơơ Ưư Đđ ộ'), document.fonts.load(`600 14px "Be Vietnam Pro"`, 'Mẫu')])
+    : Promise.resolve();
+  fontsReady.catch(() => {}).then(() => { measureFont(); layoutAndDraw(); });
+})();
+</script>
+</body></html>
