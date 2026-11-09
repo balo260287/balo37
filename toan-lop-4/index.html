@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Toán Lớp 4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a sheet of math graph paper; topics grouped like chapters of the textbook, one question card at a time while practising */
+:root{
+  --bg:#eef3ef; --grid:rgba(15,122,90,.08); --surface:#ffffff; --fg:#14231d; --muted:#53675d; --line:#d3e0d8;
+  --accent:#0f7a5a; --accent-soft:#dff1e9; --on-accent:#ffffff; --sun:#e9a800;
+  --good:#1b7f45; --good-soft:#e1f4e8; --bad:#b93c0c; --bad-soft:#fcebe2;
+  --shadow:0 1px 2px rgba(20,35,29,.06),0 6px 20px rgba(20,35,29,.08);
+  --f-display:"Baloo 2","Be Vietnam Pro",system-ui,sans-serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1714; --grid:rgba(110,220,175,.06); --surface:#18231f; --fg:#e6f0eb; --muted:#9cb2a7; --line:#2a3a33;
+    --accent:#4fd1a1; --accent-soft:#173a2e; --on-accent:#06261b; --sun:#ffcf3d;
+    --good:#5bd88f; --good-soft:#15321f; --bad:#ff8f63; --bad-soft:#3a2117;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1714; --grid:rgba(110,220,175,.06); --surface:#18231f; --fg:#e6f0eb; --muted:#9cb2a7; --line:#2a3a33;
+  --accent:#4fd1a1; --accent-soft:#173a2e; --on-accent:#06261b; --sun:#ffcf3d;
+  --good:#5bd88f; --good-soft:#15321f; --bad:#ff8f63; --bad-soft:#3a2117;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background-color:var(--bg);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:24px 24px;color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5}
+.app{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;font-family:var(--f-display);text-wrap:balance}
+.num{font-variant-numeric:tabular-nums}
+
+/* home */
+.hero{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.hero h1{font-size:34px;font-weight:800;line-height:1;color:var(--accent)}
+.hero p{margin:4px 0 0;color:var(--muted)}
+.total{display:flex;align-items:center;gap:6px;font-weight:700;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+.total svg{width:20px;height:20px;color:var(--sun)}
+.mixed{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;padding:16px 18px;border-radius:16px;border:0;background:var(--accent);color:var(--on-accent);box-shadow:var(--shadow);margin-bottom:22px}
+.mixed b{font-family:var(--f-display);font-size:22px;font-weight:800;display:block;line-height:1.2}
+.mixed span{opacity:.9;font-size:14.5px}
+.mixed .go{font-weight:700;white-space:nowrap}
+.group{margin-bottom:22px}
+.group h2{font-size:14px;font-family:var(--f-body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.card{display:flex;flex-direction:column;gap:4px;text-align:left;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--surface);min-width:0}
+.card:hover{border-color:var(--accent)}
+.card b{font-family:var(--f-display);font-weight:600;font-size:19px;line-height:1.25}
+.card .ex{color:var(--muted);font-size:14px}
+.stars{display:flex;gap:2px;margin-top:4px}
+.stars svg{width:16px;height:16px;color:var(--line)}
+.stars svg.on{color:var(--sun)}
+
+/* quiz */
+.qtop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.back{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px;min-height:42px;font-weight:600}
+.qtitle{font-family:var(--f-display);font-weight:800;font-size:22px;line-height:1.2;margin:4px 0 10px}
+.score{font-weight:700;color:var(--muted)}
+.bar{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-bottom:16px}
+.bar i{height:8px;border-radius:4px;background:var(--line)}
+.bar i.ok{background:var(--good)} .bar i.no{background:var(--bad)} .bar i.now{background:var(--accent);opacity:.55}
+.qcard{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px 20px;display:flex;flex-direction:column;gap:18px}
+.qno{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.qtext{font-size:21px;line-height:1.55;font-weight:500}
+.qtext b{font-weight:700}
+.qfig{display:flex;justify-content:center}
+.qfig svg{width:100%;max-width:260px;height:auto}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;line-height:1.1;margin:0 3px;font-weight:700}
+.fr > span:first-child{border-bottom:2px solid currentColor;padding:0 4px 2px}
+.fr > span:last-child{padding:2px 4px 0}
+.blank{display:inline-block;min-width:2.2em;border-bottom:2px dashed var(--muted);text-align:center;color:var(--muted)}
+
+.answer{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:14px;font-weight:600;color:var(--muted)}
+.inrow{display:flex;align-items:center;gap:8px}
+.answer input{width:170px;max-width:100%;min-height:52px;padding:8px 12px;font-size:22px;font-weight:700;border-radius:12px;border:2px solid var(--line);background:var(--bg);font-variant-numeric:tabular-nums}
+.answer input:focus{border-color:var(--accent);outline:none}
+.answer input.ok{border-color:var(--good);background:var(--good-soft)}
+.answer input.no{border-color:var(--bad);background:var(--bad-soft)}
+.unit{font-weight:600;color:var(--muted);font-size:18px}
+.fracin{display:inline-flex;flex-direction:column;align-items:center;gap:6px}
+.fracin input{width:96px;text-align:center}
+.fracin hr{width:110px;border:0;border-top:3px solid var(--fg);margin:0}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;width:100%}
+.choices.big{grid-template-columns:repeat(3,1fr)}
+.choice{min-height:54px;padding:10px 14px;border-radius:12px;border:2px solid var(--line);background:var(--bg);font-weight:600;font-size:17px}
+.choices.big .choice{font-size:28px;font-weight:800}
+.choice:hover:not(:disabled){border-color:var(--accent)}
+.choice.ok{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.choice.no{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+.choice:disabled{cursor:default}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.primary{min-height:50px;padding:10px 22px;border-radius:12px;border:0;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:17px}
+.ghost{min-height:50px;padding:10px 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600}
+.msg{color:var(--bad);font-weight:600;font-size:15px}
+.fb{border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.fb.ok{background:var(--good-soft)} .fb.no{background:var(--bad-soft)}
+.fb .head{font-family:var(--f-display);font-weight:800;font-size:20px}
+.fb.ok .head{color:var(--good)} .fb.no .head{color:var(--bad)}
+.fb .how{font-size:15.5px;line-height:1.6}
+
+/* result */
+.result{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:26px 20px;display:flex;flex-direction:column;gap:16px;align-items:flex-start}
+.big{font-family:var(--f-display);font-weight:800;font-size:56px;line-height:1;color:var(--accent)}
+.rstars{display:flex;gap:6px}
+.rstars svg{width:40px;height:40px;color:var(--line)}
+.rstars svg.on{color:var(--sun)}
+.wrong{width:100%;display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.wrong li{border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--bg)}
+.wrong .a{color:var(--good);font-weight:700}
+.foot{margin-top:28px;color:var(--muted);font-size:13.5px;max-width:68ch}
+</style>
+</head><body>
+
+<div class="app">
+  <section id="home">
+    <div class="hero">
+      <div>
+        <h1>Toán Lớp 4</h1>
+        <p>Chọn một bài, làm 10 câu, máy chấm ngay và chỉ cách làm.</p>
+      </div>
+      <div class="total" id="total"></div>
+    </div>
+    <button class="mixed" id="mixedBtn">
+      <div><b>Kiểm tra tổng hợp</b><span>10 câu trộn từ tất cả các bài</span></div>
+      <span class="go">Bắt đầu ›</span>
+    </button>
+    <div id="groups"></div>
+    <p class="foot">Mỗi lần làm, máy tạo câu hỏi mới nên bé luyện bao nhiêu lần cũng được. Từ 5 câu đúng trở lên được 1 sao, từ 7 câu được 2 sao, từ 9 câu được 3 sao. Sao lưu trên máy này.</p>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="qtop">
+      <button class="back" id="backBtn">‹ Các bài</button>
+      <span class="score num" id="score"></span>
+    </div>
+    <h2 class="qtitle" id="qtitle"></h2>
+    <div class="bar" id="bar"></div>
+    <div class="qcard">
+      <div class="qno" id="qno"></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="qfig" id="qfig" hidden></div>
+      <form class="answer" id="answer" autocomplete="off"></form>
+      <div class="actions">
+        <button class="primary" id="checkBtn" type="button">Kiểm tra</button>
+        <span class="msg" id="msg"></span>
+      </div>
+      <div class="fb" id="fb" hidden></div>
+    </div>
+  </section>
+
+  <section id="result" hidden>
+    <div class="result">
+      <h2 class="qtitle" id="rtitle"></h2>
+      <div class="big num" id="rscore"></div>
+      <div class="rstars" id="rstars"></div>
+      <p id="rmsg" style="margin:0;font-size:18px;font-weight:600"></p>
+      <ul class="wrong" id="rwrong"></ul>
+      <div class="actions">
+        <button class="primary" id="againBtn">Làm lại bài này</button>
+        <button class="ghost" id="homeBtn">Chọn bài khác</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const store = {
+    get(k, d){ try{ const v = localStorage.getItem('toan4:' + k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+    set(k, v){ try{ localStorage.setItem('toan4:' + k, JSON.stringify(v)); }catch(e){} }
+  };
+
+  /* ---------- tiện ích ---------- */
+  const ri = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = ri(0, i); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const fmt = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+  const F = (n, d) => `<span class="fr"><span>${fmt(n)}</span><span>${fmt(d)}</span></span>`;
+  const FR = (n, d) => { const g = gcd(n, d), a = n / g, b = d / g; return b === 1 ? fmt(a) : F(a, b); };
+  const B = '<span class="blank">?</span>';
+  const ROMAN = n => [['M',1000],['CM',900],['D',500],['CD',400],['C',100],['XC',90],['L',50],['XL',40],['X',10],['IX',9],['V',5],['IV',4],['I',1]].reduce((s,[r,v]) => { while (n >= v) { s += r; n -= v; } return s; }, '');
+
+  /* ---------- Số tự nhiên ---------- */
+  const HANG = ['đơn vị','chục','trăm','nghìn','chục nghìn','trăm nghìn','triệu','chục triệu','trăm triệu'];
+  function gPlace(){
+    let n, s, p, d;
+    do { n = ri(1000000, 999999999); s = String(n); p = ri(0, s.length - 1); d = s[s.length - 1 - p]; }
+    while (d === '0' || s.split(d).length !== 2);
+    if (Math.random() < .5) {
+      const choices = shuffle([HANG[p], ...shuffle(HANG.filter((h, i) => i !== p && i < s.length)).slice(0, 3)]);
+      return {q:`Trong số <b>${fmt(n)}</b>, chữ số <b>${d}</b> thuộc hàng nào?`, type:'mc', choices:choices.map(c => 'Hàng ' + c), answer:choices.indexOf(HANG[p]),
+        how:`Đếm từ phải sang trái: hàng đơn vị, chục, trăm, nghìn, chục nghìn, trăm nghìn, triệu, chục triệu, trăm triệu. Chữ số ${d} đứng ở hàng ${HANG[p]}.`};
+    }
+    const v = +d * 10 ** p;
+    return {q:`Giá trị của chữ số <b>${d}</b> trong số <b>${fmt(n)}</b> là bao nhiêu?`, type:'num', answer:v,
+      how:`Chữ số ${d} ở hàng ${HANG[p]} nên có giá trị là ${fmt(v)}.`};
+  }
+  function gRound(){
+    const k = pick([3,4,5,6]), name = {3:'nghìn',4:'chục nghìn',5:'trăm nghìn',6:'triệu'}[k];
+    const n = ri(1000000, 99999999), u = 10 ** k, a = Math.round(n / u) * u, next = Math.floor(n / 10 ** (k - 1)) % 10;
+    return {q:`Làm tròn số <b>${fmt(n)}</b> đến hàng ${name}.`, type:'num', answer:a,
+      how:`Chữ số ngay sau hàng ${name} là ${next}. Vì ${next} ${next >= 5 ? '≥ 5 nên làm tròn lên' : '< 5 nên làm tròn xuống'}, các chữ số phía sau thay bằng 0: ${fmt(a)}.`};
+  }
+  function gCompare(){
+    const a = ri(100000, 99999999); let b; const r = Math.random();
+    if (r < .15) b = a;
+    else if (r < .65) { const s = String(a).split(''); const i = ri(0, s.length - 1); let nd; do { nd = ri(i === 0 ? 1 : 0, 9); } while (String(nd) === s[i]); s[i] = nd; b = +s.join(''); }
+    else b = Math.max(1, a + pick([-1, 1]) * ri(1, 999) * 10 ** ri(0, 3));
+    const sym = a < b ? '<' : a > b ? '>' : '=';
+    const how = a === b ? 'Hai số giống hệt nhau nên bằng nhau.'
+      : String(a).length !== String(b).length ? `Số nào có nhiều chữ số hơn thì lớn hơn. Vậy ${fmt(a)} ${sym} ${fmt(b)}.`
+      : `Hai số có cùng số chữ số. So sánh từng cặp chữ số từ trái sang phải, gặp cặp khác nhau đầu tiên thì số nào có chữ số lớn hơn là số lớn hơn. Vậy ${fmt(a)} ${sym} ${fmt(b)}.`;
+    return {q:`Điền dấu thích hợp:<br><b>${fmt(a)}</b> ${B} <b>${fmt(b)}</b>`, type:'mc', big:true, choices:['<','>','='], answer:['<','>','='].indexOf(sym), how};
+  }
+
+  /* ---------- Phép tính ---------- */
+  function gAddSub(){
+    if (Math.random() < .5) { const a = ri(10000, 899999), b = ri(1000, 99999);
+      return {q:`Tính: <b>${fmt(a)} + ${fmt(b)}</b>`, type:'num', answer:a + b, how:`Đặt tính cho các hàng thẳng cột, cộng từ phải sang trái, nhớ sang hàng bên trái. ${fmt(a)} + ${fmt(b)} = ${fmt(a + b)}.`}; }
+    const a = ri(100000, 999999), b = ri(10000, a - 1);
+    return {q:`Tính: <b>${fmt(a)} − ${fmt(b)}</b>`, type:'num', answer:a - b, how:`Đặt tính cho các hàng thẳng cột, trừ từ phải sang trái; chữ số trên bé hơn thì mượn 1 ở hàng bên trái. ${fmt(a)} − ${fmt(b)} = ${fmt(a - b)}. Thử lại: ${fmt(a - b)} + ${fmt(b)} = ${fmt(a)}.`};
+  }
+  function gMul(){
+    if (Math.random() < .5) { const a = ri(1000, 99999), b = ri(2, 9);
+      return {q:`Tính: <b>${fmt(a)} × ${b}</b>`, type:'num', answer:a * b, how:`Nhân ${b} lần lượt với từng chữ số từ phải sang trái, nhớ sang hàng bên trái. ${fmt(a)} × ${b} = ${fmt(a * b)}.`}; }
+    const a = ri(100, 999), b = ri(11, 99), u = b % 10, t = b - u;
+    return {q:`Tính: <b>${fmt(a)} × ${b}</b>`, type:'num', answer:a * b,
+      how:`Tách ${b} = ${t} + ${u}. Tích riêng thứ nhất: ${fmt(a)} × ${u} = ${fmt(a * u)}. Tích riêng thứ hai: ${fmt(a)} × ${t} = ${fmt(a * t)} (viết lùi sang trái một cột). Cộng lại: ${fmt(a * u)} + ${fmt(a * t)} = ${fmt(a * b)}.`};
+  }
+  function gDiv(){
+    const two = Math.random() < .45, d = two ? ri(12, 98) : ri(2, 9), qt = two ? ri(20, 999) : ri(100, 9999);
+    if (Math.random() < .35) { const r = ri(1, d - 1), n = d * qt + r;
+      return {q:`Tính <b>${fmt(n)} : ${d}</b>. Ghi thương và số dư.`, type:'num2', labels:['Thương','Số dư'], answer:[qt, r],
+        how:`${fmt(n)} : ${d} = ${fmt(qt)} (dư ${r}). Số dư luôn bé hơn số chia. Thử lại: ${fmt(qt)} × ${d} + ${r} = ${fmt(n)}.`}; }
+    const n = d * qt;
+    return {q:`Tính: <b>${fmt(n)} : ${d}</b>`, type:'num', answer:qt, how:`Chia lần lượt từ trái sang phải. ${fmt(n)} : ${d} = ${fmt(qt)}. Thử lại: ${fmt(qt)} × ${d} = ${fmt(n)}.`};
+  }
+  function gSmart(){
+    const t = ri(0, 2);
+    if (t === 0) {
+      const [p, q] = pick([[25,4],[125,8],[5,2],[50,2],[20,5],[250,4]]), m = ri(11, 99);
+      const o = pick([[p, m, q], [q, m, p], [m, p, q]]);
+      return {q:`Tính bằng cách thuận tiện: <b>${o.join(' × ')}</b>`, type:'num', answer:p * q * m,
+        how:`Đổi chỗ để nhân ${p} với ${q} trước: (${p} × ${q}) × ${m} = ${fmt(p * q)} × ${m} = ${fmt(p * q * m)}.`};
+    }
+    const a = ri(12, 99);
+    if (t === 1) { const b = ri(11, 89), c = 100 - b;
+      return {q:`Tính bằng cách thuận tiện: <b>${a} × ${b} + ${a} × ${c}</b>`, type:'num', answer:a * 100,
+        how:`Nhân một số với một tổng: ${a} × ${b} + ${a} × ${c} = ${a} × (${b} + ${c}) = ${a} × 100 = ${fmt(a * 100)}.`}; }
+    const c = ri(10, 89), k = pick([10, 100]), b = c + k;
+    return {q:`Tính bằng cách thuận tiện: <b>${a} × ${b} − ${a} × ${c}</b>`, type:'num', answer:a * k,
+      how:`Nhân một số với một hiệu: ${a} × ${b} − ${a} × ${c} = ${a} × (${b} − ${c}) = ${a} × ${k} = ${fmt(a * k)}.`};
+  }
+
+  /* ---------- Giải toán ---------- */
+  function gAvg(){
+    let k, A, nums, last;
+    do { k = ri(3, 5); A = ri(15, 250); nums = []; for (let i = 0; i < k - 1; i++) nums.push(A + ri(-Math.min(A - 1, 40), 40)); last = A * k - nums.reduce((s, x) => s + x, 0); } while (last <= 0);
+    nums.push(last); const sum = A * k;
+    const how = `Trung bình cộng = Tổng các số : Số các số = (${nums.map(fmt).join(' + ')}) : ${k} = ${fmt(sum)} : ${k} = ${fmt(A)}.`;
+    if (Math.random() < .5) return {q:`Tìm số trung bình cộng của các số: <b>${nums.map(fmt).join('; ')}</b>.`, type:'num', answer:A, how};
+    return {q:`Một cửa hàng bán gạo trong ${k} ngày, lần lượt được ${nums.map(fmt).join(' kg, ')} kg. Hỏi trung bình mỗi ngày cửa hàng bán được bao nhiêu ki-lô-gam gạo?`, type:'num', unit:'kg', answer:A, how};
+  }
+  function gSumDiff(){
+    const b = ri(50, 900), D = ri(10, 300), a = b + D, S = a + b;
+    const T = pick([
+      {q:`Tổng của hai số là <b>${fmt(S)}</b>, hiệu của hai số là <b>${fmt(D)}</b>. Tìm hai số đó.`, labels:['Số lớn','Số bé']},
+      {q:`Hai lớp 4A và 4B trồng được tất cả ${fmt(S)} cây. Lớp 4A trồng nhiều hơn lớp 4B ${fmt(D)} cây. Hỏi mỗi lớp trồng được bao nhiêu cây?`, labels:['Lớp 4A','Lớp 4B'], unit:'cây'},
+      {q:`Hai thùng có tất cả ${fmt(S)} lít dầu. Thùng thứ hai ít hơn thùng thứ nhất ${fmt(D)} lít. Hỏi mỗi thùng có bao nhiêu lít dầu?`, labels:['Thùng thứ nhất','Thùng thứ hai'], unit:'lít'},
+      {q:`Bố và con có tổng số tuổi là ${S > 120 ? '' : ''}${fmt(S)}. Bố hơn con ${fmt(D)} tuổi. Tính số tuổi của mỗi người.`, labels:['Bố','Con'], unit:'tuổi', ok: S <= 120}
+    ].filter(t => t.ok !== false));
+    return {q:T.q, type:'num2', labels:T.labels, unit:T.unit, answer:[a, b],
+      how:`Số lớn = (Tổng + Hiệu) : 2 = (${fmt(S)} + ${fmt(D)}) : 2 = ${fmt(a)}. Số bé = Tổng − Số lớn = ${fmt(S)} − ${fmt(a)} = ${fmt(b)}.`};
+  }
+
+  /* ---------- Phân số ---------- */
+  function coprime(qMin, qMax){ let p, q; do { q = ri(qMin, qMax); p = ri(1, q - 1); } while (gcd(p, q) !== 1); return [p, q]; }
+  function gReduce(){
+    const [p, q] = coprime(2, 12), k = ri(2, 9);
+    return {q:`Rút gọn phân số ${F(p * k, q * k)} thành phân số tối giản.`, type:'frac', strict:true, answer:[p, q],
+      how:`Cả tử số và mẫu số cùng chia hết cho ${k}: ${F(p * k, q * k)} = ${F(p * k + ' : ' + k, q * k + ' : ' + k)} = ${F(p, q)}. Phân số ${F(p, q)} không rút gọn được nữa.`};
+  }
+  function gFracCompare(){
+    const t = ri(0, 3); let a, b, c, d, how;
+    if (t === 0) { d = b = ri(3, 15); a = ri(1, b - 1); do { c = ri(1, b - 1); } while (c === a); how = 'Hai phân số cùng mẫu số: phân số nào có tử số lớn hơn thì lớn hơn.'; }
+    else if (t === 1) { a = c = ri(1, 9); b = ri(a + 1, 15); do { d = ri(a + 1, 15); } while (d === b); how = 'Hai phân số cùng tử số: phân số nào có mẫu số bé hơn thì lớn hơn.'; }
+    else if (t === 2) { [a, b] = coprime(2, 9); const k = ri(2, 4); c = a * k; d = b * k; how = `Rút gọn ${F(c, d)} được ${F(a, b)}, nên hai phân số bằng nhau.`; }
+    else { do { [a, b] = coprime(2, 9); [c, d] = coprime(2, 9); } while (a * d === b * c || b === d);
+      how = `Quy đồng mẫu số: ${F(a, b)} = ${F(a * d, b * d)} và ${F(c, d)} = ${F(c * b, d * b)}. So sánh hai tử số ${a * d} và ${c * b}.`; }
+    const sym = a * d < b * c ? '<' : a * d > b * c ? '>' : '=';
+    return {q:`Điền dấu thích hợp:<br>${F(a, b)} ${B} ${F(c, d)}`, type:'mc', big:true, choices:['<','>','='], answer:['<','>','='].indexOf(sym), how: how + ` Vậy ${F(a, b)} ${sym} ${F(c, d)}.`};
+  }
+  function gFracAddSub(){
+    const d1 = ri(2, 9), m = pick([1, 1, 2, 3, 4]), d2 = d1 * m;
+    let a = ri(1, d1 * 2 - 1), b = ri(1, d2 - 1);
+    const plus = Math.random() < .5;
+    let L = [a, d1], R = [b, d2], flip = Math.random() < .5;
+    if (flip) [L, R] = [R, L];
+    // giá trị trên mẫu chung d2
+    const lv = L[0] * (d2 / L[1]), rv = R[0] * (d2 / R[1]);
+    if (!plus && lv <= rv) { [L, R] = [R, L]; }
+    const lv2 = L[0] * (d2 / L[1]), rv2 = R[0] * (d2 / R[1]);
+    const num = plus ? lv2 + rv2 : lv2 - rv2, op = plus ? '+' : '−';
+    if (num === 0) return gFracAddSub();
+    const step = L[1] === R[1] ? `Hai phân số cùng mẫu số: giữ nguyên mẫu số, ${plus ? 'cộng' : 'trừ'} hai tử số.`
+      : `Quy đồng: ${L[1] === d2 ? F(R[0], R[1]) + ' = ' + F(rv2, d2) : F(L[0], L[1]) + ' = ' + F(lv2, d2)}.`;
+    return {q:`Tính: ${F(L[0], L[1])} ${op} ${F(R[0], R[1])}`, type:'frac', answer:[num, d2],
+      how:`${step} ${F(lv2, d2)} ${op} ${F(rv2, d2)} = ${F(num, d2)}${gcd(num, d2) > 1 ? ' = ' + FR(num, d2) : ''}.`};
+  }
+  function gFracMulDiv(){
+    const [a, b] = coprime(2, 9), [c, d] = coprime(2, 9);
+    if (Math.random() < .5) return {q:`Tính: ${F(a, b)} × ${F(c, d)}`, type:'frac', answer:[a * c, b * d],
+      how:`Nhân tử số với tử số, mẫu số với mẫu số: ${F(a + ' × ' + c, b + ' × ' + d)} = ${F(a * c, b * d)}${gcd(a * c, b * d) > 1 ? ' = ' + FR(a * c, b * d) : ''}.`};
+    return {q:`Tính: ${F(a, b)} : ${F(c, d)}`, type:'frac', answer:[a * d, b * c],
+      how:`Chia cho một phân số là nhân với phân số đảo ngược: ${F(a, b)} × ${F(d, c)} = ${F(a * d, b * c)}${gcd(a * d, b * c) > 1 ? ' = ' + FR(a * d, b * c) : ''}.`};
+  }
+  function gFracOf(){
+    const q = pick([2, 3, 4, 5, 6, 8]); let p; do { p = ri(1, q - 1); } while (gcd(p, q) !== 1);
+    const N = q * ri(4, 12), A = N / q * p;
+    const how = `Muốn tìm ${F(p, q)} của ${N}, lấy ${N} : ${q} × ${p} = ${N / q} × ${p} = ${A}.`;
+    if (Math.random() < .5) return {q:`${F(p, q)} của <b>${N}</b> là bao nhiêu?`, type:'num', answer:A, how};
+    return pick([
+      {q:`Một lớp có ${N} học sinh, trong đó ${F(p, q)} số học sinh là học sinh nữ. Hỏi lớp đó có bao nhiêu học sinh nữ?`, type:'num', unit:'bạn', answer:A, how},
+      {q:`Một sợi dây dài ${N} m. Mẹ cắt đi ${F(p, q)} sợi dây. Hỏi mẹ đã cắt đi bao nhiêu mét dây?`, type:'num', unit:'m', answer:A, how}
+    ]);
+  }
+
+  /* ---------- Đo lường ---------- */
+  const MASS = 'Nhớ: 1 tấn = 10 tạ = 100 yến = 1 000 kg; 1 tạ = 10 yến = 100 kg; 1 yến = 10 kg.';
+  function gMass(){
+    const t = ri(0, 5), a = ri(2, 9);
+    if (t === 0) return {q:`${a} tấn = ${B} kg`, type:'num', unit:'kg', answer:a * 1000, how:`${MASS} ${a} tấn = ${a} × 1 000 = ${fmt(a * 1000)} kg.`};
+    if (t === 1) return {q:`${a} tạ = ${B} kg`, type:'num', unit:'kg', answer:a * 100, how:`${MASS} ${a} tạ = ${a} × 100 = ${a * 100} kg.`};
+    if (t === 2) { const y = ri(2, 30); return {q:`${y} yến = ${B} kg`, type:'num', unit:'kg', answer:y * 10, how:`${MASS} ${y} yến = ${y} × 10 = ${y * 10} kg.`}; }
+    if (t === 3) { const k = ri(5, 995); return {q:`${a} tấn ${k} kg = ${B} kg`, type:'num', unit:'kg', answer:a * 1000 + k, how:`${a} tấn = ${fmt(a * 1000)} kg, cộng thêm ${k} kg: ${fmt(a * 1000)} + ${k} = ${fmt(a * 1000 + k)} kg.`}; }
+    if (t === 4) { const y = ri(1, 9); return {q:`${a} tạ ${y} yến = ${B} kg`, type:'num', unit:'kg', answer:a * 100 + y * 10, how:`${a} tạ = ${a * 100} kg, ${y} yến = ${y * 10} kg. Cộng lại: ${a * 100 + y * 10} kg.`}; }
+    const n = ri(2, 40); return {q:`${fmt(n * 100)} kg = ${B} tạ`, type:'num', unit:'tạ', answer:n, how:`${MASS} ${fmt(n * 100)} : 100 = ${n} tạ.`};
+  }
+  function gTime(){
+    const t = ri(0, 4);
+    if (t === 0) { const m = ri(2, 9), s = ri(5, 55); return {q:`${m} phút ${s} giây = ${B} giây`, type:'num', unit:'giây', answer:m * 60 + s, how:`1 phút = 60 giây. ${m} phút = ${m * 60} giây, cộng ${s} giây được ${m * 60 + s} giây.`}; }
+    if (t === 1) { const h = ri(2, 9), m = ri(5, 55); return {q:`${h} giờ ${m} phút = ${B} phút`, type:'num', unit:'phút', answer:h * 60 + m, how:`1 giờ = 60 phút. ${h} giờ = ${h * 60} phút, cộng ${m} phút được ${h * 60 + m} phút.`}; }
+    if (t === 2) { const c = ri(2, 9); return {q:`${c} thế kỷ = ${B} năm`, type:'num', unit:'năm', answer:c * 100, how:`1 thế kỷ = 100 năm. ${c} thế kỷ = ${c * 100} năm.`}; }
+    if (t === 3) { const n = ri(2, 10); return {q:`${n * 60} giây = ${B} phút`, type:'num', unit:'phút', answer:n, how:`60 giây = 1 phút. ${n * 60} : 60 = ${n} phút.`}; }
+    const y = ri(1001, 2099), c = Math.floor((y - 1) / 100) + 1;
+    return {q:`Năm ${y} thuộc thế kỷ thứ mấy? (viết bằng số)`, type:'num', answer:c,
+      how:`Thế kỷ ${ROMAN(c)} (thế kỷ ${c}) tính từ năm ${(c - 1) * 100 + 1} đến năm ${c * 100}, nên năm ${y} thuộc thế kỷ ${ROMAN(c)}.`};
+  }
+  const AREA = 'Hai đơn vị đo diện tích liền nhau gấp hoặc kém nhau 100 lần: 1 m² = 100 dm², 1 dm² = 100 cm², 1 cm² = 100 mm².';
+  function gArea(){
+    const t = ri(0, 5), a = ri(2, 40);
+    if (t === 0) return {q:`${a} m² = ${B} dm²`, type:'num', unit:'dm²', answer:a * 100, how:`${AREA} ${a} × 100 = ${fmt(a * 100)} dm².`};
+    if (t === 1) return {q:`${a} dm² = ${B} cm²`, type:'num', unit:'cm²', answer:a * 100, how:`${AREA} ${a} × 100 = ${fmt(a * 100)} cm².`};
+    if (t === 2) { const b = ri(2, 9); return {q:`${b} m² = ${B} cm²`, type:'num', unit:'cm²', answer:b * 10000, how:`1 m² = 100 dm² = 10 000 cm². ${b} × 10 000 = ${fmt(b * 10000)} cm².`}; }
+    if (t === 3) { const c = ri(1, 99); return {q:`${a} dm² ${c} cm² = ${B} cm²`, type:'num', unit:'cm²', answer:a * 100 + c, how:`${a} dm² = ${fmt(a * 100)} cm², cộng ${c} cm² được ${fmt(a * 100 + c)} cm².`}; }
+    if (t === 4) return {q:`${fmt(a * 100)} cm² = ${B} dm²`, type:'num', unit:'dm²', answer:a, how:`${AREA} ${fmt(a * 100)} : 100 = ${a} dm².`};
+    return {q:`${a} cm² = ${B} mm²`, type:'num', unit:'mm²', answer:a * 100, how:`${AREA} ${a} × 100 = ${fmt(a * 100)} mm².`};
+  }
+
+  /* ---------- Hình học ---------- */
+  const ANG = ['Góc nhọn','Góc vuông','Góc tù','Góc bẹt'];
+  function angleSvg(deg){
+    const vx = deg > 150 ? 120 : 70, vy = 120, r = 95, rad = deg * Math.PI / 180;
+    const x2 = vx + r * Math.cos(rad), y2 = vy - r * Math.sin(rad);
+    const ar = 26, ax = vx + ar * Math.cos(rad), ay = vy - ar * Math.sin(rad);
+    const mark = deg === 90 ? `<path d="M${vx + 18} ${vy} V${vy - 18} H${vx}" fill="none" stroke="var(--accent)" stroke-width="2"/>`
+      : `<path d="M${vx + ar} ${vy} A${ar} ${ar} 0 0 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+    return `<svg viewBox="0 0 240 140" role="img" aria-label="Hình một góc"><g stroke="var(--fg)" stroke-width="3" stroke-linecap="round" fill="none"><path d="M${vx} ${vy} H${vx + r}"/><path d="M${vx} ${vy} L${x2.toFixed(1)} ${y2.toFixed(1)}"/></g>${mark}<circle cx="${vx}" cy="${vy}" r="4" fill="var(--fg)"/><text x="${vx - 6}" y="${vy + 16}" font-size="14" fill="var(--muted)" font-family="sans-serif" text-anchor="end">O</text></svg>`;
+  }
+  function gAngle(){
+    const k = ri(0, 3), deg = [ri(25, 75), 90, ri(105, 165), 180][k];
+    const how = 'Góc nhọn bé hơn góc vuông (bé hơn 90°). Góc vuông bằng 90°. Góc tù lớn hơn góc vuông nhưng bé hơn góc bẹt (từ 90° đến 180°). Góc bẹt bằng 180°, hai cạnh nằm trên một đường thẳng.';
+    if (Math.random() < .55) return {q:'Góc dưới đây là góc gì?', fig:angleSvg(deg), type:'mc', choices:ANG.slice(), answer:k, how};
+    return {q:`Góc có số đo <b>${deg}°</b> là góc gì?`, type:'mc', choices:ANG.slice(), answer:k, how};
+  }
+  function gRect(){
+    const t = ri(0, 4), u = pick(['cm', 'm']);
+    const b = ri(3, 30), a = b + ri(2, 25);
+    if (t === 0) return {q:`Hình chữ nhật có chiều dài ${a} ${u}, chiều rộng ${b} ${u}. Tính chu vi hình chữ nhật.`, type:'num', unit:u, answer:2 * (a + b), how:`Chu vi = (dài + rộng) × 2 = (${a} + ${b}) × 2 = ${2 * (a + b)} ${u}.`};
+    if (t === 1) return {q:`Một mảnh vườn hình chữ nhật có chiều dài ${a} m, chiều rộng ${b} m. Tính diện tích mảnh vườn.`, type:'num', unit:'m²', answer:a * b, how:`Diện tích = dài × rộng = ${a} × ${b} = ${fmt(a * b)} m².`};
+    if (t === 2) { const s = ri(4, 40); return {q:`Hình vuông có cạnh ${s} ${u}. Tính chu vi hình vuông.`, type:'num', unit:u, answer:4 * s, how:`Chu vi hình vuông = cạnh × 4 = ${s} × 4 = ${4 * s} ${u}.`}; }
+    if (t === 3) { const s = ri(4, 30); return {q:`Hình vuông có cạnh ${s} cm. Tính diện tích hình vuông.`, type:'num', unit:'cm²', answer:s * s, how:`Diện tích hình vuông = cạnh × cạnh = ${s} × ${s} = ${s * s} cm².`}; }
+    const P = 2 * (a + b);
+    return {q:`Hình chữ nhật có chu vi ${P} ${u}, chiều dài ${a} ${u}. Tính chiều rộng.`, type:'num', unit:u, answer:b, how:`Nửa chu vi = dài + rộng = ${P} : 2 = ${P / 2} ${u}. Chiều rộng = ${P / 2} − ${a} = ${b} ${u}.`};
+  }
+
+  /* ---------- Danh sách bài ---------- */
+  const TOPICS = [
+    {id:'hang', group:'Số tự nhiên', name:'Hàng, lớp và làm tròn số', ex:'Chữ số 8 trong 4 382 560 thuộc hàng nào?', gens:[gPlace, gPlace, gRound]},
+    {id:'sosanh', group:'Số tự nhiên', name:'So sánh số', ex:'7 805 312 … 7 850 312', gens:[gCompare]},
+    {id:'congtru', group:'Phép tính', name:'Cộng, trừ', ex:'485 627 + 39 584', gens:[gAddSub]},
+    {id:'nhan', group:'Phép tính', name:'Nhân', ex:'4 236 × 7 · 352 × 46', gens:[gMul]},
+    {id:'chia', group:'Phép tính', name:'Chia', ex:'9 576 : 8 · 7 245 : 35', gens:[gDiv]},
+    {id:'thuantien', group:'Phép tính', name:'Tính thuận tiện', ex:'25 × 37 × 4', gens:[gSmart]},
+    {id:'tbc', group:'Giải toán có lời văn', name:'Trung bình cộng', ex:'Trung bình của 36; 42 và 57', gens:[gAvg]},
+    {id:'tonghieu', group:'Giải toán có lời văn', name:'Tìm hai số khi biết tổng và hiệu', ex:'Tổng 120, hiệu 30', gens:[gSumDiff]},
+    {id:'rutgon', group:'Phân số', name:'Rút gọn phân số', ex:'12/18 = 2/3', gens:[gReduce]},
+    {id:'ssps', group:'Phân số', name:'So sánh phân số', ex:'3/4 … 5/8', gens:[gFracCompare]},
+    {id:'congtrups', group:'Phân số', name:'Cộng, trừ phân số', ex:'1/3 + 5/6', gens:[gFracAddSub]},
+    {id:'nhanchiaps', group:'Phân số', name:'Nhân, chia phân số', ex:'2/3 × 4/5 · 3/4 : 2/7', gens:[gFracMulDiv]},
+    {id:'pscua', group:'Phân số', name:'Tìm phân số của một số', ex:'2/5 của 40', gens:[gFracOf]},
+    {id:'khoiluong', group:'Đo lường', name:'Yến, tạ, tấn', ex:'3 tấn 50 kg = … kg', gens:[gMass]},
+    {id:'thoigian', group:'Đo lường', name:'Giây, phút, thế kỷ', ex:'Năm 2026 thuộc thế kỷ nào?', gens:[gTime]},
+    {id:'dientich', group:'Đo lường', name:'Đơn vị đo diện tích', ex:'5 m² = … dm²', gens:[gArea]},
+    {id:'goc', group:'Hình học', name:'Góc nhọn, vuông, tù, bẹt', ex:'Góc 120° là góc gì?', gens:[gAngle]},
+    {id:'hcn', group:'Hình học', name:'Chu vi và diện tích', ex:'Hình chữ nhật dài 25 m, rộng 14 m', gens:[gRect]}
+  ];
+  const MIXED = {id:'tonghop', name:'Kiểm tra tổng hợp', gens:TOPICS.flatMap(t => t.gens)};
+
+  /* ---------- Trang chủ ---------- */
+  const STAR = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z"/></svg>';
+  const starsOf = s => s >= 9 ? 3 : s >= 7 ? 2 : s >= 5 ? 1 : 0;
+  let best = store.get('best', {});
+  function renderHome(){
+    const total = Object.values(best).reduce((s, v) => s + starsOf(v), 0);
+    $('#total').innerHTML = STAR + `<span class="num">${total} / ${(TOPICS.length + 1) * 3} sao</span>`;
+    const groups = {}; TOPICS.forEach(t => (groups[t.group] = groups[t.group] || []).push(t));
+    $('#groups').innerHTML = Object.entries(groups).map(([g, list]) => `
+      <section class="group"><h2>${g}</h2><div class="cards">${list.map(t => {
+        const n = starsOf(best[t.id] || 0);
+        return `<button class="card" data-id="${t.id}"><b>${t.name}</b><span class="ex">${t.ex.replace(/ /g, ' ')}</span>
+          <span class="stars" aria-label="${n} sao">${[0,1,2].map(i => STAR.replace('<svg', `<svg class="${i < n ? 'on' : ''}"`)).join('')}</span></button>`;
+      }).join('')}</div></section>`).join('');
+    document.querySelectorAll('.card').forEach(c => c.onclick = () => start(TOPICS.find(t => t.id === c.dataset.id)));
+  }
+
+  /* ---------- Làm bài ---------- */
+  let quiz = null;
+  function show(id){ ['home', 'quiz', 'result'].forEach(s => $('#' + s).hidden = s !== id); window.scrollTo(0, 0); }
+  function start(topic){
+    quiz = {topic, i:0, score:0, marks:[], wrong:[], seen:new Set()};
+    $('#qtitle').textContent = topic.name; show('quiz'); next();
+  }
+  function makeQ(){
+    for (let k = 0; k < 8; k++) { const q = pick(quiz.topic.gens)(); if (!quiz.seen.has(q.q)) { quiz.seen.add(q.q); return q; } }
+    return pick(quiz.topic.gens)();
+  }
+  function renderBar(){
+    $('#bar').innerHTML = Array.from({length:10}, (_, i) => `<i class="${quiz.marks[i] === true ? 'ok' : quiz.marks[i] === false ? 'no' : i === quiz.i ? 'now' : ''}"></i>`).join('');
+    $('#score').textContent = `Đúng ${quiz.score} / ${quiz.marks.length}`;
+  }
+  const inp = (id, label, unit, cls = '') => `<div class="field">${label ? `<label for="${id}">${label}</label>` : ''}<div class="inrow"><input id="${id}" class="${cls}" inputmode="numeric" enterkeyhint="done" aria-label="${label || 'Đáp số'}">${unit ? `<span class="unit">${unit}</span>` : ''}</div></div>`;
+  function next(){
+    const q = quiz.q = makeQ(); quiz.done = false;
+    $('#qno').textContent = `Câu ${quiz.i + 1} / 10`;
+    $('#qtext').innerHTML = q.q;
+    $('#qfig').hidden = !q.fig; $('#qfig').innerHTML = q.fig || '';
+    $('#fb').hidden = true; $('#msg').textContent = '';
+    const A = $('#answer');
+    if (q.type === 'num') A.innerHTML = inp('a0', 'Đáp số', q.unit);
+    else if (q.type === 'num2') A.innerHTML = q.labels.map((l, i) => inp('a' + i, l, q.unit)).join('');
+    else if (q.type === 'frac') A.innerHTML = `<div class="field"><label>Viết phân số${q.strict ? ' tối giản' : ''}</label><div class="fracin"><input id="a0" inputmode="numeric" aria-label="Tử số" placeholder="tử"><hr><input id="a1" inputmode="numeric" aria-label="Mẫu số" placeholder="mẫu"></div></div>`;
+    else A.innerHTML = `<div class="choices${q.big ? ' big' : ''}">${q.choices.map((c, i) => `<button type="button" class="choice" data-i="${i}">${c}</button>`).join('')}</div>`;
+    $('#checkBtn').hidden = q.type === 'mc'; $('#checkBtn').textContent = 'Kiểm tra';
+    A.querySelectorAll('.choice').forEach(b => b.onclick = () => check(+b.dataset.i));
+    renderBar();
+    const first = A.querySelector('input'); if (first) first.focus({preventScroll:true});
+  }
+  const parseN = v => { const s = String(v).replace(/[\s., ]/g, ''); return /^\d+$/.test(s) ? +s : null; };
+  function answerText(q){
+    if (q.type === 'num') return fmt(q.answer) + (q.unit ? ' ' + q.unit : '');
+    if (q.type === 'num2') return q.labels.map((l, i) => `${l}: ${fmt(q.answer[i])}${q.unit ? ' ' + q.unit : ''}`).join('; ');
+    if (q.type === 'frac') return FR(q.answer[0], q.answer[1]);
+    return q.choices[q.answer];
+  }
+  function check(choice){
+    const q = quiz.q; if (quiz.done) return;
+    let ok = false, note = '';
+    if (q.type === 'mc') {
+      ok = choice === q.answer;
+      document.querySelectorAll('.choice').forEach((b, i) => { b.disabled = true; if (i === q.answer) b.classList.add('ok'); else if (i === choice) b.classList.add('no'); });
+    } else {
+      const ins = [...document.querySelectorAll('#answer input')];
+      const vals = ins.map(i => parseN(i.value));
+      if (q.type === 'frac' && vals[0] !== null && ins[1].value.trim() === '') vals[1] = 1;
+      if (vals.some(v => v === null)) { $('#msg').textContent = 'Bé hãy viết đáp số bằng chữ số vào ô trống.'; const e = ins[vals.findIndex(v => v === null)]; e.focus(); return; }
+      if (q.type === 'frac' && vals[1] === 0) { $('#msg').textContent = 'Mẫu số phải khác 0.'; ins[1].focus(); return; }
+      if (q.type === 'num') ok = vals[0] === q.answer;
+      else if (q.type === 'num2') ok = vals.every((v, i) => v === q.answer[i]);
+      else {
+        const same = vals[0] * q.answer[1] === vals[1] * q.answer[0];
+        const reduced = gcd(vals[0], vals[1]) === 1;
+        ok = same && (!q.strict || reduced);
+        if (same && !reduced) note = q.strict ? 'Đúng giá trị nhưng chưa phải phân số tối giản.' : `Kết quả đúng. Có thể rút gọn thành ${FR(q.answer[0], q.answer[1])}.`;
+      }
+      ins.forEach((e, i) => { e.readOnly = true; const good = q.type === 'num2' ? vals[i] === q.answer[i] : ok; e.classList.add(good ? 'ok' : 'no'); });
+    }
+    quiz.done = true; $('#msg').textContent = '';
+    quiz.marks.push(ok); if (ok) quiz.score++; else quiz.wrong.push({q:q.q, a:answerText(q)});
+    const fb = $('#fb'); fb.className = 'fb ' + (ok ? 'ok' : 'no'); fb.hidden = false;
+    fb.innerHTML = `<div class="head">${ok ? pick(['Đúng rồi!', 'Giỏi lắm!', 'Chính xác!']) : 'Chưa đúng rồi'}</div>
+      ${ok ? '' : `<div>Đáp án đúng: <b>${answerText(q)}</b></div>`}
+      ${note ? `<div>${note}</div>` : ''}
+      <div class="how"><b>Cách làm:</b> ${q.how}</div>`;
+    quiz.i++; renderBar();
+    const btn = $('#checkBtn'); btn.hidden = false; btn.textContent = quiz.i >= 10 ? 'Xem kết quả' : 'Câu tiếp ›'; btn.focus({preventScroll:true});
+  }
+  function finish(){
+    const s = quiz.score, id = quiz.topic.id, n = starsOf(s);
+    const prev = best[id] || 0; if (s > prev) { best[id] = s; store.set('best', best); }
+    $('#rtitle').textContent = quiz.topic.name;
+    $('#rscore').textContent = `${s} / 10`;
+    $('#rstars').innerHTML = [0,1,2].map(i => STAR.replace('<svg', `<svg class="${i < n ? 'on' : ''}"`)).join('');
+    $('#rmsg').textContent = s === 10 ? 'Tuyệt vời! Bé làm đúng hết.' : s >= 7 ? 'Giỏi lắm! Xem lại mấy câu sai bên dưới nhé.' : s >= 5 ? 'Khá rồi! Làm thêm một lượt nữa để được nhiều sao hơn.' : 'Không sao, xem lại cách làm rồi thử lại nhé.';
+    $('#rwrong').innerHTML = quiz.wrong.map(w => `<li><div>${w.q}</div><div>Đáp án: <span class="a">${w.a}</span></div></li>`).join('');
+    show('result');
+  }
+
+  $('#checkBtn').onclick = () => { if (!quiz.done) check(); else if (quiz.i >= 10) finish(); else next(); };
+  $('#answer').addEventListener('submit', e => e.preventDefault());
+  $('#answer').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('#checkBtn').click(); } });
+  $('#backBtn').onclick = () => { renderHome(); show('home'); };
+  $('#homeBtn').onclick = () => { renderHome(); show('home'); };
+  $('#againBtn').onclick = () => start(quiz.topic);
+  $('#mixedBtn').onclick = () => start(MIXED);
+  renderHome();
+})();
+</script>
+</body></html>
