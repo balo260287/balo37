@@ -218,7 +218,7 @@ button{cursor:pointer}
 
   /* ---------- Trạng thái ---------- */
   const st = {
-    grade: store.get('grade', 2),
+    grade: /^#lop-4$/.test(location.hash) ? 4 : /^#lop-2$/.test(location.hash) ? 2 : store.get('grade', 2),
     current: store.get('current', {2:'g2-A', 4:'g4-0'}),
     mode: store.get('mode', 'trace'),
     color: store.get('color', '#5a2db5'),
@@ -467,7 +467,9 @@ button{cursor:pointer}
 
   /* ---------- Nút bấm ---------- */
   document.querySelectorAll('.seg button').forEach(b => b.onclick = () => {
-    st.grade = +b.dataset.grade; store.set('grade', st.grade); openLesson(st.current[st.grade]);
+    st.grade = +b.dataset.grade; store.set('grade', st.grade);
+    try { history.replaceState(null, '', '#lop-' + st.grade); } catch (_) {}
+    openLesson(st.current[st.grade]);
   });
   $('#modeTrace').onclick = () => { st.mode = 'trace'; store.set('mode', st.mode); layoutAndDraw(); };
   $('#modeSelf').onclick = () => { st.mode = 'self'; store.set('mode', st.mode); layoutAndDraw(); };
@@ -524,6 +526,10 @@ button{cursor:pointer}
   }).observe(sheet);
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => layoutAndDraw());
 
+  window.addEventListener('hashchange', () => {
+    const m = /^#lop-(2|4)$/.exec(location.hash);
+    if (m && +m[1] !== st.grade) { st.grade = +m[1]; store.set('grade', st.grade); openLesson(st.current[st.grade]); }
+  });
   lesson = findLesson(); strokes = store.get('ink:' + lesson.key, []);
   renderChips(); renderHead(); renderTray(); layoutAndDraw();
   const fontsReady = document.fonts && document.fonts.load
