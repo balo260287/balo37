@@ -65,3 +65,16 @@ Với phụ huynh, thêm:
 - `references/toan-4.md` – kiến thức Toán 4 và cách gợi ý các dạng bài điển hình.
 - `references/tieng-viet-4.md` – Luyện từ và câu, đọc hiểu, tập làm văn lớp 4.
 - `references/mon-khac.md` – Khoa học, Lịch sử và Địa lí, Tiếng Anh lớp 4.
+
+## 6. Đọc bài giảng thành giọng nói (khi được nhờ "đọc cho nghe", "giảng bằng giọng")
+
+1. Viết **kịch bản nói** riêng vào file `.txt` (không dùng bảng, emoji, kí hiệu, gạch đầu dòng):
+   - Mỗi dòng một câu, dài 8–25 chữ; dùng **dấu phẩy** để tạo chỗ ngắt hơi như người thật.
+   - Không để câu cảm thán quá ngắn đứng một mình ("Chào con!", "Giỏi lắm!") vì giọng máy dễ nuốt mất: gộp vào câu sau, ví dụ *"Chào con nhé, cô là cô giáo Minh An đây."*
+   - Thêm từ đệm tự nhiên của cô giáo: *nhé, nha, nào, đấy, con thấy không, đúng không con?*
+   - Viết số và kí hiệu bằng chữ khi đọc (*mười bảy*, *chia cho*, *bằng*), viết đúng dấu tiếng Việt.
+   - Giọng văn trò chuyện: hỏi – chờ – giải thích, khen con ở đầu và động viên ở cuối.
+2. Chạy: `bash scripts/doc-bai-giang.sh <kich-ban.txt> <ket-qua.mp3>`
+   (giọng Piper `vi_VN-vais1000`, đã chỉnh tốc độ chậm hơn, ngắt câu 0,6 giây, làm ấm giọng và chuẩn hoá âm lượng;
+   đổi `TOC_DO=1.2` để đọc chậm hơn cho bé nhỏ, `NGAT_CAU=0.8` để nghỉ lâu hơn).
+3. Gửi file mp3 cho người dùng và nói rõ đây là **giọng máy tổng hợp**, chỗ nào đọc lạ thì bố mẹ đọc lại theo bản chữ.
