@@ -65,9 +65,16 @@ try {
 }
 
 if ($coDefender) {
-    Ghi 'Dang cap nhat du lieu virus moi nhat...'
-    try { Update-MpSignature -ErrorAction Stop; Ghi 'Cap nhat xong.' 'Green' }
-    catch { Ghi 'Khong cap nhat duoc (kiem tra mang). Van quet bang du lieu hien co.' 'Yellow' }
+    Ghi 'Dang cap nhat du lieu virus moi nhat... (toi da 3 phut)'
+    $job = Start-Job { Update-MpSignature -ErrorAction Stop }
+    if (Wait-Job $job -Timeout 180) {
+        try { Receive-Job $job -ErrorAction Stop | Out-Null; Ghi 'Cap nhat xong.' 'Green' }
+        catch { Ghi 'Khong cap nhat duoc (kiem tra mang). Van quet bang du lieu hien co.' 'Yellow' }
+    } else {
+        Stop-Job $job -ErrorAction SilentlyContinue
+        Ghi 'Cap nhat qua lau -> bo qua, quet bang du lieu hien co.' 'Yellow'
+    }
+    Remove-Job $job -Force -ErrorAction SilentlyContinue
 
     $kieu = if ($KhamKy) { 'FullScan' } else { 'QuickScan' }
     Ghi ("Dang quet ({0})... {1}" -f $kieu, $(if ($KhamKy) { 'co the mat 30-90 phut, cu de may chay.' } else { 'khoang 2-10 phut.' }))
