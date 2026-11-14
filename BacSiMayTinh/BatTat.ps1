@@ -15,7 +15,14 @@ foreach ($f in 'BacSiMayTinh.ps1','BatTat.ps1','BatTat.bat') {
 }
 
 function Tao-BieuTuong([bool]$bat) {
-    Get-ChildItem $desktop -Filter 'Bac Si May Tinh*.lnk' -ErrorAction SilentlyContinue | Remove-Item -Force
+    # Xoa MOI bieu tuong cu (ca Desktop chung) de chi con 1 cai
+    $publicDesktop = [Environment]::GetFolderPath('CommonDesktopDirectory')
+    foreach ($d in @($desktop, $publicDesktop)) {
+        Get-ChildItem $d -Filter 'Bac Si May Tinh - *.lnk' -Force -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+    }
+    # Cat cac to bao cao cu ngoai Desktop vao C:\BacSiMayTinh\BaoCao
+    New-Item -ItemType Directory -Path "$noiCai\BaoCao" -Force | Out-Null
+    Get-ChildItem $desktop -Filter 'BacSiMayTinh_BaoCao_*.txt' -ErrorAction SilentlyContinue | Move-Item -Destination "$noiCai\BaoCao" -Force -ErrorAction SilentlyContinue
     $tenFile = if ($bat) { 'Bac Si May Tinh - DANG BAT.lnk' } else { 'Bac Si May Tinh - DANG TAT.lnk' }
     $icon    = if ($bat) { "$env:WINDIR\System32\imageres.dll,101" } else { "$env:WINDIR\System32\imageres.dll,100" }
     $ws = New-Object -ComObject WScript.Shell

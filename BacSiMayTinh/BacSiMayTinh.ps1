@@ -10,7 +10,15 @@ $ErrorActionPreference = 'Continue'
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 $Host.UI.RawUI.WindowTitle = 'Bac Si May Tinh'
 
-$baoCao = Join-Path ([Environment]::GetFolderPath('Desktop')) ("BacSiMayTinh_BaoCao_{0}.txt" -f (Get-Date -Format 'yyyy-MM-dd_HH-mm'))
+$desktop = [Environment]::GetFolderPath('Desktop')
+$thuMucBaoCao = 'C:\BacSiMayTinh\BaoCao'
+New-Item -ItemType Directory -Path $thuMucBaoCao -Force | Out-Null
+# Don cac to bao cao cu ngoai Desktop (ban cu de lai)
+Get-ChildItem $desktop -Filter 'BacSiMayTinh_BaoCao_*.txt' -ErrorAction SilentlyContinue | Move-Item -Destination $thuMucBaoCao -Force -ErrorAction SilentlyContinue
+# Chi giu 30 bao cao gan nhat
+Get-ChildItem $thuMucBaoCao -Filter '*.txt' | Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 | Remove-Item -Force -ErrorAction SilentlyContinue
+$baoCao = Join-Path $thuMucBaoCao ("BacSiMayTinh_BaoCao_{0}.txt" -f (Get-Date -Format 'yyyy-MM-dd_HH-mm'))
+$baoCaoDesktop = Join-Path $desktop 'Bao cao Bac Si May Tinh.txt'
 $tongDonDep = 0
 
 function Ghi([string]$text, [string]$mau = 'White') {
@@ -214,4 +222,6 @@ Ghi ''
 Ghi '############################################'
 Ghi '#     KHAM XONG - MAY CUA BAN DA KHOE!      #'
 Ghi '############################################'
-Ghi ("Bao cao da luu tai: {0}" -f $baoCao) 'Cyan'
+Copy-Item $baoCao $baoCaoDesktop -Force
+Ghi ("Bao cao moi nhat: Desktop\Bao cao Bac Si May Tinh.txt") 'Cyan'
+Ghi ("Bao cao cu: {0}" -f $thuMucBaoCao) 'DarkGray'
