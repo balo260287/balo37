@@ -1,0 +1,348 @@
+<title>Bé Học Tiếng Anh</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;800&display=swap">
+<style>
+/* Layout: one screen at a time (home / learn / game), giant touch targets, picture first, word second */
+:root {
+  --sky: #CDEBFF;
+  --sky-deep: #9AD3FF;
+  --ink: #1F2A55;
+  --sun: #FFC93C;
+  --grass: #3CC47C;
+  --berry: #FF5E7E;
+  --grape: #8A6CFF;
+  --wave: #2FA8FF;
+  --card: #FFFFFF;
+  --soft: #5B6690;
+  --display: "Baloo 2", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  --body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
+  color-scheme: light;
+}
+html, body { height: 100%; }
+body {
+  background: var(--sky);
+  background-image: radial-gradient(circle at 15% 8%, #fff8 0 60px, transparent 61px),
+                    radial-gradient(circle at 85% 18%, #fff6 0 40px, transparent 41px);
+  color: var(--ink);
+  font-family: var(--body);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+  overflow-x: hidden;
+}
+.app {
+  min-height: 100%;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 14px 24px;
+  max-width: 560px; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 16px;
+  box-sizing: border-box;
+}
+button { font: inherit; color: inherit; border: 0; cursor: pointer; touch-action: manipulation; }
+button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.round {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--card); box-shadow: 0 5px 0 var(--sky-deep);
+  font-size: 32px; display: grid; place-items: center; flex: none;
+}
+.round:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--sky-deep); }
+.stars {
+  font-family: var(--display); font-weight: 800; font-size: 26px;
+  background: var(--card); border-radius: 999px; padding: 6px 18px;
+  box-shadow: 0 5px 0 var(--sky-deep);
+}
+
+/* ---------- home ---------- */
+.hello { text-align: center; }
+.hello h1 {
+  font-family: var(--display); font-weight: 800; margin: 0;
+  font-size: clamp(38px, 11vw, 56px); line-height: 1;
+  color: var(--ink); text-wrap: balance;
+}
+.hello h1 span { color: var(--berry); }
+.hello p { margin: 6px 0 0; color: var(--soft); font-size: 16px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tile {
+  border-radius: 28px; padding: 16px 8px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  box-shadow: 0 7px 0 rgba(31,42,85,.22);
+  color: #fff;
+}
+.tile:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(31,42,85,.22); }
+.tile .pic { font-size: 64px; line-height: 1.1; }
+.tile .en { font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1.1; }
+.tile .vi { font-size: 14px; opacity: .92; }
+.tile.play {
+  grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 14px;
+  background: var(--berry); padding: 18px 12px;
+}
+.tile.play .pic { font-size: 56px; }
+.tile.play .en { font-size: 34px; }
+.parent {
+  font-size: 13px; color: var(--soft); text-align: center; line-height: 1.5;
+  max-width: 44ch; margin: 4px auto 0;
+}
+
+/* ---------- learn ---------- */
+.stage {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+}
+.card {
+  width: min(100%, 380px); aspect-ratio: 1 / 1; max-width: 100%;
+  background: var(--card); border-radius: 40px;
+  box-shadow: 0 10px 0 var(--sky-deep);
+  display: grid; place-items: center; position: relative;
+}
+.card .big { font-size: clamp(130px, 44vw, 200px); line-height: 1; }
+.card .count {
+  display: flex; flex-wrap: wrap; justify-content: center; align-content: center;
+  gap: 4px; padding: 28px; font-size: clamp(34px, 10vw, 46px); line-height: 1.05;
+}
+.card .numeral {
+  position: absolute; top: 10px; left: 20px;
+  font-family: var(--display); font-weight: 800; font-size: 56px; color: var(--grape);
+}
+.blob { width: 68%; aspect-ratio: 1; border-radius: 46% 54% 50% 50% / 52% 46% 54% 48%; border: 6px solid #0002; }
+.card .ear {
+  position: absolute; right: 14px; bottom: 14px; font-size: 30px;
+  background: var(--sun); width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+}
+.word { text-align: center; }
+.word .en {
+  font-family: var(--display); font-weight: 800; font-size: clamp(48px, 14vw, 68px);
+  line-height: 1; color: var(--ink);
+}
+.word .vi { color: var(--soft); font-size: 18px; margin-top: 4px; }
+.nav { display: flex; justify-content: space-between; align-items: center; width: min(100%, 380px); }
+.dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 180px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: #fff; opacity: .7; }
+.dots i.on { background: var(--ink); opacity: 1; }
+.arrow {
+  width: 84px; height: 84px; border-radius: 50%; font-size: 40px; color: #fff;
+  background: var(--wave); box-shadow: 0 6px 0 #1b7fc4; display: grid; place-items: center;
+}
+.arrow:active { transform: translateY(5px); box-shadow: 0 1px 0 #1b7fc4; }
+
+/* ---------- game ---------- */
+.ask { text-align: center; }
+.ask .q { font-family: var(--display); font-weight: 800; font-size: clamp(34px, 10vw, 46px); line-height: 1.05; }
+.ask .q b { color: var(--berry); }
+.ask .vi { color: var(--soft); font-size: 16px; }
+.choices { display: grid; gap: 14px; width: 100%; }
+.choice {
+  background: var(--card); border-radius: 32px; box-shadow: 0 8px 0 var(--sky-deep);
+  min-height: 150px; display: grid; place-items: center; font-size: 96px; line-height: 1;
+}
+.choice:active { transform: translateY(5px); box-shadow: 0 3px 0 var(--sky-deep); }
+.choice .blob { width: 110px; }
+.choice.right { background: #D8FFE6; box-shadow: 0 8px 0 var(--grass); }
+
+/* ---------- effects ---------- */
+.pop { animation: pop .45s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { 0% { transform: scale(.8); } 100% { transform: scale(1); } }
+.wiggle { animation: wiggle .5s; }
+@keyframes wiggle { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-7deg); } 40% { transform: rotate(7deg); } 60% { transform: rotate(-5deg); } 80% { transform: rotate(4deg); } }
+.party {
+  position: fixed; inset: 0; pointer-events: none; z-index: 20;
+  display: grid; place-items: center;
+}
+.party .msg {
+  font-family: var(--display); font-weight: 800; font-size: clamp(46px, 14vw, 72px); color: #fff;
+  background: var(--grass); padding: 6px 30px; border-radius: 30px; box-shadow: 0 8px 0 #24935a;
+  animation: pop .45s cubic-bezier(.3,1.6,.5,1);
+}
+.confetti { position: fixed; top: -40px; font-size: 34px; animation: fall 1.6s linear forwards; z-index: 19; pointer-events: none; }
+@keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .pop, .wiggle, .party .msg { animation: none; }
+  .confetti { display: none; }
+}
+</style>
+
+<div class="app" id="app"></div>
+
+<script>
+const TOPICS = {
+  animals: { en: 'Animals', vi: 'Con vật', color: '#FF8A3D', pic: '🐶', items: [
+    ['🐱','cat','con mèo'], ['🐶','dog','con chó'], ['🦆','duck','con vịt'], ['🐮','cow','con bò'],
+    ['🐷','pig','con heo'], ['🐔','chicken','con gà'], ['🐟','fish','con cá'], ['🐦','bird','con chim'],
+    ['🐘','elephant','con voi'], ['🐵','monkey','con khỉ'], ['🦁','lion','sư tử'], ['🐰','rabbit','con thỏ'] ] },
+  fruits: { en: 'Fruits', vi: 'Trái cây', color: '#3CC47C', pic: '🍎', items: [
+    ['🍎','apple','quả táo'], ['🍌','banana','quả chuối'], ['🍊','orange','quả cam'], ['🍇','grapes','chùm nho'],
+    ['🍉','watermelon','dưa hấu'], ['🍓','strawberry','quả dâu'], ['🥭','mango','quả xoài'], ['🍍','pineapple','quả thơm'] ] },
+  colors: { en: 'Colors', vi: 'Màu sắc', color: '#8A6CFF', pic: '🎨', items: [
+    ['#E53935','red','màu đỏ'], ['#1E6FFF','blue','màu xanh dương'], ['#FFD600','yellow','màu vàng'],
+    ['#2EBD59','green','màu xanh lá'], ['#FF8F00','orange','màu cam'], ['#9C4DFF','purple','màu tím'],
+    ['#FF7EB6','pink','màu hồng'], ['#222222','black','màu đen'], ['#FFFFFF','white','màu trắng'], ['#8D5A2B','brown','màu nâu'] ] },
+  numbers: { en: 'Numbers', vi: 'Con số', color: '#2FA8FF', pic: '🔢', items: [
+    [1,'one','số một'], [2,'two','số hai'], [3,'three','số ba'], [4,'four','số bốn'], [5,'five','số năm'],
+    [6,'six','số sáu'], [7,'seven','số bảy'], [8,'eight','số tám'], [9,'nine','số chín'], [10,'ten','số mười'] ] },
+  things: { en: 'Vehicles', vi: 'Xe cộ', color: '#FFB300', pic: '🚗', items: [
+    ['🚗','car','xe hơi'], ['🚌','bus','xe buýt'], ['🚆','train','tàu hỏa'], ['✈️','airplane','máy bay'],
+    ['⛵','boat','thuyền'], ['🚲','bike','xe đạp'], ['🚒','fire truck','xe cứu hỏa'], ['🚀','rocket','tên lửa'] ] },
+  body: { en: 'My Body', vi: 'Cơ thể', color: '#FF5E7E', pic: '👀', items: [
+    ['👀','eyes','đôi mắt'], ['👃','nose','cái mũi'], ['👄','mouth','cái miệng'], ['👂','ear','cái tai'],
+    ['✋','hand','bàn tay'], ['🦶','foot','bàn chân'], ['🦷','teeth','hàm răng'], ['💪','arm','cánh tay'] ] },
+};
+const COUNT_PICS = ['🍎','⭐','🐤','🎈','🍓','🐟','🌸','🚗','🍌','🐞'];
+const PRAISE = ['Great job!', 'Well done!', 'Yay! You did it!', 'Super!', 'Good job!'];
+
+const app = document.getElementById('app');
+let stars = 0;
+try { stars = +localStorage.getItem('bhta-stars') || 0; } catch (e) {}
+function saveStars() { try { localStorage.setItem('bhta-stars', stars); } catch (e) {} }
+
+/* ---------- voice ---------- */
+let voice = null;
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang));
+  voice = vs.find(v => /en[-_]US/i.test(v.lang) && /female|samantha|google us/i.test(v.name))
+       || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text) {
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; if (voice) u.voice = voice;
+  u.rate = 0.8; u.pitch = 1.15;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- little sounds ---------- */
+let ac = null;
+function tone(freqs, dur = 0.12, type = 'triangle') {
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f, i) => {
+      const o = ac.createOscillator(), g = ac.createGain();
+      o.type = type; o.frequency.value = f;
+      const t = ac.currentTime + i * dur;
+      g.gain.setValueAtTime(0.18, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur * 1.6);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur * 1.7);
+    });
+  } catch (e) {}
+}
+const ding = () => tone([523, 659, 784, 1047], 0.1);
+const boop = () => tone([300, 240], 0.14, 'sine');
+
+/* ---------- drawing helpers ---------- */
+function picture(topicKey, item, size) {
+  if (topicKey === 'colors') return `<div class="blob" style="background:${item[0]}"></div>`;
+  if (topicKey === 'numbers') {
+    const n = item[0], p = COUNT_PICS[n - 1];
+    if (size === 'small') return `<span style="font-family:var(--display);font-weight:800;color:var(--grape)">${n}</span>`;
+    return `<div class="numeral">${n}</div><div class="count">${p.repeat(n).match(/./gu).map(c => `<span>${c}</span>`).join('')}</div>`;
+  }
+  return size === 'small' ? item[0] : `<div class="big">${item[0]}</div>`;
+}
+function topBar(extra = '') {
+  return `<div class="bar">
+    <button class="round" id="home" aria-label="Về trang chính">🏠</button>
+    ${extra}
+    <div class="stars" aria-label="Số sao">⭐ ${stars}</div>
+  </div>`;
+}
+function bindHome() { document.getElementById('home').onclick = () => { tone([400], 0.08); home(); }; }
+
+/* ---------- HOME ---------- */
+function home() {
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  app.innerHTML = `
+    <div class="bar"><div></div><div class="stars">⭐ ${stars}</div></div>
+    <div class="hello"><h1>Hello <span>baby!</span></h1><p>Chạm vào hình để nghe tiếng Anh</p></div>
+    <div class="grid">
+      <button class="tile play" data-play="1"><span class="pic">🎈</span><span><span class="en">Let's play!</span><br><span class="vi">Chơi trò tìm hình</span></span></button>
+      ${Object.entries(TOPICS).map(([k, t]) => `
+        <button class="tile" data-topic="${k}" style="background:${t.color}">
+          <span class="pic">${t.pic}</span><span class="en">${t.en}</span><span class="vi">${t.vi}</span>
+        </button>`).join('')}
+    </div>
+    <p class="parent">Ba mẹ ơi: bật âm lượng lên. Bé chạm vào hình sẽ nghe đọc chữ tiếng Anh. Mỗi ngày chơi 10 phút cùng bé và đọc theo là bé nhớ rất nhanh.</p>`;
+  app.querySelectorAll('[data-topic]').forEach(b => b.onclick = () => { const t = TOPICS[b.dataset.topic]; say(t.en); learn(b.dataset.topic, 0); });
+  app.querySelector('[data-play]').onclick = () => { say("Let's play!"); setTimeout(game, 700); };
+}
+
+/* ---------- LEARN ---------- */
+function learn(key, i) {
+  const t = TOPICS[key], item = t.items[i];
+  app.innerHTML = `
+    ${topBar()}
+    <div class="stage">
+      <button class="card pop" id="card" aria-label="Nghe lại: ${item[1]}">${picture(key, item)}<span class="ear">🔊</span></button>
+      <div class="word"><div class="en">${item[1]}</div><div class="vi">${item[2]}</div></div>
+      <div class="nav">
+        <button class="arrow" id="prev" aria-label="Hình trước">◀</button>
+        <div class="dots">${t.items.map((_, j) => `<i class="${j === i ? 'on' : ''}"></i>`).join('')}</div>
+        <button class="arrow" id="next" aria-label="Hình tiếp">▶</button>
+      </div>
+    </div>`;
+  bindHome();
+  const card = document.getElementById('card');
+  const speak = () => say(key === 'numbers' ? `${item[1]}!` : item[1]);
+  card.onclick = () => { card.classList.remove('wiggle'); void card.offsetWidth; card.classList.add('wiggle'); speak(); };
+  document.getElementById('next').onclick = () => { tone([660], 0.06); learn(key, (i + 1) % t.items.length); };
+  document.getElementById('prev').onclick = () => { tone([520], 0.06); learn(key, (i - 1 + t.items.length) % t.items.length); };
+  setTimeout(speak, 250);
+}
+
+/* ---------- GAME: find the picture ---------- */
+let lastAnswer = '';
+function game() {
+  const keys = Object.keys(TOPICS);
+  const key = keys[Math.floor(Math.random() * keys.length)];
+  const pool = TOPICS[key].items.slice().sort(() => Math.random() - 0.5);
+  let answer = pool[0];
+  if (answer[1] === lastAnswer) answer = pool[1];
+  lastAnswer = answer[1];
+  const options = [answer, ...pool.filter(x => x !== answer).slice(0, 2)].sort(() => Math.random() - 0.5);
+  const article = key === 'colors' ? 'Find' : 'Where is';
+  const question = key === 'colors' ? `Find ${answer[1]}!` : key === 'numbers' ? `Find number ${answer[1]}!` : `Where is the ${answer[1]}?`;
+  app.innerHTML = `
+    ${topBar(`<button class="round" id="again" aria-label="Nghe lại câu hỏi">🔊</button>`)}
+    <div class="ask"><div class="q">${key === 'colors' || key === 'numbers' ? 'Find' : 'Where is the'} <b>${answer[1]}</b>${key === 'colors' || key === 'numbers' ? '!' : '?'}</div>
+      <div class="vi">Bé tìm ${answer[2]} nào</div></div>
+    <div class="choices">
+      ${options.map((o, j) => `<button class="choice" data-j="${j}" aria-label="${o[1]}">${picture(key, o, 'small')}</button>`).join('')}
+    </div>`;
+  bindHome();
+  document.getElementById('again').onclick = () => say(question);
+  let done = false;
+  app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
+    if (done) return;
+    const o = options[+btn.dataset.j];
+    if (o === answer) {
+      done = true; btn.classList.add('right', 'pop');
+      stars++; saveStars(); ding();
+      const praise = PRAISE[Math.floor(Math.random() * PRAISE.length)];
+      say(`${praise} ${answer[1]}!`);
+      celebrate(praise);
+      setTimeout(game, 2200);
+    } else {
+      boop(); btn.classList.remove('wiggle'); void btn.offsetWidth; btn.classList.add('wiggle');
+      say(`That is ${key === 'colors' || key === 'numbers' ? '' : 'a '}${o[1]}. Try again!`);
+    }
+  });
+  setTimeout(() => say(question), 300);
+}
+function celebrate(text) {
+  const p = document.createElement('div');
+  p.className = 'party'; p.innerHTML = `<div class="msg">${text}</div>`;
+  document.body.appendChild(p);
+  const bits = ['⭐','🎉','🎈','💖','🌟'];
+  for (let k = 0; k < 18; k++) {
+    const c = document.createElement('div');
+    c.className = 'confetti'; c.textContent = bits[k % bits.length];
+    c.style.left = Math.random() * 92 + 'vw'; c.style.animationDelay = Math.random() * 0.5 + 's';
+    document.body.appendChild(c); setTimeout(() => c.remove(), 2300);
+  }
+  setTimeout(() => p.remove(), 1700);
+}
+
+home();
+</script>
