@@ -335,7 +335,7 @@ function loadState() {
     return { stars: +localStorage.getItem('bhta-stars') || 0, buddy: localStorage.getItem('bhta-buddy') || 'bear', installOk: !!localStorage.getItem('bhta-install-ok') };
   } catch (e) { return {}; }
 }
-const S = Object.assign({ stars: 0, buddy: 'bear', world: {}, rate: 'slow', limit: 0, usage: { d: '', s: 0 }, installOk: false, stk: 0 }, loadState());
+const S = Object.assign({ stars: 0, buddy: 'bear', world: {}, rate: 'slow', viOn: true, limit: 0, usage: { d: '', s: 0 }, installOk: false, stk: 0 }, loadState());
 S.stk = Math.max(S.stk || 0, Math.floor(S.stars / 3));
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
@@ -354,9 +354,11 @@ function stopAll() {
 }
 
 /* ---------- voice ---------- */
-let voice = null;
+let voice = null, viVoice = null;
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
+  const all = speechSynthesis.getVoices();
+  viVoice = all.find(v => /^vi[-_]/i.test(v.lang)) || null;
   const vs = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang));
   voice = vs.find(v => /en[-_]US/i.test(v.lang) && /samantha|female|google us/i.test(v.name))
        || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
@@ -364,7 +366,8 @@ function pickVoice() {
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 let talkTimer = null;
 function setTalking(on) { document.querySelectorAll('.buddy').forEach(b => b.classList.toggle('talking', on)); }
-function say(text, onDone) {
+/* say(text) speaks English; say(text, done, 'vi') speaks Vietnamese */
+function say(text, onDone, lang = 'en') {
   clearTimeout(talkTimer);
   const r = RUN;
   let finished = false;
@@ -374,10 +377,15 @@ function say(text, onDone) {
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US'; if (voice) u.voice = voice;
-  u.rate = S.rate === 'slow' ? 0.72 : 0.9; u.pitch = 1.12;
+  if (lang === 'vi') { u.lang = 'vi-VN'; if (viVoice) u.voice = viVoice; u.rate = S.rate === 'slow' ? 0.85 : 1; u.pitch = 1.05; }
+  else { u.lang = 'en-US'; if (voice) u.voice = voice; u.rate = S.rate === 'slow' ? 0.72 : 0.9; u.pitch = 1.12; }
   u.onend = finish; u.onerror = finish;
   speechSynthesis.speak(u);
+}
+
+/* English first, then the Vietnamese meaning (when turned on in the parents' corner) */
+function sayBoth(en, vi, onDone) {
+  say(en, () => { if (S.viOn && vi) later(() => say(vi, onDone, 'vi'), 250); else if (onDone) onDone(); });
 }
 
 /* ---------- sounds ---------- */
@@ -744,7 +752,7 @@ function learn(dk, i, back) {
       </div>
     </div>`, back);
   const card = $('#card');
-  const speak = () => say(item.say || item.w);
+  const speak = () => sayBoth(item.say || item.w, item.vi);
   card.onclick = () => { bounce(card, 'wiggle'); speak(); };
   $('#next').onclick = () => { click(); learn(dk, (i + 1) % d.items.length, back); };
   $('#prev').onclick = () => { click(); learn(dk, (i - 1 + d.items.length) % d.items.length, back); };
@@ -787,7 +795,7 @@ function find(ds, back) {
       boop(); bounce(btn, 'wiggle'); say(`${thatIs(d, o)} Try again!`);
     }
   });
-  later(() => say(plain(q)), 300);
+  later(() => sayBoth(plain(q), d.fvi ? d.fvi(ans) : `Bé tìm ${ans.vi} nào`), 300);
 }
 
 /* =====================================================================
@@ -805,7 +813,7 @@ function count(back) {
     <div class="talkrow">${buddy()}<div class="bubble">Let's count the <b>${many}</b>!<small>Bé chạm vào từng ${vi} để đếm</small></div></div>
     <div class="counting">${Array(n).fill(0).map((_, j) => `<button class="cnt" data-j="${j}" aria-label="${one}">${p}</button>`).join('')}</div>
     <div id="after" class="choices"></div>`, back);
-  say(`Let's count the ${many}!`);
+  sayBoth(`Let's count the ${many}!`, `Bé chạm vào từng ${vi} để đếm nhé`);
   let k = 0;
   app.querySelectorAll('.cnt').forEach(b => b.onclick = () => {
     if (b.classList.contains('done')) return;
@@ -849,7 +857,7 @@ function compare(back) {
     <div class="choices two">${sides.map((s, j) => `<button class="choice" data-j="${j}" style="min-height:230px">${s.c
       ? `<div class="groupe">${Array(s.c).fill(e).join('')}</div>` : `<span style="font-size:${s.s}px">${e}</span>`}</button>`).join('')}</div>`, back);
   $('#again').onclick = () => say(plain(q));
-  say(plain(q));
+  sayBoth(plain(q), vi);
   let done = false;
   app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
     if (done) return;
@@ -902,7 +910,7 @@ function sortGame(key, back) {
     <div class="choices two">${two.map(b => { const bb = s.bins[b]; return `<button class="choice" data-b="${b}" style="font-size:70px">
       <span>${bb[0]}<span class="label">${bb[1]}</span><span class="sub">${bb[2]}</span></span></button>`; }).join('')}</div>`, back);
   $('#again').onclick = () => say(plain(q));
-  say(plain(q));
+  sayBoth(plain(q), s.vi);
   let done = false;
   app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
     if (done) return;
@@ -922,7 +930,7 @@ function seq(key, back) {
     <div class="talkrow">${buddy()}<div class="bubble">${s.en}<small>${s.vi}: bé xếp theo đúng thứ tự</small></div></div>
     <div class="slots" style="--n:${steps.length}">${steps.map((_, i) => `<div class="slot" id="slot${i}"><b>${i + 1}</b></div>`).join('')}</div>
     <div class="cards">${pool.map(st => `<button class="step" data-i="${st.i}"><span class="p">${st.p}</span><span class="t">${st.w}</span><span class="v">${st.vi}</span></button>`).join('')}</div>`, back);
-  const ask = () => say(next === 0 ? `${s.en}! What comes first?` : 'What comes next?');
+  const ask = () => next === 0 ? sayBoth(`${s.en}! What comes first?`, `${s.vi}. Bé chọn việc làm đầu tiên nhé`) : say('What comes next?');
   $('#again').onclick = ask;
   ask();
   app.querySelectorAll('.step').forEach(btn => btn.onclick = () => {
@@ -971,7 +979,7 @@ function trace(i, back) {
       <button class="tool" id="clear" aria-label="Tô lại">🔄</button>
       <button class="arrow green" id="next" aria-label="Chữ tiếp">▶</button>
     </div>`, back);
-  const sayIt = () => say(`Trace the letter ${Lt}. ${Lt} is for ${w}.`);
+  const sayIt = () => sayBoth(`Trace the letter ${Lt}. ${Lt} is for ${w}.`, `Bé dùng ngón tay tô theo chữ ${Lt} nhé`);
   $('#again').onclick = sayIt;
   $('#prev').onclick = () => { click(); trace((i + 25) % 26, back); };
   $('#next').onclick = () => { click(); trace((i + 1) % 26, back); };
@@ -1198,7 +1206,7 @@ function watch(di = 0, i = 0) {
   const next = () => { if (paused) return; let ni = i + 1, nd = di; if (ni >= d.items.length) { ni = 0; nd = di + 1; } watch(nd, ni); };
   const play = () => {
     if (paused) return;
-    say(intro, () => later(() => {
+    sayBoth(intro, item.vi, () => later(() => {
       if (paused) return;
       $('#bubble').innerHTML = `Say: ${sayWord}!<small>Bé đọc theo nào: ${sayWord}</small>`;
       say(`${sayWord}! Say: ${sayWord}!`, () => later(next, 1600));
@@ -1234,6 +1242,9 @@ function parents() {
     <div class="panel"><h2>Giới hạn giờ chơi mỗi ngày</h2>
       <div class="seg" id="lim">${[[0, 'Không giới hạn'], [15, '15 phút'], [20, '20 phút'], [30, '30 phút'], [45, '45 phút']].map(([v, t]) => `<button data-v="${v}" class="${S.limit === v ? 'on' : ''}">${t}</button>`).join('')}</div>
       <div style="color:var(--soft)">Hết giờ, app hiện màn hình "Nghỉ ngơi". Ba mẹ giữ nút 3 giây để cho bé chơi thêm 10 phút. WHO khuyên trẻ 3–4 tuổi dùng màn hình không quá 1 giờ mỗi ngày.</div></div>
+    <div class="panel"><h2>Đọc nghĩa tiếng Việt</h2>
+      <div class="seg" id="vion">${[[true, 'Bật: đọc tiếng Anh rồi tiếng Việt'], [false, 'Tắt: chỉ tiếng Anh']].map(([v, t]) => `<button data-v="${v}" class="${S.viOn === v ? 'on' : ''}">${t}</button>`).join('')}</div>
+      <div style="color:var(--soft)">Bé mới học nên Bật. Khi bé đã thuộc nhiều từ, ba mẹ Tắt để bé quen nghe hoàn toàn bằng tiếng Anh.</div></div>
     <div class="panel"><h2>Tốc độ đọc</h2>
       <div class="seg" id="rate">${[['slow', 'Chậm (cho bé mới học)'], ['normal', 'Vừa']].map(([v, t]) => `<button data-v="${v}" class="${S.rate === v ? 'on' : ''}">${t}</button>`).join('')}</div></div>
     <div class="panel"><h2>Chương trình học (theo khung EYFS, Anh)</h2>
@@ -1245,6 +1256,7 @@ function parents() {
       </ul></div>
     <div class="panel"><h2>Xóa tiến độ</h2><button class="danger" id="reset">Xóa sao và sticker</button></div>`, home);
   app.querySelectorAll('#lim button').forEach(b => b.onclick = () => { S.limit = +b.dataset.v; save(); parents(); });
+  app.querySelectorAll('#vion button').forEach(b => b.onclick = () => { S.viOn = b.dataset.v === 'true'; save(); parents(); sayBoth('Cat!', 'con mèo'); });
   app.querySelectorAll('#rate button').forEach(b => b.onclick = () => { S.rate = b.dataset.v; save(); parents(); say('Hello! This is my reading speed.'); });
   let armed = false;
   $('#reset').onclick = () => {
@@ -1298,7 +1310,7 @@ function splash() {
     <button class="go" id="go">▶ Bắt đầu</button>
     <p>Bật loa lên nhé. Trên iPhone, gạt nút im lặng bên hông để có tiếng.</p>`;
   document.body.appendChild(el);
-  $('#go').onclick = () => { audio(); pickVoice(); say(curBuddy().hi); tone([523, 659, 784], 0.09); el.remove(); };
+  $('#go').onclick = () => { audio(); pickVoice(); sayBoth(curBuddy().hi, 'Chào bé! Mình cùng học tiếng Anh nhé!'); tone([523, 659, 784], 0.09); el.remove(); };
 }
 
 home();
