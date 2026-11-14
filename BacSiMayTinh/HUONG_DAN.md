@@ -24,8 +24,12 @@ Nếu Windows hiện màn hình xanh *"Windows protected your PC"* thì bấm **
 
 **Không đụng tới:** mật khẩu, lịch sử, bookmark trình duyệt, tài liệu, ảnh, game.
 
-### Muốn tự khám mỗi tuần, không cần bấm
-Mở **Task Scheduler**, chọn **Create Basic Task**, đặt Weekly, Action là *Start a program*, chọn file `1-KhamNhanh.bat`. Tick **Run with highest privileges**.
+### Tự khám MỖI NGÀY (nút BẬT / TẮT)
+Bấm đúp `4-BAT-TAT-TuDong.bat` rồi bấm **Yes**. Ngoài Desktop sẽ có biểu tượng:
+- **Bac Si May Tinh - DANG BAT**: máy tự khám mỗi ngày lúc 12 giờ trưa (lúc đó máy tắt thì lần bật máy kế tiếp sẽ khám bù).
+- **Bac Si May Tinh - DANG TAT**: không tự khám nữa.
+
+Muốn đổi qua lại giữa BẬT và TẮT thì bấm đúp vào biểu tượng đó.
 
 ## Phần 2: Gmail tự dọn rác (cài 1 lần, ~3 phút)
 
