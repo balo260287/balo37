@@ -141,6 +141,34 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .choice .blob { width: 110px; }
 .choice.right { background: #D8FFE6; box-shadow: 0 8px 0 var(--grass); }
 
+/* ---------- talking buddy ---------- */
+.buddy { width: 96px; flex: none; }
+.buddy.lg { width: 120px; }
+.buddy svg { display: block; width: 100%; height: auto; overflow: visible; }
+.buddy .mouth { transform-box: fill-box; transform-origin: center; transform: scaleY(.3); }
+.buddy .eye { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
+.buddy.talking .mouth { animation: talk .18s infinite alternate ease-in-out; }
+.buddy.talking svg { animation: bob .36s infinite alternate ease-in-out; }
+@keyframes talk { from { transform: scaleY(.2); } to { transform: scaleY(1); } }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes bob { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-5px) rotate(2deg); } }
+.talkrow { display: flex; align-items: center; gap: 10px; justify-content: center; width: min(100%, 400px); }
+.bubble {
+  background: var(--card); border-radius: 26px; padding: 10px 18px; position: relative;
+  font-family: var(--display); font-weight: 800; font-size: clamp(24px, 7vw, 32px); line-height: 1.1;
+  box-shadow: 0 5px 0 var(--sky-deep); min-width: 0; flex: 1;
+}
+.bubble::before {
+  content: ""; position: absolute; left: -12px; top: 50%; margin-top: -10px;
+  border: 10px solid transparent; border-right-color: var(--card); border-left: 0;
+}
+.bubble small { display: block; font-family: var(--body); font-weight: 600; font-size: 15px; color: var(--soft); }
+.tile.watch { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 14px; background: var(--grape); padding: 18px 12px; }
+.tile.watch .pic { font-size: 56px; }
+.tile.watch .en { font-size: 34px; }
+.progress { height: 10px; background: #fff8; border-radius: 99px; overflow: hidden; width: min(100%, 380px); }
+.progress i { display: block; height: 100%; background: var(--grape); border-radius: 99px; transition: width .4s; }
+
 /* ---------- effects ---------- */
 .pop { animation: pop .45s cubic-bezier(.3,1.6,.5,1); }
 @keyframes pop { 0% { transform: scale(.8); } 100% { transform: scale(1); } }
@@ -160,6 +188,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .pop, .wiggle, .party .msg { animation: none; }
   .confetti { display: none; }
+  .buddy .eye, .buddy.talking svg { animation: none; }
 }
 </style>
 
@@ -205,13 +234,39 @@ function pickVoice() {
        || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function say(text) {
+/* The buddy's mouth moves while the voice is speaking.
+   onDone fires when speech ends (with a timer fallback, since some phones never fire onend). */
+let talkTimer = null;
+function setTalking(on) {
+  document.querySelectorAll('.buddy').forEach(b => b.classList.toggle('talking', on));
+}
+function say(text, onDone) {
+  clearTimeout(talkTimer);
+  let finished = false;
+  const finish = () => { if (finished) return; finished = true; clearTimeout(talkTimer); setTalking(false); if (onDone) onDone(); };
+  setTalking(true);
+  talkTimer = setTimeout(finish, 900 + text.length * 110);
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'en-US'; if (voice) u.voice = voice;
   u.rate = 0.8; u.pitch = 1.15;
+  u.onend = finish; u.onerror = finish;
   speechSynthesis.speak(u);
+}
+function buddy(cls = '') {
+  return `<div class="buddy ${cls}" aria-hidden="true"><svg viewBox="0 0 120 120">
+    <circle cx="22" cy="30" r="15" fill="#FFB23F"/><circle cx="98" cy="30" r="15" fill="#FFB23F"/>
+    <circle cx="22" cy="30" r="7" fill="#FF8FA8"/><circle cx="98" cy="30" r="7" fill="#FF8FA8"/>
+    <circle cx="60" cy="64" r="50" fill="#FFC93C"/>
+    <ellipse cx="60" cy="84" rx="30" ry="22" fill="#FFE7A3"/>
+    <ellipse class="eye" cx="42" cy="56" rx="7" ry="9" fill="#1F2A55"/>
+    <ellipse class="eye" cx="78" cy="56" rx="7" ry="9" fill="#1F2A55"/>
+    <circle cx="44.5" cy="52.5" r="2.6" fill="#fff"/><circle cx="80.5" cy="52.5" r="2.6" fill="#fff"/>
+    <circle cx="28" cy="74" r="7" fill="#FF8FA8" opacity=".7"/><circle cx="92" cy="74" r="7" fill="#FF8FA8" opacity=".7"/>
+    <ellipse cx="60" cy="72" rx="6" ry="4.5" fill="#1F2A55"/>
+    <ellipse class="mouth" cx="60" cy="88" rx="12" ry="9" fill="#C2185B"/>
+  </svg></div>`;
 }
 
 /* ---------- little sounds ---------- */
@@ -237,7 +292,7 @@ function picture(topicKey, item, size) {
   if (topicKey === 'numbers') {
     const n = item[0], p = COUNT_PICS[n - 1];
     if (size === 'small') return `<span style="font-family:var(--display);font-weight:800;color:var(--grape)">${n}</span>`;
-    return `<div class="numeral">${n}</div><div class="count">${p.repeat(n).match(/./gu).map(c => `<span>${c}</span>`).join('')}</div>`;
+    return `<div class="numeral">${n}</div><div class="count" style="font-size:${n <= 2 ? 96 : n <= 4 ? 64 : ''}px">${p.repeat(n).match(/./gu).map(c => `<span>${c}</span>`).join('')}</div>`;
   }
   return size === 'small' ? item[0] : `<div class="big">${item[0]}</div>`;
 }
@@ -252,11 +307,14 @@ function bindHome() { document.getElementById('home').onclick = () => { tone([40
 
 /* ---------- HOME ---------- */
 function home() {
+  watchRun++;
   if ('speechSynthesis' in window) speechSynthesis.cancel();
+  setTalking(false);
   app.innerHTML = `
     <div class="bar"><div></div><div class="stars">⭐ ${stars}</div></div>
-    <div class="hello"><h1>Hello <span>baby!</span></h1><p>Chạm vào hình để nghe tiếng Anh</p></div>
+    <div class="talkrow">${buddy('lg')}<div class="hello" style="text-align:left"><h1>Hello <span>baby!</span></h1><p>Chạm vào hình để nghe tiếng Anh</p></div></div>
     <div class="grid">
+      <button class="tile watch" data-watch="1"><span class="pic">📺</span><span><span class="en">Watch!</span><br><span class="vi">Xem video học</span></span></button>
       <button class="tile play" data-play="1"><span class="pic">🎈</span><span><span class="en">Let's play!</span><br><span class="vi">Chơi trò tìm hình</span></span></button>
       ${Object.entries(TOPICS).map(([k, t]) => `
         <button class="tile" data-topic="${k}" style="background:${t.color}">
@@ -266,6 +324,51 @@ function home() {
     <p class="parent">Ba mẹ ơi: bật âm lượng lên. Bé chạm vào hình sẽ nghe đọc chữ tiếng Anh. Mỗi ngày chơi 10 phút cùng bé và đọc theo là bé nhớ rất nhanh.</p>`;
   app.querySelectorAll('[data-topic]').forEach(b => b.onclick = () => { const t = TOPICS[b.dataset.topic]; say(t.en); learn(b.dataset.topic, 0); });
   app.querySelector('[data-play]').onclick = () => { say("Let's play!"); setTimeout(game, 700); };
+  app.querySelector('[data-watch]').onclick = () => watch();
+  app.querySelector('.buddy').onclick = () => say('Hello! I am Bông. Let\'s learn English!');
+}
+
+/* ---------- WATCH: the buddy presents every picture, like a video ---------- */
+let watchRun = 0;
+const WATCH_ORDER = ['animals', 'fruits', 'colors', 'numbers', 'things', 'body'];
+function watch(ti = 0, i = 0, run = ++watchRun) {
+  if (run !== watchRun) return;
+  if (ti >= WATCH_ORDER.length) ti = 0;
+  const key = WATCH_ORDER[ti], t = TOPICS[key], item = t.items[i], w = item[1];
+  const total = WATCH_ORDER.reduce((s, k) => s + TOPICS[k].items.length, 0);
+  const done = WATCH_ORDER.slice(0, ti).reduce((s, k) => s + TOPICS[k].items.length, 0) + i;
+  const intro = key === 'colors' ? `This is ${w}.` : key === 'numbers' ? `Number ${w}.` : `This is ${/^[aeiou]/.test(w) ? 'an' : 'a'} ${w}.`;
+  app.innerHTML = `
+    ${topBar(`<button class="round" id="pause" aria-label="Tạm dừng">⏸️</button>`)}
+    <div class="stage">
+      <div class="progress"><i style="width:${(done / total * 100).toFixed(1)}%"></i></div>
+      <div class="card pop">${picture(key, item)}</div>
+      <div class="talkrow">${buddy()}<div class="bubble" id="bubble">${intro}<small>${item[2]}</small></div></div>
+    </div>`;
+  bindHome();
+  let paused = false;
+  const next = () => {
+    if (run !== watchRun || paused) return;
+    let ni = i + 1, nti = ti;
+    if (ni >= t.items.length) { ni = 0; nti = ti + 1; }
+    watch(nti, ni, run);
+  };
+  const play = () => {
+    if (run !== watchRun || paused) return;
+    say(intro, () => setTimeout(() => {
+      if (run !== watchRun || paused) return;
+      const bubble = document.getElementById('bubble');
+      bubble.innerHTML = `Say: ${w}!<small>Bé đọc theo nào: ${w}</small>`;
+      say(`${w}! Say: ${w}!`, () => setTimeout(next, 1600));
+    }, 350));
+  };
+  document.getElementById('pause').onclick = (e) => {
+    paused = !paused;
+    e.currentTarget.textContent = paused ? '▶️' : '⏸️';
+    if (paused) { if ('speechSynthesis' in window) speechSynthesis.cancel(); clearTimeout(talkTimer); setTalking(false); }
+    else play();
+  };
+  setTimeout(play, 300);
 }
 
 /* ---------- LEARN ---------- */
@@ -275,7 +378,7 @@ function learn(key, i) {
     ${topBar()}
     <div class="stage">
       <button class="card pop" id="card" aria-label="Nghe lại: ${item[1]}">${picture(key, item)}<span class="ear">🔊</span></button>
-      <div class="word"><div class="en">${item[1]}</div><div class="vi">${item[2]}</div></div>
+      <div class="talkrow">${buddy()}<div class="word" style="text-align:left"><div class="en">${item[1]}</div><div class="vi">${item[2]}</div></div></div>
       <div class="nav">
         <button class="arrow" id="prev" aria-label="Hình trước">◀</button>
         <div class="dots">${t.items.map((_, j) => `<i class="${j === i ? 'on' : ''}"></i>`).join('')}</div>
@@ -305,8 +408,8 @@ function game() {
   const question = key === 'colors' ? `Find ${answer[1]}!` : key === 'numbers' ? `Find number ${answer[1]}!` : `Where is the ${answer[1]}?`;
   app.innerHTML = `
     ${topBar(`<button class="round" id="again" aria-label="Nghe lại câu hỏi">🔊</button>`)}
-    <div class="ask"><div class="q">${key === 'colors' || key === 'numbers' ? 'Find' : 'Where is the'} <b>${answer[1]}</b>${key === 'colors' || key === 'numbers' ? '!' : '?'}</div>
-      <div class="vi">Bé tìm ${answer[2]} nào</div></div>
+    <div class="talkrow">${buddy()}<div class="ask" style="text-align:left"><div class="q">${key === 'colors' || key === 'numbers' ? 'Find' : 'Where is the'} <b>${answer[1]}</b>${key === 'colors' || key === 'numbers' ? '!' : '?'}</div>
+      <div class="vi">Bé tìm ${answer[2]} nào</div></div></div>
     <div class="choices">
       ${options.map((o, j) => `<button class="choice" data-j="${j}" aria-label="${o[1]}">${picture(key, o, 'small')}</button>`).join('')}
     </div>`;
