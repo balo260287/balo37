@@ -27,7 +27,7 @@
 @font-face{font-family:'Nunito';font-weight:800;font-display:swap;src:url(fonts/nunito-800-vietnamese.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB}
 @font-face{font-family:'Nunito';font-weight:800;font-display:swap;src:url(fonts/nunito-800-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
 @font-face{font-family:'Nunito';font-weight:800;font-display:swap;src:url(fonts/nunito-800-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
-/* Layout: one screen at a time (home / learn / game), giant touch targets, picture first, word second */
+/* Layout: one screen at a time. Home -> 10 learning worlds -> activities. Giant touch targets, picture first, word second. */
 :root {
   --sky: #CDEBFF;
   --sky-deep: #9AD3FF;
@@ -39,131 +39,135 @@
   --wave: #2FA8FF;
   --card: #FFFFFF;
   --soft: #5B6690;
-  --display: "Baloo 2", "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+  --display: "Baloo 2", "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
   --body: "Nunito", "Trebuchet MS", system-ui, sans-serif;
   color-scheme: light;
 }
 html, body { height: 100%; }
+html { -webkit-text-size-adjust: 100%; }
 body {
+  margin: 0;
   background: var(--sky);
-  background-image: radial-gradient(circle at 15% 8%, #fff8 0 60px, transparent 61px),
-                    radial-gradient(circle at 85% 18%, #fff6 0 40px, transparent 41px);
+  background-image: radial-gradient(circle at 15% 8%, #ffffff88 0 60px, transparent 61px),
+                    radial-gradient(circle at 85% 18%, #ffffff66 0 40px, transparent 41px);
   color: var(--ink);
   font-family: var(--body);
   -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
   user-select: none; -webkit-user-select: none;
-  overflow-x: hidden;
+  overflow-x: hidden; overscroll-behavior: none;
 }
 .app {
   min-height: 100%;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 14px 24px;
+  padding-top: max(14px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(24px, env(safe-area-inset-bottom, 0px));
   max-width: 560px; margin: 0 auto;
   display: flex; flex-direction: column; gap: 16px;
   box-sizing: border-box;
 }
-button { font: inherit; color: inherit; border: 0; cursor: pointer; touch-action: manipulation; }
+button { font: inherit; color: inherit; border: 0; cursor: pointer; touch-action: manipulation; background: none; padding: 0; }
 button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
+h2 { font-family: var(--display); font-weight: 800; margin: 0; }
 
 /* ---------- top bar ---------- */
-.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.bar .grow { flex: 1; }
 .round {
-  width: 64px; height: 64px; border-radius: 50%;
+  width: 60px; height: 60px; border-radius: 50%;
   background: var(--card); box-shadow: 0 5px 0 var(--sky-deep);
-  font-size: 32px; display: grid; place-items: center; flex: none;
+  font-size: 30px; display: grid; place-items: center; flex: none;
 }
 .round:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--sky-deep); }
+.round.small { width: 48px; height: 48px; font-size: 24px; }
+.round.holding { animation: fillhold 2s linear forwards; }
+@keyframes fillhold { from { box-shadow: inset 0 0 0 0 var(--grape), 0 5px 0 var(--sky-deep); } to { box-shadow: inset 0 0 0 30px var(--grape), 0 5px 0 var(--sky-deep); } }
 .stars {
-  font-family: var(--display); font-weight: 800; font-size: 26px;
-  background: var(--card); border-radius: 999px; padding: 6px 18px;
-  box-shadow: 0 5px 0 var(--sky-deep);
+  font-family: var(--display); font-weight: 800; font-size: 24px;
+  background: var(--card); border-radius: 999px; padding: 6px 16px;
+  box-shadow: 0 5px 0 var(--sky-deep); white-space: nowrap;
 }
 
 /* ---------- home ---------- */
-.hello { text-align: center; }
 .hello h1 {
   font-family: var(--display); font-weight: 800; margin: 0;
-  font-size: clamp(38px, 11vw, 56px); line-height: 1;
-  color: var(--ink); text-wrap: balance;
+  font-size: clamp(36px, 10vw, 54px); line-height: 1; text-wrap: balance;
 }
 .hello h1 span { color: var(--berry); }
 .hello p { margin: 6px 0 0; color: var(--soft); font-size: 16px; }
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .tile {
-  border-radius: 28px; padding: 16px 8px 12px;
+  border-radius: 28px; padding: 14px 8px 12px;
   display: flex; flex-direction: column; align-items: center; gap: 2px;
-  box-shadow: 0 7px 0 rgba(31,42,85,.22);
-  color: #fff;
+  box-shadow: 0 7px 0 rgba(31,42,85,.22); color: #fff; text-align: center;
 }
 .tile:active { transform: translateY(5px); box-shadow: 0 2px 0 rgba(31,42,85,.22); }
-.tile .pic { font-size: 64px; line-height: 1.1; }
-.tile .en { font-family: var(--display); font-weight: 800; font-size: 26px; line-height: 1.1; }
-.tile .vi { font-size: 14px; opacity: .92; }
-.tile.play {
-  grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 14px;
-  background: var(--berry); padding: 18px 12px;
+.tile .pic { font-size: 58px; line-height: 1.1; }
+.tile .en { font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1.1; }
+.tile .vi { font-size: 14px; opacity: .95; }
+.tile .got { font-size: 13px; font-weight: 800; background: #ffffff33; border-radius: 99px; padding: 1px 10px; margin-top: 4px; }
+.tile.wide { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 14px; padding: 16px 12px; text-align: left; }
+.tile.wide .pic { font-size: 52px; }
+.tile.wide .en { font-size: 32px; }
+.parent { font-size: 13px; color: var(--soft); text-align: center; line-height: 1.5; max-width: 44ch; margin: 4px auto 0; }
+.pick { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; }
+.pick button {
+  width: 48px; height: 48px; border-radius: 50%; background: var(--card); font-size: 27px;
+  box-shadow: 0 4px 0 var(--sky-deep); display: grid; place-items: center; opacity: .75;
 }
-.tile.play .pic { font-size: 56px; }
-.tile.play .en { font-size: 34px; }
-.parent {
-  font-size: 13px; color: var(--soft); text-align: center; line-height: 1.5;
-  max-width: 44ch; margin: 4px auto 0;
-}
+.pick button.on { opacity: 1; outline: 4px solid var(--berry); outline-offset: 2px; }
+.pick-label { text-align: center; font-size: 14px; color: var(--soft); margin: 0 0 -8px; }
+.worldhead { display: flex; align-items: center; gap: 14px; border-radius: 28px; padding: 14px 18px; color: #fff; }
+.worldhead .pic { font-size: 60px; line-height: 1; }
+.worldhead h2 { font-size: 34px; line-height: 1; }
+.worldhead p { margin: 4px 0 0; font-size: 15px; opacity: .95; }
 
-/* ---------- learn ---------- */
-.stage {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
-}
+/* ---------- learn cards ---------- */
+.stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
 .card {
   width: min(100%, 380px); aspect-ratio: 1 / 1; max-width: 100%;
-  background: var(--card); border-radius: 40px;
-  box-shadow: 0 10px 0 var(--sky-deep);
-  display: grid; place-items: center; position: relative;
+  background: var(--card); border-radius: 40px; box-shadow: 0 10px 0 var(--sky-deep);
+  display: grid; place-items: center; position: relative; overflow: hidden;
 }
 .card .big { font-size: clamp(130px, 44vw, 200px); line-height: 1; }
-.card .count {
-  display: flex; flex-wrap: wrap; justify-content: center; align-content: center;
-  gap: 4px; padding: 28px; font-size: clamp(34px, 10vw, 46px); line-height: 1.05;
-}
-.card .numeral {
-  position: absolute; top: 10px; left: 20px;
-  font-family: var(--display); font-weight: 800; font-size: 56px; color: var(--grape);
-}
+.card .count { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 4px; padding: 28px; font-size: clamp(34px, 10vw, 46px); line-height: 1.05; }
+.card .numeral { position: absolute; top: 10px; left: 20px; font-family: var(--display); font-weight: 800; font-size: 56px; color: var(--grape); }
+.card .shape { width: 72%; }
+.card .letter { display: flex; align-items: baseline; gap: 4px; font-family: var(--display); font-weight: 800; line-height: .9; color: var(--berry); font-size: clamp(110px, 34vw, 160px); }
+.card .letter small { font-size: .62em; color: var(--wave); }
+.card .letter-pic { position: absolute; bottom: 16px; left: 20px; font-size: 64px; }
 .blob { width: 68%; aspect-ratio: 1; border-radius: 46% 54% 50% 50% / 52% 46% 54% 48%; border: 6px solid #0002; }
-.card .ear {
-  position: absolute; right: 14px; bottom: 14px; font-size: 30px;
-  background: var(--sun); width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
-}
-.word { text-align: center; }
-.word .en {
-  font-family: var(--display); font-weight: 800; font-size: clamp(48px, 14vw, 68px);
-  line-height: 1; color: var(--ink);
-}
+.card .ear { position: absolute; right: 14px; bottom: 14px; font-size: 28px; background: var(--sun); width: 54px; height: 54px; border-radius: 50%; display: grid; place-items: center; }
+.word .en { font-family: var(--display); font-weight: 800; font-size: clamp(40px, 12vw, 62px); line-height: 1; }
 .word .vi { color: var(--soft); font-size: 18px; margin-top: 4px; }
-.nav { display: flex; justify-content: space-between; align-items: center; width: min(100%, 380px); }
+.nav { display: flex; justify-content: space-between; align-items: center; gap: 10px; width: min(100%, 380px); }
 .dots { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; max-width: 180px; }
 .dots i { width: 10px; height: 10px; border-radius: 50%; background: #fff; opacity: .7; }
 .dots i.on { background: var(--ink); opacity: 1; }
-.arrow {
-  width: 84px; height: 84px; border-radius: 50%; font-size: 40px; color: #fff;
-  background: var(--wave); box-shadow: 0 6px 0 #1b7fc4; display: grid; place-items: center;
-}
+.arrow { width: 80px; height: 80px; border-radius: 50%; font-size: 38px; color: #fff; background: var(--wave); box-shadow: 0 6px 0 #1b7fc4; display: grid; place-items: center; flex: none; }
 .arrow:active { transform: translateY(5px); box-shadow: 0 1px 0 #1b7fc4; }
+.arrow.green { background: var(--grass); box-shadow: 0 6px 0 #24935a; }
 
-/* ---------- game ---------- */
-.ask { text-align: center; }
-.ask .q { font-family: var(--display); font-weight: 800; font-size: clamp(34px, 10vw, 46px); line-height: 1.05; }
+/* ---------- quiz ---------- */
+.ask .q { font-family: var(--display); font-weight: 800; font-size: clamp(30px, 9vw, 42px); line-height: 1.05; }
 .ask .q b { color: var(--berry); }
 .ask .vi { color: var(--soft); font-size: 16px; }
 .choices { display: grid; gap: 14px; width: 100%; }
+.choices.two { grid-template-columns: 1fr 1fr; }
 .choice {
   background: var(--card); border-radius: 32px; box-shadow: 0 8px 0 var(--sky-deep);
-  min-height: 150px; display: grid; place-items: center; font-size: 96px; line-height: 1;
+  min-height: 140px; display: grid; place-items: center; font-size: 92px; line-height: 1; padding: 10px;
 }
 .choice:active { transform: translateY(5px); box-shadow: 0 3px 0 var(--sky-deep); }
-.choice .blob { width: 110px; }
+.choice .blob { width: 104px; }
+.choice .shape { width: 110px; }
 .choice.right { background: #D8FFE6; box-shadow: 0 8px 0 var(--grass); }
+.choice .label { display: block; font-family: var(--display); font-weight: 800; font-size: 22px; margin-top: 4px; }
+.choice .sub { display: block; font-size: 14px; color: var(--soft); }
+.numsm, .lettersm { font-family: var(--display); font-weight: 800; color: var(--grape); }
+.lettersm { color: var(--berry); }
+.groupe { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; font-size: 40px; max-width: 150px; }
 
 /* ---------- talking buddy ---------- */
 .buddy { width: 96px; flex: none; }
@@ -173,389 +177,474 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 .buddy .eye { transform-box: fill-box; transform-origin: center; animation: blink 4s infinite; }
 .buddy.talking .mouth { animation: talk .18s infinite alternate ease-in-out; }
 .buddy.talking svg { animation: bob .36s infinite alternate ease-in-out; }
-@keyframes talk { from { transform: scaleY(.2); } to { transform: scaleY(1); } }
-@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
-@keyframes bob { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-5px) rotate(2deg); } }
 .buddy.emo { display: grid; place-items: center; aspect-ratio: 1; font-size: 72px; line-height: 1; }
 .buddy.emo.lg { font-size: 92px; }
 .buddy.emo span { display: block; }
 .buddy.emo.talking span { animation: chat .3s infinite alternate ease-in-out; }
+@keyframes talk { from { transform: scaleY(.2); } to { transform: scaleY(1); } }
+@keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+@keyframes bob { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-5px) rotate(2deg); } }
 @keyframes chat { from { transform: translateY(0) scale(1) rotate(-4deg); } to { transform: translateY(-8px) scale(1.08) rotate(4deg); } }
-.pick { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; }
-.pick button {
-  width: 48px; height: 48px; border-radius: 50%; background: var(--card); font-size: 27px;
-  box-shadow: 0 4px 0 var(--sky-deep); display: grid; place-items: center; opacity: .75;
-}
-.pick button.on { opacity: 1; outline: 4px solid var(--berry); outline-offset: 2px; }
-.pick-label { text-align: center; font-size: 14px; color: var(--soft); margin: 0 0 -8px; }
-.talkrow { display: flex; align-items: center; gap: 10px; justify-content: center; width: min(100%, 400px); }
+.talkrow { display: flex; align-items: center; gap: 10px; width: 100%; }
+.talkrow > :last-child { min-width: 0; flex: 1; }
 .bubble {
   background: var(--card); border-radius: 26px; padding: 10px 18px; position: relative;
-  font-family: var(--display); font-weight: 800; font-size: clamp(24px, 7vw, 32px); line-height: 1.1;
-  box-shadow: 0 5px 0 var(--sky-deep); min-width: 0; flex: 1;
+  font-family: var(--display); font-weight: 800; font-size: clamp(22px, 6.5vw, 30px); line-height: 1.1;
+  box-shadow: 0 5px 0 var(--sky-deep);
 }
-.bubble::before {
-  content: ""; position: absolute; left: -12px; top: 50%; margin-top: -10px;
-  border: 10px solid transparent; border-right-color: var(--card); border-left: 0;
-}
-.bubble small { display: block; font-family: var(--body); font-weight: 600; font-size: 15px; color: var(--soft); }
-.tile.watch { grid-column: 1 / -1; flex-direction: row; justify-content: center; gap: 14px; background: var(--grape); padding: 18px 12px; }
-.tile.watch .pic { font-size: 56px; }
-.tile.watch .en { font-size: 34px; }
-.progress { height: 10px; background: #fff8; border-radius: 99px; overflow: hidden; width: min(100%, 380px); }
+.bubble b { color: var(--berry); }
+.bubble::before { content: ""; position: absolute; left: -12px; top: 50%; margin-top: -10px; border: 10px solid transparent; border-right-color: var(--card); border-left: 0; }
+.bubble small { display: block; font-family: var(--body); font-weight: 600; font-size: 15px; color: var(--soft); margin-top: 2px; }
+.progress { height: 10px; background: #ffffff88; border-radius: 99px; overflow: hidden; width: 100%; }
 .progress i { display: block; height: 100%; background: var(--grape); border-radius: 99px; transition: width .4s; }
+
+/* ---------- counting ---------- */
+.counting { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; background: var(--card); border-radius: 32px; padding: 20px 12px; box-shadow: 0 8px 0 var(--sky-deep); }
+.cnt { font-size: 58px; line-height: 1; position: relative; width: 78px; height: 78px; display: grid; place-items: center; border-radius: 22px; }
+.cnt.done { background: #FFF4CC; }
+.cnt.done::after {
+  content: attr(data-n); position: absolute; top: -8px; right: -6px; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--grape); color: #fff; font-family: var(--display); font-weight: 800; font-size: 22px; display: grid; place-items: center;
+}
+
+/* ---------- patterns ---------- */
+.pat { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; background: var(--card); border-radius: 28px; padding: 16px 10px; box-shadow: 0 8px 0 var(--sky-deep); }
+.pat span { font-size: 46px; width: 58px; height: 58px; display: grid; place-items: center; line-height: 1; }
+.pat .hole { border: 4px dashed var(--grape); border-radius: 16px; font-family: var(--display); font-weight: 800; color: var(--grape); font-size: 36px; }
+
+/* ---------- sequence ---------- */
+.slots { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 8px; width: 100%; }
+.slot { aspect-ratio: 1; border: 4px dashed #ffffffcc; border-radius: 18px; display: grid; place-items: center; font-size: 40px; position: relative; background: #ffffff55; }
+.slot b { position: absolute; top: 2px; left: 8px; font-family: var(--display); font-size: 16px; color: var(--soft); }
+.slot.filled { border-style: solid; border-color: var(--grass); background: var(--card); }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+.step { background: var(--card); border-radius: 26px; box-shadow: 0 7px 0 var(--sky-deep); padding: 12px 8px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.step .p { font-size: 64px; line-height: 1.05; }
+.step .t { font-family: var(--display); font-weight: 800; font-size: 18px; line-height: 1.1; text-align: center; }
+.step .v { font-size: 13px; color: var(--soft); text-align: center; }
+
+/* ---------- memory ---------- */
+.mem { display: grid; gap: 10px; width: 100%; }
+.mcard { aspect-ratio: 3 / 4; border-radius: 20px; background: var(--grape); box-shadow: 0 6px 0 #6a50d6; display: grid; place-items: center; font-size: 44px; color: #fff; transition: transform .25s; }
+.mcard.open, .mcard.ok { background: var(--card); box-shadow: 0 6px 0 var(--sky-deep); transform: rotateY(180deg); }
+.mcard.open span, .mcard.ok span { transform: rotateY(180deg); }
+.mcard.ok { background: #D8FFE6; box-shadow: 0 6px 0 var(--grass); }
+
+/* ---------- drawing & tracing ---------- */
+.pad { width: 100%; background: #fff; border-radius: 28px; box-shadow: 0 8px 0 var(--sky-deep); touch-action: none; display: block; }
+.pad.square { aspect-ratio: 1; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.sw { width: 44px; height: 44px; border-radius: 50%; border: 4px solid #fff; box-shadow: 0 3px 0 var(--sky-deep); }
+.sw.on { outline: 4px solid var(--ink); outline-offset: 1px; }
+.tool { min-width: 48px; height: 48px; border-radius: 16px; background: var(--card); box-shadow: 0 4px 0 var(--sky-deep); font-size: 24px; display: grid; place-items: center; padding: 0 8px; }
+.tool.on { background: var(--sun); }
+
+/* ---------- piano ---------- */
+.keys { display: flex; gap: 6px; width: 100%; height: min(52vh, 340px); }
+.key { flex: 1; border-radius: 0 0 18px 18px; background: var(--kc); box-shadow: 0 8px 0 rgba(31,42,85,.25); position: relative; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 12px; }
+.key i { width: 18px; height: 18px; border-radius: 50%; background: #ffffffcc; }
+.key.down { transform: translateY(6px); box-shadow: 0 2px 0 rgba(31,42,85,.25); filter: brightness(1.15); }
+.key .star { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-size: 30px; opacity: 0; }
+.key.hint .star { opacity: 1; animation: hop .5s infinite alternate ease-in-out; }
+@keyframes hop { to { transform: translate(-50%, -8px); } }
+
+/* ---------- move / freeze ---------- */
+.action { width: min(100%, 380px); background: var(--card); border-radius: 40px; box-shadow: 0 10px 0 var(--sky-deep); padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; box-sizing: border-box; }
+.action .big { font-size: clamp(110px, 36vw, 170px); line-height: 1.05; }
+.action .big.dance { animation: dance .5s infinite alternate ease-in-out; }
+@keyframes dance { from { transform: rotate(-10deg) translateY(0); } to { transform: rotate(10deg) translateY(-10px); } }
+.timer { height: 14px; width: 100%; background: #E6EEFF; border-radius: 99px; overflow: hidden; }
+.timer i { display: block; height: 100%; width: 100%; background: var(--grass); border-radius: 99px; }
+
+/* ---------- stickers & parents ---------- */
+.stickers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.stk { aspect-ratio: 1; background: var(--card); border-radius: 18px; display: grid; place-items: center; font-size: 38px; box-shadow: 0 4px 0 var(--sky-deep); }
+.stk.lock { background: #ffffff77; box-shadow: none; font-size: 24px; color: var(--soft); }
+.panel { background: var(--card); border-radius: 24px; padding: 16px 18px; box-shadow: 0 6px 0 var(--sky-deep); display: flex; flex-direction: column; gap: 10px; font-size: 15px; line-height: 1.5; }
+.panel h2 { font-size: 22px; color: var(--grape); }
+.panel ul { margin: 0; padding-left: 20px; }
+.seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.seg button { border-radius: 999px; padding: 8px 14px; background: #EEF2FF; font-weight: 800; font-size: 15px; }
+.seg button.on { background: var(--grape); color: #fff; }
+.row { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid #EEF2FF; padding: 4px 0; }
+.row span:last-child { font-weight: 800; white-space: nowrap; }
+.danger { align-self: flex-start; border-radius: 999px; padding: 8px 16px; background: #FFE3E8; color: #B0173A; font-weight: 800; }
+
+/* ---------- overlays ---------- */
+.splash, .rest {
+  position: fixed; inset: 0; z-index: 30; background: var(--sky);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; box-sizing: border-box; text-align: center;
+  padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right, 0px)) env(safe-area-inset-bottom, 0px) max(16px, env(safe-area-inset-left, 0px));
+}
+.rest { background: #2B2F66; color: #fff; z-index: 40; }
+.rest p { color: #C9CCFF !important; }
+.splash h1, .rest h1 { font-family: var(--display); font-weight: 800; font-size: clamp(36px, 10vw, 52px); margin: 0; line-height: 1.05; }
+.splash h1 span { color: var(--berry); }
+.splash p, .rest p { margin: 0; color: var(--soft); font-size: 15px; max-width: 32ch; line-height: 1.45; }
+.go { font-family: var(--display); font-weight: 800; font-size: 32px; color: #fff; background: var(--grass); border-radius: 999px; padding: 12px 40px; box-shadow: 0 8px 0 #24935a; animation: breathe 1.6s infinite ease-in-out; }
+.go:active { transform: translateY(6px); box-shadow: 0 2px 0 #24935a; }
+@keyframes breathe { 50% { transform: scale(1.06); } }
+.install { background: var(--card); border-radius: 24px; padding: 16px 18px; box-shadow: 0 6px 0 var(--sky-deep); display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.4; }
+.install h2 { font-size: 22px; color: var(--grape); }
+.install ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
+.install .ico { display: inline-grid; place-items: center; vertical-align: -6px; width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; }
+.install .ico svg { width: 18px; height: 18px; }
+.install button { align-self: flex-end; background: var(--grape); color: #fff; font-weight: 800; border-radius: 999px; padding: 8px 20px; font-size: 16px; }
+.toast { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 12px); transform: translateX(-50%); z-index: 25; background: var(--card); border-radius: 999px; padding: 8px 20px; box-shadow: 0 6px 0 var(--sky-deep); font-family: var(--display); font-weight: 800; font-size: 22px; white-space: nowrap; animation: pop .45s cubic-bezier(.3,1.6,.5,1); }
 
 /* ---------- effects ---------- */
 .pop { animation: pop .45s cubic-bezier(.3,1.6,.5,1); }
 @keyframes pop { 0% { transform: scale(.8); } 100% { transform: scale(1); } }
 .wiggle { animation: wiggle .5s; }
 @keyframes wiggle { 0%,100% { transform: rotate(0); } 20% { transform: rotate(-7deg); } 40% { transform: rotate(7deg); } 60% { transform: rotate(-5deg); } 80% { transform: rotate(4deg); } }
-.party {
-  position: fixed; inset: 0; pointer-events: none; z-index: 20;
-  display: grid; place-items: center;
-}
-.party .msg {
-  font-family: var(--display); font-weight: 800; font-size: clamp(46px, 14vw, 72px); color: #fff;
-  background: var(--grass); padding: 6px 30px; border-radius: 30px; box-shadow: 0 8px 0 #24935a;
-  animation: pop .45s cubic-bezier(.3,1.6,.5,1);
-}
+.party { position: fixed; inset: 0; pointer-events: none; z-index: 20; display: grid; place-items: center; }
+.party .msg { font-family: var(--display); font-weight: 800; font-size: clamp(42px, 13vw, 68px); color: #fff; background: var(--grass); padding: 6px 30px; border-radius: 30px; box-shadow: 0 8px 0 #24935a; animation: pop .45s cubic-bezier(.3,1.6,.5,1); text-align: center; }
 .confetti { position: fixed; top: -40px; font-size: 34px; animation: fall 1.6s linear forwards; z-index: 19; pointer-events: none; }
 @keyframes fall { to { transform: translateY(110vh) rotate(540deg); } }
 @media (prefers-reduced-motion: reduce) {
-  .pop, .wiggle, .party .msg { animation: none; }
+  .pop, .wiggle, .party .msg, .go, .key.hint .star, .action .big.dance { animation: none; }
   .confetti { display: none; }
   .buddy .eye, .buddy.talking svg, .buddy.emo.talking span { animation: none; }
 }
-
-/* ---------- app shell (iPhone) ---------- */
-html { -webkit-text-size-adjust: 100%; }
-body { margin: 0; overscroll-behavior: none; -webkit-touch-callout: none; }
-.app { padding-top: max(14px, env(safe-area-inset-top, 0px)); padding-bottom: max(24px, env(safe-area-inset-bottom, 0px)); }
-.party, .splash { padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
-
-/* tap-to-start: iPhone only lets sound play after the first touch */
-.splash {
-  position: fixed; inset: 0; z-index: 30; background: var(--sky);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
-  box-sizing: border-box; text-align: center;
-}
-.splash .buddy { width: 150px; }
-.splash .buddy.emo { font-size: 120px; }
-.splash h1 { font-family: var(--display); font-weight: 800; font-size: clamp(36px, 10vw, 52px); margin: 0; line-height: 1.05; }
-.splash h1 span { color: var(--berry); }
-.go {
-  font-family: var(--display); font-weight: 800; font-size: 34px; color: #fff;
-  background: var(--grass); border-radius: 999px; padding: 14px 44px;
-  box-shadow: 0 8px 0 #24935a; animation: breathe 1.6s infinite ease-in-out;
-}
-.go:active { transform: translateY(6px); box-shadow: 0 2px 0 #24935a; }
-@keyframes breathe { 50% { transform: scale(1.06); } }
-.splash p { margin: 0; color: var(--soft); font-size: 15px; max-width: 30ch; line-height: 1.45; }
-
-/* install guide card (only in Safari, before the app is on the home screen) */
-.install {
-  background: var(--card); border-radius: 24px; padding: 16px 18px; box-shadow: 0 6px 0 var(--sky-deep);
-  display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.4;
-}
-.install h2 { font-family: var(--display); font-weight: 800; font-size: 22px; margin: 0; color: var(--grape); }
-.install ol { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; }
-.install .ico { display: inline-grid; place-items: center; vertical-align: -6px; width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; }
-.install .ico svg { width: 18px; height: 18px; }
-.install button { align-self: flex-end; background: var(--grape); color: #fff; font-weight: 800; border-radius: 999px; padding: 8px 20px; font-size: 16px; }
-
-/* ABC cards */
-.card .letter { display: flex; align-items: baseline; gap: 4px; font-family: var(--display); font-weight: 800; line-height: .9; color: var(--berry); font-size: clamp(110px, 34vw, 160px); }
-.card .letter small { font-size: .62em; color: var(--wave); }
-.card .letter-pic { position: absolute; bottom: 16px; left: 20px; font-size: 64px; }
 </style>
 </head>
 <body>
-
 <div class="app" id="app"></div>
 
 <script>
-const TOPICS = {
-  animals: { en: 'Animals', vi: 'Con vật', color: '#FF8A3D', pic: '🐶', items: [
-    ['🐱','cat','con mèo'], ['🐶','dog','con chó'], ['🦆','duck','con vịt'], ['🐮','cow','con bò'],
-    ['🐷','pig','con heo'], ['🐔','chicken','con gà'], ['🐟','fish','con cá'], ['🐦','bird','con chim'],
-    ['🐘','elephant','con voi'], ['🐵','monkey','con khỉ'], ['🦁','lion','sư tử'], ['🐰','rabbit','con thỏ'] ] },
-  fruits: { en: 'Fruits', vi: 'Trái cây', color: '#3CC47C', pic: '🍎', items: [
-    ['🍎','apple','quả táo'], ['🍌','banana','quả chuối'], ['🍊','orange','quả cam'], ['🍇','grapes','chùm nho'],
-    ['🍉','watermelon','dưa hấu'], ['🍓','strawberry','quả dâu'], ['🥭','mango','quả xoài'], ['🍍','pineapple','quả thơm'] ] },
-  colors: { en: 'Colors', vi: 'Màu sắc', color: '#8A6CFF', pic: '🎨', items: [
-    ['#E53935','red','màu đỏ'], ['#1E6FFF','blue','màu xanh dương'], ['#FFD600','yellow','màu vàng'],
-    ['#2EBD59','green','màu xanh lá'], ['#FF8F00','orange','màu cam'], ['#9C4DFF','purple','màu tím'],
-    ['#FF7EB6','pink','màu hồng'], ['#222222','black','màu đen'], ['#FFFFFF','white','màu trắng'], ['#8D5A2B','brown','màu nâu'] ] },
-  numbers: { en: 'Numbers', vi: 'Con số', color: '#2FA8FF', pic: '🔢', items: [
-    [1,'one','số một'], [2,'two','số hai'], [3,'three','số ba'], [4,'four','số bốn'], [5,'five','số năm'],
-    [6,'six','số sáu'], [7,'seven','số bảy'], [8,'eight','số tám'], [9,'nine','số chín'], [10,'ten','số mười'] ] },
-  things: { en: 'Vehicles', vi: 'Xe cộ', color: '#FFB300', pic: '🚗', items: [
-    ['🚗','car','xe hơi'], ['🚌','bus','xe buýt'], ['🚆','train','tàu hỏa'], ['✈️','airplane','máy bay'],
-    ['⛵','boat','thuyền'], ['🚲','bike','xe đạp'], ['🚒','fire truck','xe cứu hỏa'], ['🚀','rocket','tên lửa'] ] },
-  abc: { en: 'ABC', vi: 'Chữ cái', color: '#5C7CFA', pic: '🔤', items: [
-    ['A','apple','quả táo','🍎'], ['B','ball','quả bóng','⚽'], ['C','cat','con mèo','🐱'], ['D','dog','con chó','🐶'],
-    ['E','egg','quả trứng','🥚'], ['F','fish','con cá','🐟'], ['G','grapes','chùm nho','🍇'], ['H','hat','cái mũ','👒'],
-    ['I','ice cream','kem','🍦'], ['J','juice','nước ép','🧃'], ['K','kite','con diều','🪁'], ['L','lion','sư tử','🦁'],
-    ['M','moon','mặt trăng','🌙'], ['N','nose','cái mũi','👃'], ['O','orange','quả cam','🍊'], ['P','pig','con heo','🐷'],
-    ['Q','queen','nữ hoàng','👸'], ['R','rabbit','con thỏ','🐰'], ['S','sun','mặt trời','☀️'], ['T','tiger','con hổ','🐯'],
-    ['U','umbrella','cái ô','☂️'], ['V','van','xe tải nhỏ','🚐'], ['W','whale','cá voi','🐳'], ['X','xylophone','đàn gõ','🎹'],
-    ['Y','yo-yo','con yo-yo','🪀'], ['Z','zebra','ngựa vằn','🦓'] ] },
-  fairy: { en: 'Fairy Tales', vi: 'Cổ tích', color: '#FF7EB6', pic: '🧜‍♀️', items: [
-    ['🧜‍♀️','mermaid','nàng tiên cá'], ['👸','princess','công chúa'], ['🤴','prince','hoàng tử'], ['🧚','fairy','cô tiên'],
-    ['🦄','unicorn','kỳ lân'], ['🐉','dragon','con rồng'], ['🏰','castle','lâu đài'], ['👑','crown','vương miện'],
-    ['⛄','snowman','người tuyết'], ['❄️','snowflake','bông tuyết'], ['🤖','robot','người máy'], ['🪄','magic wand','đũa thần'] ] },
-  cute: { en: 'Cute Friends', vi: 'Thú dễ thương', color: '#2EBD9A', pic: '🐼', items: [
-    ['🐼','panda','gấu trúc'], ['🐨','koala','gấu túi'], ['🐧','penguin','chim cánh cụt'], ['🦊','fox','con cáo'],
-    ['🐻','bear','con gấu'], ['🐸','frog','con ếch'], ['🐢','turtle','con rùa'], ['🐙','octopus','bạch tuộc'],
-    ['🐬','dolphin','cá heo'], ['🦋','butterfly','con bướm'], ['🐹','hamster','chuột hamster'], ['🦒','giraffe','hươu cao cổ'] ] },
-  body: { en: 'My Body', vi: 'Cơ thể', color: '#FF5E7E', pic: '👀', items: [
-    ['👀','eyes','đôi mắt'], ['👃','nose','cái mũi'], ['👄','mouth','cái miệng'], ['👂','ear','cái tai'],
-    ['✋','hand','bàn tay'], ['🦶','foot','bàn chân'], ['🦷','teeth','hàm răng'], ['💪','arm','cánh tay'] ] },
-};
-const COUNT_PICS = ['🍎','⭐','🐤','🎈','🍓','🐟','🌸','🚗','🍌','🐞'];
-const PRAISE = ['Great job!', 'Well done!', 'Yay! You did it!', 'Super!', 'Good job!'];
+'use strict';
+/* =====================================================================
+   BÉ HỌC TIẾNG ANH — app học cho bé 3 tuổi theo khung mầm non EYFS
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const NUMW = ['zero','one','two','three','four','five','six','seven','eight','nine','ten'];
+const NUMVI = ['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín','mười'];
+const article = w => /^[aeio]|^u(?!ni)/i.test(w) ? 'an' : 'a';
+const PRAISE = ['Great job!', 'Well done!', 'Yay! You did it!', 'Super!', 'Good job!', 'Awesome!', 'Fantastic!'];
 
-const app = document.getElementById('app');
-let stars = 0;
-try { stars = +localStorage.getItem('bhta-stars') || 0; } catch (e) {}
-function saveStars() { try { localStorage.setItem('bhta-stars', stars); } catch (e) {} }
+/* ---------- saved progress (only on this phone) ---------- */
+const KEY = 'bhta2';
+function loadState() {
+  try {
+    const o = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (o) return o;
+    return { stars: +localStorage.getItem('bhta-stars') || 0, buddy: localStorage.getItem('bhta-buddy') || 'bear', installOk: !!localStorage.getItem('bhta-install-ok') };
+  } catch (e) { return {}; }
+}
+const S = Object.assign({ stars: 0, buddy: 'bear', world: {}, rate: 'slow', limit: 0, usage: { d: '', s: 0 }, installOk: false, stk: 0 }, loadState());
+S.stk = Math.max(S.stk || 0, Math.floor(S.stars / 3));
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ---------- run token: leaving a screen cancels its timers and speech ---------- */
+let RUN = 0;
+const timeouts = new Set(), intervals = new Set();
+function later(fn, ms) { const r = RUN; const id = setTimeout(() => { timeouts.delete(id); if (r === RUN) fn(); }, ms); timeouts.add(id); return id; }
+function every(fn, ms) { const r = RUN; const id = setInterval(() => { if (r === RUN) fn(); }, ms); intervals.add(id); return id; }
+function stopAll() {
+  RUN++;
+  timeouts.forEach(clearTimeout); timeouts.clear();
+  intervals.forEach(clearInterval); intervals.clear();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+  clearTimeout(talkTimer); setTalking(false);
+  document.querySelectorAll('.party, .confetti').forEach(e => e.remove());
+}
 
 /* ---------- voice ---------- */
 let voice = null;
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
   const vs = speechSynthesis.getVoices().filter(v => /^en[-_]/i.test(v.lang));
-  voice = vs.find(v => /en[-_]US/i.test(v.lang) && /female|samantha|google us/i.test(v.name))
+  voice = vs.find(v => /en[-_]US/i.test(v.lang) && /samantha|female|google us/i.test(v.name))
        || vs.find(v => /en[-_]US/i.test(v.lang)) || vs[0] || null;
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-/* The buddy's mouth moves while the voice is speaking.
-   onDone fires when speech ends (with a timer fallback, since some phones never fire onend). */
 let talkTimer = null;
-function setTalking(on) {
-  document.querySelectorAll('.buddy').forEach(b => b.classList.toggle('talking', on));
-}
+function setTalking(on) { document.querySelectorAll('.buddy').forEach(b => b.classList.toggle('talking', on)); }
 function say(text, onDone) {
   clearTimeout(talkTimer);
+  const r = RUN;
   let finished = false;
-  const finish = () => { if (finished) return; finished = true; clearTimeout(talkTimer); setTalking(false); if (onDone) onDone(); };
+  const finish = () => { if (finished) return; finished = true; clearTimeout(talkTimer); setTalking(false); if (onDone && r === RUN) onDone(); };
   setTalking(true);
-  talkTimer = setTimeout(finish, 900 + text.length * 110);
+  talkTimer = setTimeout(finish, 1000 + text.length * (S.rate === 'slow' ? 125 : 100));
   if (!('speechSynthesis' in window)) return;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'en-US'; if (voice) u.voice = voice;
-  u.rate = 0.8; u.pitch = 1.15;
+  u.rate = S.rate === 'slow' ? 0.72 : 0.9; u.pitch = 1.12;
   u.onend = finish; u.onerror = finish;
   speechSynthesis.speak(u);
 }
-/* Bé chọn bạn đồng hành; bạn đó sẽ đọc và nhún nhảy khi nói */
-const BUDDIES = [
-  { id: 'bear',     pic: '🐻', name: 'Bông',   hi: "Hi! I am Bông the bear. Let's learn English!" },
-  { id: 'mermaid',  pic: '🧜‍♀️', name: 'Marina', hi: "Hello! I am Marina the mermaid. Let's swim and learn!" },
-  { id: 'princess', pic: '👸', name: 'Snowy',  hi: "Hello! I am Princess Snowy. Let's learn together!" },
-  { id: 'robot',    pic: '🤖', name: 'Robo',   hi: "Beep boop! I am Robo the robot. Let's learn English!" },
-  { id: 'panda',    pic: '🐼', name: 'Pandy',  hi: "Hi hi! I am Pandy the panda. Let's play!" },
-  { id: 'unicorn',  pic: '🦄', name: 'Sparkle',hi: "Hello! I am Sparkle the unicorn. Let's learn!" },
-];
-let buddyId = 'bear';
-try { buddyId = localStorage.getItem('bhta-buddy') || 'bear'; } catch (e) {}
-const curBuddy = () => BUDDIES.find(b => b.id === buddyId) || BUDDIES[0];
-function buddy(cls = '') {
-  if (buddyId !== 'bear') return `<div class="buddy emo ${cls}" aria-hidden="true"><span>${curBuddy().pic}</span></div>`;
-  return `<div class="buddy ${cls}" aria-hidden="true"><svg viewBox="0 0 120 120">
-    <circle cx="22" cy="30" r="15" fill="#FFB23F"/><circle cx="98" cy="30" r="15" fill="#FFB23F"/>
-    <circle cx="22" cy="30" r="7" fill="#FF8FA8"/><circle cx="98" cy="30" r="7" fill="#FF8FA8"/>
-    <circle cx="60" cy="64" r="50" fill="#FFC93C"/>
-    <ellipse cx="60" cy="84" rx="30" ry="22" fill="#FFE7A3"/>
-    <ellipse class="eye" cx="42" cy="56" rx="7" ry="9" fill="#1F2A55"/>
-    <ellipse class="eye" cx="78" cy="56" rx="7" ry="9" fill="#1F2A55"/>
-    <circle cx="44.5" cy="52.5" r="2.6" fill="#fff"/><circle cx="80.5" cy="52.5" r="2.6" fill="#fff"/>
-    <circle cx="28" cy="74" r="7" fill="#FF8FA8" opacity=".7"/><circle cx="92" cy="74" r="7" fill="#FF8FA8" opacity=".7"/>
-    <ellipse cx="60" cy="72" rx="6" ry="4.5" fill="#1F2A55"/>
-    <ellipse class="mouth" cx="60" cy="88" rx="12" ry="9" fill="#C2185B"/>
-  </svg></div>`;
-}
 
-/* ---------- little sounds ---------- */
+/* ---------- sounds ---------- */
 let ac = null;
-function tone(freqs, dur = 0.12, type = 'triangle') {
-  try {
-    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
-    freqs.forEach((f, i) => {
-      const o = ac.createOscillator(), g = ac.createGain();
-      o.type = type; o.frequency.value = f;
-      const t = ac.currentTime + i * dur;
-      g.gain.setValueAtTime(0.18, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur * 1.6);
-      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + dur * 1.7);
-    });
-  } catch (e) {}
+function audio() { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch (e) {} return ac; }
+function tone(freqs, dur = 0.12, type = 'triangle', vol = 0.18) {
+  const a = audio(); if (!a) return;
+  freqs.forEach((f, i) => {
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type; o.frequency.value = f;
+    const t = a.currentTime + i * dur;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur * 1.6);
+    o.connect(g).connect(a.destination); o.start(t); o.stop(t + dur * 1.7);
+  });
+}
+function note(f, dur = 0.6) {
+  const a = audio(); if (!a) return;
+  const t = a.currentTime, g = a.createGain();
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.32, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  [[f, 'triangle', 1], [f * 2, 'sine', 0.25]].forEach(([fr, ty, v]) => {
+    const o = a.createOscillator(), og = a.createGain(); o.type = ty; o.frequency.value = fr; og.gain.value = v;
+    o.connect(og).connect(g); o.start(t); o.stop(t + dur + 0.05);
+  });
+  g.connect(a.destination);
 }
 const ding = () => tone([523, 659, 784, 1047], 0.1);
 const boop = () => tone([300, 240], 0.14, 'sine');
+const click = () => tone([660], 0.05);
 
-/* ---------- drawing helpers ---------- */
-function picture(topicKey, item, size) {
-  if (topicKey === 'abc') {
-    if (size === 'small') return `<span style="font-family:var(--display);font-weight:800;color:var(--berry)">${item[0]}</span>`;
-    return `<div class="letter">${item[0]}<small>${item[0].toLowerCase()}</small></div><div class="letter-pic">${item[3]}</div>`;
+/* ---------- pictures ---------- */
+const SHAPE_SVG = {
+  circle: c => `<circle cx="50" cy="50" r="42" fill="${c}"/>`,
+  square: c => `<rect x="10" y="10" width="80" height="80" rx="6" fill="${c}"/>`,
+  triangle: c => `<polygon points="50,8 94,88 6,88" fill="${c}"/>`,
+  rectangle: c => `<rect x="3" y="24" width="94" height="52" rx="6" fill="${c}"/>`,
+  star: c => `<polygon points="50,4 61,37 96,37 68,58 79,93 50,72 21,93 32,58 4,37 39,37" fill="${c}"/>`,
+  heart: c => `<path d="M50 90 C20 68 5 52 5 33 C5 18 16 8 30 8 C39 8 46 13 50 21 C54 13 61 8 70 8 C84 8 95 18 95 33 C95 52 80 68 50 90Z" fill="${c}"/>`,
+  oval: c => `<ellipse cx="50" cy="50" rx="46" ry="30" fill="${c}"/>`,
+  diamond: c => `<polygon points="50,4 92,50 50,96 8,50" fill="${c}"/>`,
+};
+const shapeSvg = (n, c) => `<svg class="shape" viewBox="0 0 100 100" aria-hidden="true">${SHAPE_SVG[n](c)}</svg>`;
+const COUNT_PICS = ['🍎','⭐','🐤','🎈','🍓','🐟','🌸','🚗','🍌','🐞'];
+
+/* picture(item, big): big card picture or small choice picture */
+function picture(item, big) {
+  if (item.html) return item.html(big);
+  return big ? `<div class="big">${item.p}</div>` : item.p;
+}
+
+/* ---------- vocabulary decks ---------- */
+const PL = { pl: true };
+const E = (list) => list.map(([p, w, vi, o]) => Object.assign({ p, w, vi }, o || {}));
+const DECKS = {
+  animals: { en: 'Animals', vi: 'Con vật', pic: '🐶', items: E([
+    ['🐱','cat','con mèo'], ['🐶','dog','con chó'], ['🦆','duck','con vịt'], ['🐮','cow','con bò'], ['🐷','pig','con heo'],
+    ['🐔','chicken','con gà'], ['🐟','fish','con cá'], ['🐦','bird','con chim'], ['🐘','elephant','con voi'], ['🐵','monkey','con khỉ'],
+    ['🦁','lion','sư tử'], ['🐰','rabbit','con thỏ'], ['🐴','horse','con ngựa'], ['🐑','sheep','con cừu'], ['🐯','tiger','con hổ'] ]) },
+  cute: { en: 'Cute Friends', vi: 'Thú dễ thương', pic: '🐼', items: E([
+    ['🐼','panda','gấu trúc'], ['🐨','koala','gấu túi'], ['🐧','penguin','chim cánh cụt'], ['🦊','fox','con cáo'], ['🐻','bear','con gấu'],
+    ['🐸','frog','con ếch'], ['🐢','turtle','con rùa'], ['🐙','octopus','bạch tuộc'], ['🐬','dolphin','cá heo'], ['🦋','butterfly','con bướm'],
+    ['🐹','hamster','chuột hamster'], ['🦒','giraffe','hươu cao cổ'] ]) },
+  fruits: { en: 'Fruits', vi: 'Trái cây', pic: '🍎', items: E([
+    ['🍎','apple','quả táo'], ['🍌','banana','quả chuối'], ['🍊','orange','quả cam'], ['🍇','grapes','chùm nho', PL], ['🍉','watermelon','dưa hấu'],
+    ['🍓','strawberry','quả dâu'], ['🥭','mango','quả xoài'], ['🍍','pineapple','quả thơm'], ['🍑','peach','quả đào'], ['🥥','coconut','quả dừa'] ]) },
+  food: { en: 'Food', vi: 'Đồ ăn', pic: '🍞', items: E([
+    ['🍞','bread','bánh mì'], ['🍚','rice','cơm'], ['🥛','milk','sữa'], ['🥚','egg','quả trứng'], ['🍜','noodles','mì', PL],
+    ['🧀','cheese','phô mai'], ['💧','water','nước'], ['🥕','carrot','cà rốt'], ['🌽','corn','bắp'], ['🍰','cake','bánh kem'], ['🍪','cookie','bánh quy'] ]) },
+  clothes: { en: 'Clothes', vi: 'Quần áo', pic: '👕', items: E([
+    ['👕','shirt','áo'], ['👖','pants','quần', PL], ['👗','dress','váy đầm'], ['🧦','socks','đôi vớ', PL], ['👟','shoes','đôi giày', PL],
+    ['🧢','cap','mũ lưỡi trai'], ['🧥','coat','áo khoác'], ['👓','glasses','mắt kính', PL], ['🧣','scarf','khăn quàng'], ['🧤','gloves','găng tay', PL] ]) },
+  home: { en: 'My Home', vi: 'Đồ trong nhà', pic: '🏠', items: E([
+    ['🛏️','bed','cái giường'], ['🪑','chair','cái ghế'], ['🚪','door','cánh cửa'], ['🪟','window','cửa sổ'], ['🥄','spoon','cái muỗng'],
+    ['📖','book','quyển sách'], ['⚽','ball','quả bóng'], ['🧸','teddy bear','gấu bông'], ['🪥','toothbrush','bàn chải'], ['⏰','clock','đồng hồ'],
+    ['🔑','key','chìa khóa'], ['☂️','umbrella','cái ô'] ]) },
+  family: { en: 'Family', vi: 'Gia đình', pic: '👨‍👩‍👧', noArt: true, items: E([
+    ['👩','mom','mẹ'], ['👨','dad','ba'], ['👶','baby','em bé'], ['👵','grandma','bà'], ['👴','grandpa','ông'], ['👦','brother','anh / em trai'], ['👧','sister','chị / em gái'] ])
+    .map(o => Object.assign(o, { say: `${o.w}!`, intro: `This is my ${o.w}.` })), ask: o => `Where is {${o.w}}?` },
+  vehicles: { en: 'Vehicles', vi: 'Xe cộ', pic: '🚗', items: E([
+    ['🚗','car','xe hơi'], ['🚌','bus','xe buýt'], ['🚆','train','tàu hỏa'], ['✈️','airplane','máy bay'], ['⛵','boat','thuyền'],
+    ['🚲','bike','xe đạp'], ['🚒','fire truck','xe cứu hỏa'], ['🚑','ambulance','xe cứu thương'], ['🚓','police car','xe cảnh sát'], ['🚁','helicopter','trực thăng'], ['🚀','rocket','tên lửa'] ]) },
+  body: { en: 'My Body', vi: 'Cơ thể', pic: '👀', items: E([
+    ['👀','eyes','đôi mắt', PL], ['👃','nose','cái mũi'], ['👄','mouth','cái miệng'], ['👂','ear','cái tai'], ['✋','hand','bàn tay'],
+    ['🦶','foot','bàn chân'], ['🦷','teeth','hàm răng', PL], ['💪','arm','cánh tay'], ['🦵','leg','cái chân'], ['👅','tongue','cái lưỡi'] ]) },
+  fairy: { en: 'Fairy Tales', vi: 'Cổ tích', pic: '🧜‍♀️', items: E([
+    ['🧜‍♀️','mermaid','nàng tiên cá'], ['👸','princess','công chúa'], ['🤴','prince','hoàng tử'], ['🧚','fairy','cô tiên'], ['🦄','unicorn','kỳ lân'],
+    ['🐉','dragon','con rồng'], ['🏰','castle','lâu đài'], ['👑','crown','vương miện'], ['⛄','snowman','người tuyết'], ['🤖','robot','người máy'], ['🪄','magic wand','đũa thần'] ]) },
+  colors: { en: 'Colors', vi: 'Màu sắc', pic: '🎨', noArt: true, ask: o => `Find {${o.w}}!`,
+    items: [['#E53935','red','màu đỏ'], ['#1E6FFF','blue','màu xanh dương'], ['#FFD600','yellow','màu vàng'], ['#2EBD59','green','màu xanh lá'],
+      ['#FF8F00','orange','màu cam'], ['#9C4DFF','purple','màu tím'], ['#FF7EB6','pink','màu hồng'], ['#222222','black','màu đen'],
+      ['#FFFFFF','white','màu trắng'], ['#8D5A2B','brown','màu nâu']]
+      .map(([c, w, vi]) => ({ c, w, vi, html: () => `<div class="blob" style="background:${c}"></div>`, intro: `This is ${w}.` })) },
+  numbers: { en: 'Numbers', vi: 'Con số', pic: '🔢', noArt: true, ask: o => `Find number {${o.w}}!`,
+    items: [1,2,3,4,5,6,7,8,9,10].map(n => ({ n, w: NUMW[n], vi: 'số ' + NUMVI[n], say: `${NUMW[n]}!`, intro: `Number ${NUMW[n]}.`,
+      html: big => big
+        ? `<div class="numeral">${n}</div><div class="count" ${n <= 2 ? 'style="font-size:96px"' : n <= 4 ? 'style="font-size:64px"' : ''}>${Array(n).fill(COUNT_PICS[n - 1]).map(c => `<span>${c}</span>`).join('')}</div>`
+        : `<span class="numsm">${n}</span>` })) },
+  shapes: { en: 'Shapes', vi: 'Hình khối', pic: '🔺', ask: o => `Find the {${o.w}}!`,
+    items: [['circle','hình tròn','#FF5E7E'], ['square','hình vuông','#2FA8FF'], ['triangle','hình tam giác','#3CC47C'], ['rectangle','hình chữ nhật','#FF8F00'],
+      ['star','ngôi sao','#FFC93C'], ['heart','trái tim','#E53935'], ['oval','hình bầu dục','#8A6CFF'], ['diamond','hình thoi','#00BFA5']]
+      .map(([w, vi, c]) => ({ w, vi, c, html: () => shapeSvg(w, c) })) },
+  opposites: { en: 'Opposites', vi: 'Từ trái nghĩa', pic: '↔️', noArt: true, fvi: o => `Hình nào là ${o.vi}?`, ask: o => `Which one is {${o.w}}?`, items: E([
+    ['🐘','big','to', { say: 'Big! The elephant is big.' }], ['🐭','small','nhỏ', { say: 'Small! The mouse is small.' }],
+    ['🔥','hot','nóng', { say: 'Hot! The fire is hot.' }], ['🧊','cold','lạnh', { say: 'Cold! The ice is cold.' }],
+    ['🐆','fast','nhanh', { say: 'Fast! The cheetah is fast.' }], ['🐌','slow','chậm', { say: 'Slow! The snail is slow.' }],
+    ['☀️','day','ban ngày', { say: 'Day! The sun is up.' }], ['🌙','night','ban đêm', { say: 'Night! Time to sleep.' }],
+    ['😊','happy','vui', { say: 'Happy! I am happy.' }], ['😢','sad','buồn', { say: 'Sad! I am sad.' }],
+    ['📂','open','mở', { say: 'Open!' }], ['📁','closed','đóng', { say: 'Closed!' }] ]) },
+  weather: { en: 'Weather', vi: 'Thời tiết', pic: '🌦️', noArt: true, fvi: o => `Hình nào là ${o.vi}?`, ask: o => `Which one is {${o.w}}?`, items: E([
+    ['☀️','sunny','trời nắng'], ['🌧️','rainy','trời mưa'], ['☁️','cloudy','nhiều mây'], ['❄️','snowy','có tuyết'], ['🌬️','windy','có gió'],
+    ['⛈️','stormy','có bão'], ['🌫️','foggy','sương mù'] ]).map(o => Object.assign(o, { say: `It is ${o.w}!`, intro: `It is ${o.w}.` })) },
+  nature: { en: 'Nature', vi: 'Thiên nhiên', pic: '🌳', items: E([
+    ['🌳','tree','cái cây'], ['🌸','flower','bông hoa'], ['🍃','leaf','chiếc lá'], ['☀️','sun','mặt trời'], ['🌙','moon','mặt trăng'],
+    ['⭐','star','ngôi sao'], ['☁️','cloud','đám mây'], ['🌈','rainbow','cầu vồng'], ['🌊','sea','biển'], ['⛰️','mountain','ngọn núi'], ['🪨','rock','hòn đá'] ]) },
+  sounds: { en: 'Animal Sounds', vi: 'Tiếng kêu', pic: '🐮', fvi: o => `Con gì kêu "${o.s}"?`, ask: o => `Who says {${o.s}}?`, items: E([
+    ['🐮','cow','con bò', { s: 'moo' }], ['🐶','dog','con chó', { s: 'woof woof' }], ['🐱','cat','con mèo', { s: 'meow' }],
+    ['🦆','duck','con vịt', { s: 'quack quack' }], ['🐷','pig','con heo', { s: 'oink oink' }], ['🐑','sheep','con cừu', { s: 'baa' }],
+    ['🐴','horse','con ngựa', { s: 'neigh' }], ['🐓','rooster','gà trống', { s: 'cock-a-doodle-doo' }], ['🦁','lion','sư tử', { s: 'roar' }],
+    ['🐝','bee','con ong', { s: 'buzz buzz' }], ['🐸','frog','con ếch', { s: 'ribbit' }], ['🦉','owl','cú mèo', { s: 'hoo hoo' }], ['🐍','snake','con rắn', { s: 'hiss' }] ])
+    .map(o => Object.assign(o, { say: `The ${o.w} says ${o.s}! ${o.s}!`, intro: `The ${o.w} says ${o.s}.` })) },
+  feelings: { en: 'Feelings', vi: 'Cảm xúc', pic: '😊', noArt: true, fvi: o => `Bạn nào đang ${o.vi}?`, ask: o => `Who is {${o.w}}?`, items: E([
+    ['😊','happy','vui vẻ'], ['😢','sad','buồn'], ['😠','angry','tức giận'], ['😨','scared','sợ hãi'], ['😲','surprised','ngạc nhiên'],
+    ['😴','sleepy','buồn ngủ'], ['🤪','silly','nghịch ngợm'], ['🥰','loved','được yêu thương'], ['🤒','sick','bị ốm'] ])
+    .map(o => Object.assign(o, { say: `I feel ${o.w}!`, intro: `I feel ${o.w}.` })) },
+  manners: { en: 'Kind Words', vi: 'Lời hay ý đẹp', pic: '🙏', noArt: true, items: E([
+    ['👋','hello','xin chào'], ['🙋','goodbye','tạm biệt'], ['🙏','please','làm ơn'], ['🙇','thank you','cảm ơn'], ['😔','sorry','xin lỗi'],
+    ['❤️','I love you','con yêu mẹ'], ['🌞','good morning','chào buổi sáng'], ['🌙','good night','chúc ngủ ngon'], ['🤝','let\'s share','cùng chia sẻ'] ])
+    .map(o => Object.assign(o, { say: `${o.w}!`, intro: `Say: ${o.w}.` })) },
+};
+/* Letters with phonics sounds */
+const LETTERS = [['A','apple','quả táo','🍎','ah'], ['B','ball','quả bóng','⚽','buh'], ['C','cat','con mèo','🐱','kuh'], ['D','dog','con chó','🐶','duh'],
+  ['E','egg','quả trứng','🥚','eh'], ['F','fish','con cá','🐟','fff'], ['G','grapes','chùm nho','🍇','guh'], ['H','hat','cái mũ','👒','hah'],
+  ['I','ice cream','kem','🍦','ih'], ['J','juice','nước ép','🧃','juh'], ['K','kite','con diều','🪁','kuh'], ['L','lion','sư tử','🦁','lll'],
+  ['M','moon','mặt trăng','🌙','mmm'], ['N','nose','cái mũi','👃','nnn'], ['O','orange','quả cam','🍊','oh'], ['P','pig','con heo','🐷','puh'],
+  ['Q','queen','nữ hoàng','👸','kwuh'], ['R','rabbit','con thỏ','🐰','rrr'], ['S','sun','mặt trời','☀️','sss'], ['T','tiger','con hổ','🐯','tuh'],
+  ['U','umbrella','cái ô','☂️','uh'], ['V','van','xe tải nhỏ','🚐','vvv'], ['W','whale','cá voi','🐳','wuh'], ['X','xylophone','đàn gõ','🎹','ks'],
+  ['Y','yo-yo','con yo-yo','🪀','yuh'], ['Z','zebra','ngựa vằn','🦓','zzz']];
+DECKS.letters = { en: 'ABC Phonics', vi: 'Chữ cái & âm', pic: '🔤', noArt: true, fvi: o => `Bé tìm chữ ${o.L} nào`, ask: o => `Find the letter {${o.L}}!`,
+  items: LETTERS.map(([L, w, vi, p, snd]) => ({ L, w, vi, p, name: L,
+    say: `${L}! ${L} says ${snd}, ${snd}, ${w}!`, intro: `${L} is for ${w}.`,
+    html: big => big ? `<div class="letter">${L}<small>${L.toLowerCase()}</small></div><div class="letter-pic">${p}</div>` : `<span class="lettersm">${L}</span>` })) };
+
+/* ---------- sorting, sequences, songs, actions ---------- */
+const SORTS = {
+  habitat: { en: 'Where do they live?', vi: 'Con vật sống ở đâu?', pic: '🏡',
+    bins: { farm: ['🚜','farm','nông trại','on the farm'], sea: ['🌊','sea','biển','in the sea'], sky: ['☁️','sky','bầu trời','in the sky'], jungle: ['🌴','jungle','rừng rậm','in the jungle'] },
+    items: [['🐮','cow','farm'], ['🐷','pig','farm'], ['🐔','chicken','farm'], ['🐑','sheep','farm'], ['🐴','horse','farm'],
+      ['🐟','fish','sea'], ['🐙','octopus','sea'], ['🐬','dolphin','sea'], ['🐳','whale','sea'], ['🦀','crab','sea'],
+      ['🐦','bird','sky'], ['🦋','butterfly','sky'], ['🦅','eagle','sky'], ['🐝','bee','sky'],
+      ['🐒','monkey','jungle'], ['🦁','lion','jungle'], ['🐯','tiger','jungle'], ['🦜','parrot','jungle'], ['🐍','snake','jungle']],
+    q: it => `Where does the {${it[1]}} live?`, ok: (it, b) => `Yes! The ${it[1]} lives ${b[3]}!` },
+  food: { en: 'Healthy or treat?', vi: 'Đồ ăn tốt hay đồ ngọt?', pic: '🥦',
+    bins: { healthy: ['💪','healthy','tốt cho sức khỏe','healthy food'], treat: ['🍭','treat','đồ ngọt, ăn ít thôi','a sweet treat'] },
+    items: [['🍎','apple','healthy'], ['🥕','carrot','healthy'], ['🥦','broccoli','healthy'], ['🍌','banana','healthy'], ['🥛','milk','healthy'],
+      ['🥚','egg','healthy'], ['🌽','corn','healthy'], ['🍚','rice','healthy'], ['🍬','candy','treat'], ['🍰','cake','treat'], ['🍭','lollipop','treat'],
+      ['🥤','soda','treat'], ['🍩','donut','treat'], ['🍪','cookie','treat'], ['🍫','chocolate','treat']],
+    q: it => `Is the {${it[1]}} healthy food or a treat?`, ok: (it, b) => b[1] === 'healthy' ? `Yes! The ${it[1]} is healthy food. Yummy!` : `Yes! The ${it[1]} is a sweet treat. Just a little!` },
+};
+const SEQS = {
+  hands: { en: 'Wash your hands', vi: 'Rửa tay', pic: '🧼', steps: [['💧','Wet your hands','Làm ướt tay'], ['🧼','Add soap','Xoa xà phòng'], ['👐','Scrub, scrub, scrub','Chà thật kỹ'], ['🚿','Rinse','Xả sạch nước'], ['🧻','Dry your hands','Lau khô tay']] },
+  teeth: { en: 'Brush your teeth', vi: 'Đánh răng', pic: '🪥', steps: [['🪥','Get your toothbrush','Lấy bàn chải'], ['🧴','Add toothpaste','Bóp kem đánh răng'], ['😁','Brush, brush, brush','Chải răng thật kỹ'], ['🥛','Rinse your mouth','Súc miệng']] },
+  dress: { en: 'Get dressed', vi: 'Tự mặc đồ', pic: '👕', steps: [['🩲','Underwear','Mặc quần lót'], ['👖','Pants','Mặc quần'], ['🧦','Socks','Mang vớ'], ['👟','Shoes','Mang giày']] },
+  bed: { en: 'Bedtime', vi: 'Giờ đi ngủ', pic: '🌙', steps: [['🛁','Take a bath','Tắm'], ['🪥','Brush your teeth','Đánh răng'], ['📖','Read a story','Đọc truyện'], ['😴','Sleep tight','Ngủ ngon']] },
+  plant: { en: 'Grow a plant', vi: 'Cây lớn lên', pic: '🌱', steps: [['🌰','Plant a seed','Gieo hạt'], ['💧','Water it','Tưới nước'], ['🌱','It sprouts','Cây nảy mầm'], ['🌻','A flower grows','Cây ra hoa']] },
+  day: { en: 'My day', vi: 'Một ngày của bé', pic: '🌅', steps: [['🌅','Morning','Buổi sáng'], ['☀️','Afternoon','Buổi trưa'], ['🌇','Evening','Buổi chiều tối'], ['🌙','Night','Ban đêm']] },
+};
+const NOTES = [261.63, 293.66, 329.63, 349.23, 392.0, 440.0, 493.88, 523.25];
+const KEYC = ['#FF5E7E', '#FF8F00', '#FFC93C', '#3CC47C', '#2FA8FF', '#5C7CFA', '#8A6CFF', '#FF7EB6'];
+const SONGS = {
+  twinkle: { en: 'Twinkle Twinkle', vi: 'Ngôi sao lấp lánh', pic: '⭐', n: [0,0,4,4,5,5,4, 3,3,2,2,1,1,0, 4,4,3,3,2,2,1, 4,4,3,3,2,2,1, 0,0,4,4,5,5,4, 3,3,2,2,1,1,0] },
+  mary: { en: 'Mary Had a Little Lamb', vi: 'Mary và chú cừu', pic: '🐑', n: [2,1,0,1,2,2,2, 1,1,1, 2,4,4, 2,1,0,1,2,2,2,2, 1,1,2,1,0] },
+};
+const ACTIONS = [['🦘','Jump!','Nhảy lên!','Jump! Jump! Jump!'], ['👏','Clap your hands!','Vỗ tay!'], ['🌀','Spin around!','Xoay một vòng!'],
+  ['🐘','Stomp like an elephant!','Dậm chân như con voi!'], ['👋','Wave hello!','Vẫy tay chào!'], ['👃','Touch your nose!','Chạm vào mũi!'],
+  ['🐰','Hop like a bunny!','Nhảy như con thỏ!'], ['🐦','Fly like a bird!','Bay như con chim!'], ['🙆','Stretch up high!','Vươn người lên cao!'],
+  ['🥁','March, march, march!','Đi đều bước!'], ['🐸','Jump like a frog!','Nhảy như con ếch!'], ['🦀','Walk like a crab!','Bò ngang như cua!'],
+  ['💃','Dance, dance, dance!','Nhảy múa nào!'], ['🙌','Hands up high!','Giơ tay lên cao!'], ['🐢','Slow like a turtle!','Chậm như con rùa!'],
+  ['🦶','Stand on one foot!','Đứng một chân!'], ['🤸','Touch your toes!','Cúi chạm ngón chân!']];
+const STICKERS = ['🦄','🐶','🌈','🍦','🚀','🐬','🌸','🦋','🍓','🐼','⭐','🎈','🐱','🧁','🦁','🐳','🍉','🚂','🐥','🌻','🦊','🍭','🐢','🎀','🐙','🦖','🍩','🐧','🌙','🏰','🐨','🎠','🍒','🦓','🐝','🌍','🐸','🎂','🦒','👑'];
+
+/* ---------- learning worlds (EYFS areas) ---------- */
+const L = d => ({ t: 'learn', d });
+const WORLDS = [
+  { id: 'words', en: 'Words', vi: 'Từ vựng', pic: '🗣️', color: '#FF8A3D', area: 'Giao tiếp & Ngôn ngữ',
+    acts: [L('animals'), L('cute'), L('fruits'), L('food'), L('clothes'), L('home'), L('family'), L('vehicles'), L('body'), L('fairy'),
+      { t: 'find', ds: ['animals','cute','fruits','food','clothes','home','vehicles','body','fairy'], en: 'Find it!', vi: 'Tìm hình', pic: '🔍' }] },
+  { id: 'abc', en: 'ABC', vi: 'Chữ cái', pic: '🔤', color: '#5C7CFA', area: 'Đọc viết (Literacy)',
+    acts: [L('letters'), { t: 'trace', en: 'Trace letters', vi: 'Tô chữ cái', pic: '✏️' }, { t: 'find', ds: ['letters'], en: 'Find the letter', vi: 'Tìm chữ cái', pic: '🔍' }] },
+  { id: 'math', en: 'Math', vi: 'Toán', pic: '🔢', color: '#2FA8FF', area: 'Toán học',
+    acts: [L('numbers'), { t: 'count', en: 'Count with me', vi: 'Đếm cùng bé', pic: '🧮' }, { t: 'find', ds: ['numbers'], en: 'Find the number', vi: 'Tìm con số', pic: '🔍' },
+      L('shapes'), { t: 'find', ds: ['shapes'], en: 'Find the shape', vi: 'Tìm hình khối', pic: '🔷' },
+      { t: 'compare', en: 'Big or small?', vi: 'To hay nhỏ, nhiều hay ít', pic: '🐘' }, L('opposites'), { t: 'pattern', en: 'What comes next?', vi: 'Quy luật', pic: '🧩' }] },
+  { id: 'world', en: 'Our World', vi: 'Khám phá', pic: '🌍', color: '#3CC47C', area: 'Hiểu biết thế giới',
+    acts: [L('weather'), L('nature'), L('sounds'), { t: 'find', ds: ['sounds'], en: 'Who says that?', vi: 'Con gì kêu?', pic: '👂' },
+      { t: 'sort', k: 'habitat' }, { t: 'seq', k: 'plant' }, { t: 'seq', k: 'day' }] },
+  { id: 'feel', en: 'Feelings', vi: 'Cảm xúc', pic: '😊', color: '#FF5E7E', area: 'Cảm xúc & Xã hội',
+    acts: [L('feelings'), { t: 'find', ds: ['feelings'], en: 'How do they feel?', vi: 'Bạn ấy cảm thấy sao?', pic: '🤔' }, L('manners')] },
+  { id: 'life', en: 'Life Skills', vi: 'Kỹ năng sống', pic: '🧼', color: '#00BFA5', area: 'Tự lập & Sức khỏe',
+    acts: [{ t: 'seq', k: 'hands' }, { t: 'seq', k: 'teeth' }, { t: 'seq', k: 'dress' }, { t: 'seq', k: 'bed' }, { t: 'sort', k: 'food' }] },
+  { id: 'art', en: 'Art', vi: 'Vẽ & Màu', pic: '🎨', color: '#8A6CFF', area: 'Nghệ thuật & Sáng tạo',
+    acts: [{ t: 'draw', en: 'Draw', vi: 'Bé tập vẽ', pic: '🖍️' }, L('colors'), { t: 'find', ds: ['colors'], en: 'Find the color', vi: 'Tìm màu', pic: '🔍' }] },
+  { id: 'music', en: 'Music', vi: 'Âm nhạc', pic: '🎵', color: '#E8589C', area: 'Nghệ thuật & Sáng tạo',
+    acts: [{ t: 'piano', en: 'Piano', vi: 'Đàn tự do', pic: '🎹' }, { t: 'piano', song: 'twinkle' }, { t: 'piano', song: 'mary' }, { t: 'freeze', en: 'Freeze dance', vi: 'Nhảy rồi đứng yên', pic: '🧊' }] },
+  { id: 'move', en: 'Move', vi: 'Vận động', pic: '🤸', color: '#FFB300', area: 'Phát triển thể chất',
+    acts: [{ t: 'move', en: 'Move with me', vi: 'Vận động theo', pic: '🦘' }, { t: 'freeze', en: 'Freeze dance', vi: 'Nhảy rồi đứng yên', pic: '🧊' }] },
+  { id: 'puzzle', en: 'Brain Games', vi: 'Trò chơi trí tuệ', pic: '🧩', color: '#7E57C2', area: 'Tư duy & Trí nhớ',
+    acts: [{ t: 'memory', en: 'Memory match', vi: 'Lật hình tìm cặp', pic: '🃏' }, { t: 'pattern', en: 'What comes next?', vi: 'Quy luật', pic: '🧩' },
+      { t: 'find', ds: ['animals','fruits','vehicles','shapes','colors','feelings','sounds'], en: 'Mixed quiz', vi: 'Đố vui tổng hợp', pic: '🎯' }] },
+];
+function actMeta(a) {
+  if (a.t === 'learn') { const d = DECKS[a.d]; return { en: d.en, vi: d.vi, pic: d.pic }; }
+  if (a.t === 'sort') { const s = SORTS[a.k]; return { en: s.en, vi: s.vi, pic: s.pic }; }
+  if (a.t === 'seq') { const s = SEQS[a.k]; return { en: s.en, vi: s.vi, pic: s.pic }; }
+  if (a.t === 'piano' && a.song) { const s = SONGS[a.song]; return { en: s.en, vi: s.vi, pic: s.pic }; }
+  return { en: a.en, vi: a.vi, pic: a.pic };
+}
+
+/* ---------- buddies ---------- */
+const BUDDIES = [
+  { id: 'bear', pic: '🐻', name: 'Bông', hi: "Hi! I am Bông the bear. Let's learn English!" },
+  { id: 'mermaid', pic: '🧜‍♀️', name: 'Marina', hi: "Hello! I am Marina the mermaid. Let's swim and learn!" },
+  { id: 'princess', pic: '👸', name: 'Snowy', hi: "Hello! I am Princess Snowy. Let's learn together!" },
+  { id: 'robot', pic: '🤖', name: 'Robo', hi: "Beep boop! I am Robo the robot. Let's learn English!" },
+  { id: 'panda', pic: '🐼', name: 'Pandy', hi: "Hi hi! I am Pandy the panda. Let's play!" },
+  { id: 'unicorn', pic: '🦄', name: 'Sparkle', hi: "Hello! I am Sparkle the unicorn. Let's learn!" },
+];
+const curBuddy = () => BUDDIES.find(b => b.id === S.buddy) || BUDDIES[0];
+function buddy(cls = '') {
+  if (S.buddy !== 'bear') return `<div class="buddy emo ${cls}" aria-hidden="true"><span>${curBuddy().pic}</span></div>`;
+  return `<div class="buddy ${cls}" aria-hidden="true"><svg viewBox="0 0 120 120">
+    <circle cx="22" cy="30" r="15" fill="#FFB23F"/><circle cx="98" cy="30" r="15" fill="#FFB23F"/>
+    <circle cx="22" cy="30" r="7" fill="#FF8FA8"/><circle cx="98" cy="30" r="7" fill="#FF8FA8"/>
+    <circle cx="60" cy="64" r="50" fill="#FFC93C"/><ellipse cx="60" cy="84" rx="30" ry="22" fill="#FFE7A3"/>
+    <ellipse class="eye" cx="42" cy="56" rx="7" ry="9" fill="#1F2A55"/><ellipse class="eye" cx="78" cy="56" rx="7" ry="9" fill="#1F2A55"/>
+    <circle cx="44.5" cy="52.5" r="2.6" fill="#fff"/><circle cx="80.5" cy="52.5" r="2.6" fill="#fff"/>
+    <circle cx="28" cy="74" r="7" fill="#FF8FA8" opacity=".7"/><circle cx="92" cy="74" r="7" fill="#FF8FA8" opacity=".7"/>
+    <ellipse cx="60" cy="72" rx="6" ry="4.5" fill="#1F2A55"/><ellipse class="mouth" cx="60" cy="88" rx="12" ry="9" fill="#C2185B"/>
+  </svg></div>`;
+}
+
+/* ---------- screen helpers ---------- */
+let curWorld = null;
+function bar(back, extra = '') {
+  return `<div class="bar"><button class="round" id="back" aria-label="Quay lại">${back === home ? '🏠' : '⬅️'}</button>${extra}<div class="grow"></div><div class="stars" aria-label="Số sao">⭐ <span id="starn">${S.stars}</span></div></div>`;
+}
+function show(html, back) {
+  stopAll();
+  app.innerHTML = html;
+  window.scrollTo(0, 0);
+  const b = $('#back');
+  if (b && back) b.onclick = () => { click(); back(); };
+}
+const hl = s => s.replace(/\{(.+?)\}/g, '<b>$1</b>');
+const plain = s => s.replace(/[{}]/g, '');
+function bounce(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+
+function award(n) {
+  S.stars += n;
+  if (curWorld) S.world[curWorld.id] = (S.world[curWorld.id] || 0) + n;
+  const sn = $('#starn'); if (sn) sn.textContent = S.stars;
+  const have = Math.floor(S.stars / 3);
+  if (have > S.stk) {
+    S.stk = have;
+    const t = document.createElement('div');
+    t.className = 'toast'; t.textContent = `🎁 New sticker! ${STICKERS[(have - 1) % STICKERS.length]}`;
+    document.body.appendChild(t); setTimeout(() => t.remove(), 2600);
   }
-  if (topicKey === 'colors') return `<div class="blob" style="background:${item[0]}"></div>`;
-  if (topicKey === 'numbers') {
-    const n = item[0], p = COUNT_PICS[n - 1];
-    if (size === 'small') return `<span style="font-family:var(--display);font-weight:800;color:var(--grape)">${n}</span>`;
-    return `<div class="numeral">${n}</div><div class="count" style="font-size:${n <= 2 ? 96 : n <= 4 ? 64 : ''}px">${p.repeat(n).match(/./gu).map(c => `<span>${c}</span>`).join('')}</div>`;
-  }
-  return size === 'small' ? item[0] : `<div class="big">${item[0]}</div>`;
-}
-function topBar(extra = '') {
-  return `<div class="bar">
-    <button class="round" id="home" aria-label="Về trang chính">🏠</button>
-    ${extra}
-    <div class="stars" aria-label="Số sao">⭐ ${stars}</div>
-  </div>`;
-}
-function bindHome() { document.getElementById('home').onclick = () => { tone([400], 0.08); home(); }; }
-
-/* ---------- HOME ---------- */
-function home() {
-  watchRun++;
-  if ('speechSynthesis' in window) speechSynthesis.cancel();
-  setTalking(false);
-  app.innerHTML = `
-    <div class="bar"><div></div><div class="stars">⭐ ${stars}</div></div>
-    <div class="talkrow">${buddy('lg')}<div class="hello" style="text-align:left"><h1>Hello <span>baby!</span></h1><p>Chạm vào hình để nghe tiếng Anh</p></div></div>
-    ${installCard()}
-    <p class="pick-label">Chọn bạn học cùng bé:</p>
-    <div class="pick">${BUDDIES.map(b => `<button data-buddy="${b.id}" class="${b.id === buddyId ? 'on' : ''}" aria-label="${b.name}">${b.pic}</button>`).join('')}</div>
-    <div class="grid">
-      <button class="tile watch" data-watch="1"><span class="pic">📺</span><span><span class="en">Watch!</span><br><span class="vi">Xem video học</span></span></button>
-      <button class="tile play" data-play="1"><span class="pic">🎈</span><span><span class="en">Let's play!</span><br><span class="vi">Chơi trò tìm hình</span></span></button>
-      ${Object.entries(TOPICS).map(([k, t]) => `
-        <button class="tile" data-topic="${k}" style="background:${t.color}">
-          <span class="pic">${t.pic}</span><span class="en">${t.en}</span><span class="vi">${t.vi}</span>
-        </button>`).join('')}
-    </div>
-    <p class="parent">Ba mẹ ơi: bật âm lượng lên và gạt nút im lặng bên hông iPhone sang chế độ có tiếng. Bé chạm vào hình sẽ nghe đọc chữ tiếng Anh. Mỗi ngày chơi 10 phút cùng bé và đọc theo là bé nhớ rất nhanh.</p>`;
-  app.querySelectorAll('[data-topic]').forEach(b => b.onclick = () => { const t = TOPICS[b.dataset.topic]; say(t.en); learn(b.dataset.topic, 0); });
-  app.querySelector('[data-play]').onclick = () => { say("Let's play!"); setTimeout(game, 700); };
-  app.querySelector('[data-watch]').onclick = () => { say("Let's watch!"); setTimeout(() => watch(), 900); };
-  const ok = document.getElementById('install-ok');
-  if (ok) ok.onclick = () => { try { localStorage.setItem('bhta-install-ok', '1'); } catch (e) {} home(); };
-  app.querySelector('.buddy').onclick = () => say(curBuddy().hi);
-  app.querySelectorAll('[data-buddy]').forEach(b => b.onclick = () => {
-    buddyId = b.dataset.buddy;
-    try { localStorage.setItem('bhta-buddy', buddyId); } catch (e) {}
-    home(); tone([660, 880], 0.08);
-    say(curBuddy().hi);
-  });
-}
-
-/* ---------- WATCH: the buddy presents every picture, like a video ---------- */
-let watchRun = 0;
-const WATCH_ORDER = ['animals', 'abc', 'fairy', 'fruits', 'cute', 'colors', 'numbers', 'things', 'body'];
-function watch(ti = 0, i = 0, run = ++watchRun) {
-  if (run !== watchRun) return;
-  if (ti >= WATCH_ORDER.length) ti = 0;
-  const key = WATCH_ORDER[ti], t = TOPICS[key], item = t.items[i], w = item[1];
-  const total = WATCH_ORDER.reduce((s, k) => s + TOPICS[k].items.length, 0);
-  const done = WATCH_ORDER.slice(0, ti).reduce((s, k) => s + TOPICS[k].items.length, 0) + i;
-  const intro = key === 'abc' ? `${item[0]} is for ${w}.` : key === 'colors' ? `This is ${w}.` : key === 'numbers' ? `Number ${w}.` : ['grapes', 'eyes', 'teeth'].includes(w) ? `These are ${w}.`
-    : `This is ${/^[aeio]|^u(?!ni)/.test(w) ? 'an' : 'a'} ${w}.`;
-  app.innerHTML = `
-    ${topBar(`<button class="round" id="pause" aria-label="Tạm dừng">⏸️</button>`)}
-    <div class="stage">
-      <div class="progress"><i style="width:${(done / total * 100).toFixed(1)}%"></i></div>
-      <div class="card pop">${picture(key, item)}</div>
-      <div class="talkrow">${buddy()}<div class="bubble" id="bubble">${intro}<small>${item[2]}</small></div></div>
-    </div>`;
-  bindHome();
-  let paused = false;
-  const next = () => {
-    if (run !== watchRun || paused) return;
-    let ni = i + 1, nti = ti;
-    if (ni >= t.items.length) { ni = 0; nti = ti + 1; }
-    watch(nti, ni, run);
-  };
-  const play = () => {
-    if (run !== watchRun || paused) return;
-    say(intro, () => setTimeout(() => {
-      if (run !== watchRun || paused) return;
-      const bubble = document.getElementById('bubble');
-      bubble.innerHTML = `Say: ${w}!<small>Bé đọc theo nào: ${w}</small>`;
-      say(`${w}! Say: ${w}!`, () => setTimeout(next, 1600));
-    }, 350));
-  };
-  document.getElementById('pause').onclick = (e) => {
-    paused = !paused;
-    e.currentTarget.textContent = paused ? '▶️' : '⏸️';
-    if (paused) { if ('speechSynthesis' in window) speechSynthesis.cancel(); clearTimeout(talkTimer); setTalking(false); }
-    else play();
-  };
-  setTimeout(play, 300);
-}
-
-/* ---------- LEARN ---------- */
-function learn(key, i) {
-  const t = TOPICS[key], item = t.items[i];
-  app.innerHTML = `
-    ${topBar()}
-    <div class="stage">
-      <button class="card pop" id="card" aria-label="Nghe lại: ${item[1]}">${picture(key, item)}<span class="ear">🔊</span></button>
-      <div class="talkrow">${buddy()}<div class="word" style="text-align:left"><div class="en">${item[1]}</div><div class="vi">${item[2]}</div></div></div>
-      <div class="nav">
-        <button class="arrow" id="prev" aria-label="Hình trước">◀</button>
-        <div class="dots">${t.items.map((_, j) => `<i class="${j === i ? 'on' : ''}"></i>`).join('')}</div>
-        <button class="arrow" id="next" aria-label="Hình tiếp">▶</button>
-      </div>
-    </div>`;
-  bindHome();
-  const card = document.getElementById('card');
-  const speak = () => say(key === 'numbers' ? `${item[1]}!` : key === 'abc' ? `${item[0]}! ${item[0]} is for ${item[1]}.` : item[1]);
-  card.onclick = () => { card.classList.remove('wiggle'); void card.offsetWidth; card.classList.add('wiggle'); speak(); };
-  document.getElementById('next').onclick = () => { tone([660], 0.06); learn(key, (i + 1) % t.items.length); };
-  document.getElementById('prev').onclick = () => { tone([520], 0.06); learn(key, (i - 1 + t.items.length) % t.items.length); };
-  setTimeout(speak, 250);
-}
-
-/* ---------- GAME: find the picture ---------- */
-let lastAnswer = '';
-function game() {
-  const keys = Object.keys(TOPICS).filter(k => k !== 'abc');
-  const key = keys[Math.floor(Math.random() * keys.length)];
-  const pool = TOPICS[key].items.slice().sort(() => Math.random() - 0.5);
-  let answer = pool[0];
-  if (answer[1] === lastAnswer) answer = pool[1];
-  lastAnswer = answer[1];
-  const options = [answer, ...pool.filter(x => x !== answer).slice(0, 2)].sort(() => Math.random() - 0.5);
-  const article = key === 'colors' ? 'Find' : 'Where is';
-  const question = key === 'colors' ? `Find ${answer[1]}!` : key === 'numbers' ? `Find number ${answer[1]}!` : `Where is the ${answer[1]}?`;
-  app.innerHTML = `
-    ${topBar(`<button class="round" id="again" aria-label="Nghe lại câu hỏi">🔊</button>`)}
-    <div class="talkrow">${buddy()}<div class="ask" style="text-align:left"><div class="q">${key === 'colors' || key === 'numbers' ? 'Find' : 'Where is the'} <b>${answer[1]}</b>${key === 'colors' || key === 'numbers' ? '!' : '?'}</div>
-      <div class="vi">Bé tìm ${answer[2]} nào</div></div></div>
-    <div class="choices">
-      ${options.map((o, j) => `<button class="choice" data-j="${j}" aria-label="${o[1]}">${picture(key, o, 'small')}</button>`).join('')}
-    </div>`;
-  bindHome();
-  document.getElementById('again').onclick = () => say(question);
-  let done = false;
-  app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
-    if (done) return;
-    const o = options[+btn.dataset.j];
-    if (o === answer) {
-      done = true; btn.classList.add('right', 'pop');
-      stars++; saveStars(); ding();
-      const praise = PRAISE[Math.floor(Math.random() * PRAISE.length)];
-      say(`${praise} ${answer[1]}!`);
-      celebrate(praise);
-      setTimeout(game, 2200);
-    } else {
-      boop(); btn.classList.remove('wiggle'); void btn.offsetWidth; btn.classList.add('wiggle');
-      say(`That is ${key === 'colors' || key === 'numbers' ? '' : 'a '}${o[1]}. Try again!`);
-    }
-  });
-  setTimeout(() => say(question), 300);
+  save();
 }
 function celebrate(text) {
   const p = document.createElement('div');
@@ -570,6 +659,619 @@ function celebrate(text) {
   }
   setTimeout(() => p.remove(), 1700);
 }
+function holdable(el, ms, cb) {
+  let t = null;
+  const end = () => { clearTimeout(t); el.classList.remove('holding'); };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); el.classList.add('holding'); t = setTimeout(() => { end(); cb(); }, ms); });
+  ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => el.addEventListener(ev, end));
+  el.addEventListener('contextmenu', e => e.preventDefault());
+}
+
+/* =====================================================================
+   HOME
+   ===================================================================== */
+function home() {
+  curWorld = null;
+  show(`
+    <div class="bar">
+      <button class="round" id="stk" aria-label="Sổ sticker">🏅</button>
+      <div class="grow"></div>
+      <div class="stars">⭐ <span id="starn">${S.stars}</span></div>
+      <button class="round small" id="gear" aria-label="Góc ba mẹ: giữ 2 giây">⚙️</button>
+    </div>
+    <div class="talkrow">${buddy('lg')}<div class="hello"><h1>Hello <span>baby!</span></h1><p>Chọn một thế giới để học và chơi</p></div></div>
+    ${installCard()}
+    <p class="pick-label">Chọn bạn học cùng bé:</p>
+    <div class="pick">${BUDDIES.map(b => `<button data-buddy="${b.id}" class="${b.id === S.buddy ? 'on' : ''}" aria-label="${b.name}">${b.pic}</button>`).join('')}</div>
+    <div class="grid">
+      <button class="tile wide" id="watch" style="background:var(--grape)"><span class="pic">📺</span><span><span class="en">Watch!</span><br><span class="vi">Xem video học</span></span></button>
+      ${WORLDS.map(w => `<button class="tile" data-world="${w.id}" style="background:${w.color}">
+        <span class="pic">${w.pic}</span><span class="en">${w.en}</span><span class="vi">${w.vi}</span>
+        <span class="got">⭐ ${S.world[w.id] || 0}</span></button>`).join('')}
+    </div>
+    <p class="parent">Ba mẹ ơi: bật âm lượng và gạt nút im lặng bên hông iPhone. Giữ nút ⚙️ 2 giây để mở Góc ba mẹ (giới hạn giờ chơi, tốc độ đọc, tiến bộ của bé).</p>`);
+  app.querySelectorAll('[data-world]').forEach(b => b.onclick = () => { const w = WORLDS.find(x => x.id === b.dataset.world); click(); world(w); say(w.en + '!'); });
+  $('#watch').onclick = () => { watch(); };
+  $('#stk').onclick = () => { click(); stickers(); };
+  holdable($('#gear'), 2000, parents);
+  app.querySelector('.buddy').onclick = () => say(curBuddy().hi);
+  app.querySelectorAll('[data-buddy]').forEach(b => b.onclick = () => {
+    S.buddy = b.dataset.buddy; save(); home(); tone([660, 880], 0.08); say(curBuddy().hi);
+  });
+  const ok = $('#install-ok');
+  if (ok) ok.onclick = () => { S.installOk = true; save(); home(); };
+}
+
+function world(w) {
+  curWorld = w;
+  show(`${bar(home)}
+    <div class="worldhead" style="background:${w.color}"><span class="pic">${w.pic}</span><div><h2>${w.en}</h2><p>${w.vi} · ⭐ ${S.world[w.id] || 0}</p></div></div>
+    <div class="grid">${w.acts.map((a, i) => { const m = actMeta(a); return `<button class="tile" data-i="${i}" style="background:${w.color}">
+      <span class="pic">${m.pic}</span><span class="en">${m.en}</span><span class="vi">${m.vi}</span></button>`; }).join('')}</div>`, home);
+  app.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { click(); openAct(w.acts[+b.dataset.i], () => world(w)); });
+}
+function openAct(a, back) {
+  switch (a.t) {
+    case 'learn': return learn(a.d, 0, back);
+    case 'find': return find(a.ds, back);
+    case 'count': return count(back);
+    case 'compare': return compare(back);
+    case 'pattern': return pattern(back);
+    case 'sort': return sortGame(a.k, back);
+    case 'seq': return seq(a.k, back);
+    case 'trace': return trace(0, back);
+    case 'draw': return draw(back);
+    case 'piano': return piano(a.song, back);
+    case 'freeze': return freeze(back);
+    case 'move': return move(back);
+    case 'memory': return memory(back);
+  }
+}
+
+/* =====================================================================
+   LEARN: flash cards
+   ===================================================================== */
+function learn(dk, i, back) {
+  const d = DECKS[dk], item = d.items[i];
+  show(`${bar(back)}
+    <div class="stage">
+      <button class="card pop" id="card" aria-label="Nghe lại: ${item.w}">${picture(item, true)}<span class="ear">🔊</span></button>
+      <div class="talkrow">${buddy()}<div class="word"><div class="en">${item.w}</div><div class="vi">${item.vi}</div></div></div>
+      <div class="nav">
+        <button class="arrow" id="prev" aria-label="Hình trước">◀</button>
+        <div class="dots">${d.items.length <= 15 ? d.items.map((_, j) => `<i class="${j === i ? 'on' : ''}"></i>`).join('') : `<b>${i + 1} / ${d.items.length}</b>`}</div>
+        <button class="arrow" id="next" aria-label="Hình tiếp">▶</button>
+      </div>
+    </div>`, back);
+  const card = $('#card');
+  const speak = () => say(item.say || item.w);
+  card.onclick = () => { bounce(card, 'wiggle'); speak(); };
+  $('#next').onclick = () => { click(); learn(dk, (i + 1) % d.items.length, back); };
+  $('#prev').onclick = () => { click(); learn(dk, (i - 1 + d.items.length) % d.items.length, back); };
+  later(speak, 250);
+}
+
+/* =====================================================================
+   FIND: "Where is the cat?" with 3 big choices
+   ===================================================================== */
+let lastAns = '';
+function questionFor(d, it) {
+  if (d.ask) return d.ask(it);
+  return `Where ${it.pl ? 'are' : 'is'} the {${it.w}}?`;
+}
+function thatIs(d, it) {
+  if (d.noArt) return `That is ${it.name || it.w}.`;
+  if (it.pl) return `Those are ${it.w}.`;
+  return `That is ${article(it.w)} ${it.w}.`;
+}
+function find(ds, back) {
+  const dk = pick(ds), d = DECKS[dk];
+  const pool = shuffle(d.items.slice());
+  let ans = pool[0]; if ((ans.name || ans.w) === lastAns && pool[1]) ans = pool[1];
+  lastAns = ans.name || ans.w;
+  const opts = shuffle([ans, ...pool.filter(x => x !== ans).slice(0, 2)]);
+  const q = questionFor(d, ans);
+  show(`${bar(back, '<button class="round" id="again" aria-label="Nghe lại câu hỏi">🔊</button>')}
+    <div class="talkrow">${buddy()}<div class="ask"><div class="q">${hl(q)}</div><div class="vi">${d.fvi ? d.fvi(ans) : `Bé tìm ${ans.vi} nào`}</div></div></div>
+    <div class="choices">${opts.map((o, j) => `<button class="choice" data-j="${j}" aria-label="${o.name || o.w}">${picture(o, false)}</button>`).join('')}</div>`, back);
+  $('#again').onclick = () => say(plain(q));
+  let done = false;
+  app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
+    if (done) return;
+    const o = opts[+btn.dataset.j];
+    if (o === ans) {
+      done = true; btn.classList.add('right', 'pop'); award(1); ding();
+      const pr = pick(PRAISE); say(`${pr} ${ans.name || ans.w}!`); celebrate(pr);
+      later(() => find(ds, back), 2300);
+    } else {
+      boop(); bounce(btn, 'wiggle'); say(`${thatIs(d, o)} Try again!`);
+    }
+  });
+  later(() => say(plain(q)), 300);
+}
+
+/* =====================================================================
+   MATH: count, compare, patterns
+   ===================================================================== */
+const COUNT_THINGS = [['🍎','apple','apples','quả táo'], ['⭐','star','stars','ngôi sao'], ['🐤','chick','chicks','gà con'], ['🎈','balloon','balloons','bóng bay'],
+  ['🐟','fish','fish','con cá'], ['🌸','flower','flowers','bông hoa'], ['🚗','car','cars','xe hơi'], ['🍌','banana','bananas','quả chuối'],
+  ['🐞','ladybug','ladybugs','bọ rùa'], ['🧁','cupcake','cupcakes','bánh cupcake'], ['🦆','duck','ducks','con vịt'], ['🍓','strawberry','strawberries','quả dâu']];
+let countLvl = 0;
+function count(back) {
+  const max = Math.min(10, 4 + countLvl);
+  const n = 2 + rnd(max - 1);
+  const [p, one, many, vi] = pick(COUNT_THINGS);
+  show(`${bar(back)}
+    <div class="talkrow">${buddy()}<div class="bubble">Let's count the <b>${many}</b>!<small>Bé chạm vào từng ${vi} để đếm</small></div></div>
+    <div class="counting">${Array(n).fill(0).map((_, j) => `<button class="cnt" data-j="${j}" aria-label="${one}">${p}</button>`).join('')}</div>
+    <div id="after" class="choices"></div>`, back);
+  say(`Let's count the ${many}!`);
+  let k = 0;
+  app.querySelectorAll('.cnt').forEach(b => b.onclick = () => {
+    if (b.classList.contains('done')) return;
+    k++; b.classList.add('done', 'pop'); b.dataset.n = k; tone([392 + k * 40], 0.08); say(NUMW[k] + '!');
+    if (k === n) later(() => say(`${NUMW[n]} ${n === 1 ? one : many}!`, () => howMany()), 700);
+  });
+  function howMany() {
+    const set = new Set([n]); while (set.size < 3) set.add(1 + rnd(10));
+    const opts = shuffle([...set]);
+    const after = $('#after');
+    after.className = 'choices'; after.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    after.innerHTML = `<div class="ask" style="grid-column:1/-1;text-align:center"><div class="q">How many <b>${many}</b>?</div><div class="vi">Có bao nhiêu ${vi}?</div></div>` +
+      opts.map(v => `<button class="choice" data-v="${v}" style="min-height:110px;font-size:64px"><span class="numsm">${v}</span></button>`).join('');
+    say(`How many ${many}?`);
+    let done = false;
+    after.querySelectorAll('[data-v]').forEach(btn => btn.onclick = () => {
+      if (done) return;
+      if (+btn.dataset.v === n) {
+        done = true; btn.classList.add('right'); award(1); ding(); countLvl++;
+        say(`Yes! ${NUMW[n]} ${many}!`); celebrate(pick(PRAISE)); later(() => count(back), 2600);
+      } else { boop(); bounce(btn, 'wiggle'); say('Hmm. Count again!'); }
+    });
+  }
+}
+
+const BS = ['🐘','🐶','🍎','🚗','🐟','🌳','🎈','🐻','⭐','🍓','🦒','🏠'];
+function compare(back) {
+  const type = pick(['big', 'small', 'big', 'small', 'more']);
+  const e = pick(BS);
+  let sides, q, vi;
+  if (type === 'more') {
+    const a = 1 + rnd(2), b = 4 + rnd(3);
+    sides = shuffle([{ c: a, ok: false }, { c: b, ok: true }]);
+    q = 'Which has {more}?'; vi = 'Bên nào nhiều hơn?';
+  } else {
+    sides = shuffle([{ s: 140, ok: type === 'big' }, { s: 54, ok: type === 'small' }]);
+    q = `Which one is {${type}}?`; vi = type === 'big' ? 'Cái nào TO?' : 'Cái nào NHỎ?';
+  }
+  show(`${bar(back, '<button class="round" id="again" aria-label="Nghe lại">🔊</button>')}
+    <div class="talkrow">${buddy()}<div class="ask"><div class="q">${hl(q)}</div><div class="vi">${vi}</div></div></div>
+    <div class="choices two">${sides.map((s, j) => `<button class="choice" data-j="${j}" style="min-height:230px">${s.c
+      ? `<div class="groupe">${Array(s.c).fill(e).join('')}</div>` : `<span style="font-size:${s.s}px">${e}</span>`}</button>`).join('')}</div>`, back);
+  $('#again').onclick = () => say(plain(q));
+  say(plain(q));
+  let done = false;
+  app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
+    if (done) return;
+    if (sides[+btn.dataset.j].ok) {
+      done = true; btn.classList.add('right', 'pop'); award(1); ding();
+      say(type === 'more' ? 'Yes! This side has more!' : `Yes! This one is ${type}!`); celebrate(pick(PRAISE)); later(() => compare(back), 2300);
+    } else { boop(); bounce(btn, 'wiggle'); say('Look again!'); }
+  });
+}
+
+function pattern(back) {
+  const d = DECKS[pick(['fruits', 'animals', 'cute', 'vehicles'])];
+  const its = shuffle(d.items.slice());
+  const t = pick(['AB', 'AB', 'AAB', 'ABB', 'ABC']);
+  const unit = t.split('').map(ch => its['ABC'.indexOf(ch)]);
+  const seqArr = []; while (seqArr.length < 8) seqArr.push(...unit);
+  const shown = seqArr.slice(0, 6), ans = seqArr[6];
+  const optSet = [...new Set([...unit, its[3]])];
+  const opts = shuffle(optSet.slice(0, 3).includes(ans) ? optSet.slice(0, 3) : [ans, ...optSet.filter(x => x !== ans).slice(0, 2)]);
+  show(`${bar(back)}
+    <div class="talkrow">${buddy()}<div class="bubble">What comes <b>next</b>?<small>Hình nào tiếp theo?</small></div></div>
+    <div class="pat" id="pat">${shown.map(x => `<span>${x.p}</span>`).join('')}<span class="hole" id="hole">?</span></div>
+    <div class="choices" style="grid-template-columns:repeat(3,1fr)">${opts.map((o, j) => `<button class="choice" data-j="${j}" style="min-height:120px;font-size:64px">${o.p}</button>`).join('')}</div>`, back);
+  say('What comes next?');
+  let done = false;
+  app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
+    if (done) return;
+    const o = opts[+btn.dataset.j];
+    if (o === ans) {
+      done = true; btn.classList.add('right'); const h = $('#hole'); h.className = 'pop'; h.textContent = ans.p;
+      award(1); ding(); celebrate(pick(PRAISE));
+      say(`Yes! ${seqArr.slice(0, 7).map(x => x.w).join(', ')}!`, () => later(() => pattern(back), 700));
+    } else { boop(); bounce(btn, 'wiggle'); say(`${o.w}? Look again!`); }
+  });
+}
+
+/* =====================================================================
+   OUR WORLD & LIFE SKILLS: sorting and sequences
+   ===================================================================== */
+let lastSort = '';
+function sortGame(key, back) {
+  const s = SORTS[key];
+  let it = pick(s.items); if (it[1] === lastSort) it = pick(s.items); lastSort = it[1];
+  const others = Object.keys(s.bins).filter(b => b !== it[2]);
+  const two = shuffle([it[2], pick(others)]);
+  const q = s.q(it);
+  show(`${bar(back, '<button class="round" id="again" aria-label="Nghe lại">🔊</button>')}
+    <div class="talkrow">${buddy()}<div class="bubble">${hl(q)}<small>${s.vi}</small></div></div>
+    <div class="card pop" style="aspect-ratio:auto;padding:18px 0"><div class="big" style="font-size:130px">${it[0]}</div></div>
+    <div class="choices two">${two.map(b => { const bb = s.bins[b]; return `<button class="choice" data-b="${b}" style="font-size:70px">
+      <span>${bb[0]}<span class="label">${bb[1]}</span><span class="sub">${bb[2]}</span></span></button>`; }).join('')}</div>`, back);
+  $('#again').onclick = () => say(plain(q));
+  say(plain(q));
+  let done = false;
+  app.querySelectorAll('.choice').forEach(btn => btn.onclick = () => {
+    if (done) return;
+    if (btn.dataset.b === it[2]) {
+      done = true; btn.classList.add('right', 'pop'); award(1); ding(); celebrate(pick(PRAISE));
+      say(s.ok(it, s.bins[it[2]]), () => later(() => sortGame(key, back), 800));
+    } else { boop(); bounce(btn, 'wiggle'); say('Hmm, not there. Try again!'); }
+  });
+}
+
+function seq(key, back) {
+  const s = SEQS[key];
+  const steps = s.steps.map((x, i) => ({ p: x[0], w: x[1], vi: x[2], i }));
+  const pool = shuffle(steps.slice());
+  let next = 0;
+  show(`${bar(back, '<button class="round" id="again" aria-label="Nghe lại">🔊</button>')}
+    <div class="talkrow">${buddy()}<div class="bubble">${s.en}<small>${s.vi}: bé xếp theo đúng thứ tự</small></div></div>
+    <div class="slots" style="--n:${steps.length}">${steps.map((_, i) => `<div class="slot" id="slot${i}"><b>${i + 1}</b></div>`).join('')}</div>
+    <div class="cards">${pool.map(st => `<button class="step" data-i="${st.i}"><span class="p">${st.p}</span><span class="t">${st.w}</span><span class="v">${st.vi}</span></button>`).join('')}</div>`, back);
+  const ask = () => say(next === 0 ? `${s.en}! What comes first?` : 'What comes next?');
+  $('#again').onclick = ask;
+  ask();
+  app.querySelectorAll('.step').forEach(btn => btn.onclick = () => {
+    const st = steps[+btn.dataset.i];
+    if (st.i === next) {
+      const slot = $('#slot' + next);
+      slot.classList.add('filled', 'pop'); slot.insertAdjacentHTML('beforeend', st.p);
+      btn.remove(); tone([523 + next * 60], 0.1); next++;
+      if (next === steps.length) {
+        award(2); celebrate(pick(PRAISE));
+        const words = ['First', 'Then', 'Then', 'Then', 'Then'];
+        const recap = steps.map((x, i) => `${i === steps.length - 1 ? 'And last' : words[i]}, ${x.w.toLowerCase()}.`).join(' ');
+        later(() => say(`Great job! ${recap}`, () => {
+          const cards = app.querySelector('.cards');
+          cards.innerHTML = `<button class="step" id="redo" style="grid-column:1/-1"><span class="p">🔁</span><span class="t">Again!</span><span class="v">Chơi lại</span></button>`;
+          $('#redo').onclick = () => seq(key, back);
+        }), 900);
+      } else say(st.w, () => later(() => say('What comes next?'), 300));
+    } else { boop(); bounce(btn, 'wiggle'); say(next === 0 ? 'Not yet! What comes first?' : 'Not yet! What comes next?'); }
+  });
+}
+
+/* =====================================================================
+   ABC: letter tracing
+   ===================================================================== */
+function makePad(canvas, onPoint) {
+  const dpr = window.devicePixelRatio || 1;
+  const r = canvas.getBoundingClientRect();
+  canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  let last = null;
+  const pos = e => { const b = canvas.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  canvas.onpointerdown = e => { e.preventDefault(); try { canvas.setPointerCapture(e.pointerId); } catch (x) {} last = pos(e); onPoint(last, last, true); };
+  canvas.onpointermove = e => { if (!last) return; const p = pos(e); onPoint(p, last, false); last = p; };
+  canvas.onpointerup = canvas.onpointercancel = () => { last = null; };
+  return { ctx, w: r.width, h: r.height };
+}
+function trace(i, back) {
+  const [Lt, w, vi, p] = LETTERS[i];
+  show(`${bar(back, '<button class="round" id="again" aria-label="Nghe lại">🔊</button>')}
+    <div class="talkrow">${buddy()}<div class="bubble">Trace the letter <b>${Lt}</b>!<small>Bé dùng ngón tay tô theo chữ ${Lt} (${p} ${w})</small></div></div>
+    <canvas id="cv" class="pad square" aria-label="Bảng tô chữ ${Lt}"></canvas>
+    <div class="nav" style="width:100%">
+      <button class="arrow" id="prev" aria-label="Chữ trước">◀</button>
+      <button class="tool" id="clear" aria-label="Tô lại">🔄</button>
+      <button class="arrow green" id="next" aria-label="Chữ tiếp">▶</button>
+    </div>`, back);
+  const sayIt = () => say(`Trace the letter ${Lt}. ${Lt} is for ${w}.`);
+  $('#again').onclick = sayIt;
+  $('#prev').onclick = () => { click(); trace((i + 25) % 26, back); };
+  $('#next').onclick = () => { click(); trace((i + 1) % 26, back); };
+  sayIt();
+  const r = RUN;
+  const ready = document.fonts && document.fonts.load ? document.fonts.load('800 100px "Baloo 2"') : Promise.resolve();
+  ready.catch(() => {}).then(() => { if (r === RUN) setup(); });
+  function setup() {
+    const cv = $('#cv');
+    const G = 60, mask = new Set(), covered = new Set();
+    const m = document.createElement('canvas'); m.width = m.height = G;
+    const mc = m.getContext('2d');
+    const font = s => `800 ${s}px "Baloo 2", "Arial Rounded MT Bold", sans-serif`;
+    mc.font = font(G * 0.85); mc.textAlign = 'center'; mc.textBaseline = 'middle'; mc.fillText(Lt, G / 2, G * 0.56);
+    const data = mc.getImageData(0, 0, G, G).data;
+    for (let k = 0; k < G * G; k++) if (data[k * 4 + 3] > 120) mask.add(k);
+    let hue = rnd(360), done = false;
+    const pad = makePad(cv, (pt, prev) => {
+      const ctx = pad.ctx;
+      hue = (hue + 4) % 360;
+      ctx.strokeStyle = `hsl(${hue} 85% 55%)`; ctx.lineWidth = pad.w * 0.075;
+      ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(pt[0] + 0.01, pt[1]); ctx.stroke();
+      const cx = Math.floor(pt[0] / pad.w * G), cy = Math.floor(pt[1] / pad.h * G);
+      for (let dx = -2; dx <= 2; dx++) for (let dy = -2; dy <= 2; dy++) {
+        const x = cx + dx, y = cy + dy; if (x < 0 || y < 0 || x >= G || y >= G) continue;
+        const idx = y * G + x; if (mask.has(idx)) covered.add(idx);
+      }
+      if (!done && covered.size / mask.size > 0.6) {
+        done = true; award(1); ding(); celebrate(pick(PRAISE)); say(`Great job! ${Lt}! ${Lt} is for ${w}!`);
+      }
+    });
+    const guide = () => {
+      const ctx = pad.ctx; ctx.clearRect(0, 0, pad.w, pad.h);
+      ctx.font = font(pad.w * 0.85); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#E4ECFF'; ctx.fillText(Lt, pad.w / 2, pad.h * 0.56);
+      ctx.save(); ctx.setLineDash([10, 12]); ctx.lineWidth = 3; ctx.strokeStyle = '#9DB2F5'; ctx.strokeText(Lt, pad.w / 2, pad.h * 0.56); ctx.restore();
+    };
+    guide();
+    $('#clear').onclick = () => { click(); covered.clear(); done = false; guide(); };
+  }
+}
+
+/* =====================================================================
+   ART: drawing pad
+   ===================================================================== */
+const PAINT = [['#E53935','red'], ['#FF8F00','orange'], ['#FFD600','yellow'], ['#2EBD59','green'], ['#1E6FFF','blue'], ['#9C4DFF','purple'], ['#FF7EB6','pink'], ['#8D5A2B','brown'], ['#222222','black']];
+const STAMPS = ['⭐','❤️','🌸','🐱','🚗','☀️'];
+function draw(back) {
+  show(`${bar(back)}
+    <div class="tools">${PAINT.map(([c, n], j) => `<button class="sw ${j === 4 ? 'on' : ''}" data-c="${c}" data-n="${n}" style="background:${c}" aria-label="${n}"></button>`).join('')}</div>
+    <div class="tools">
+      <button class="tool on" data-size="10" aria-label="Bút nhỏ">✏️</button><button class="tool" data-size="26" aria-label="Bút to">🖌️</button>
+      ${STAMPS.map(s => `<button class="tool" data-stamp="${s}" aria-label="Con dấu">${s}</button>`).join('')}
+      <button class="tool" data-eraser="1" aria-label="Cục tẩy">🧽</button><button class="tool" id="wipe" aria-label="Xóa hết">🗑️</button>
+    </div>
+    <canvas id="cv" class="pad" aria-label="Bảng vẽ"></canvas>`, back);
+  const cv = $('#cv');
+  cv.style.height = Math.max(280, window.innerHeight - cv.getBoundingClientRect().top - 30) + 'px';
+  let color = '#1E6FFF', size = 10, stamp = null, eraser = false;
+  say("Let's draw! Pick a color.");
+  const pad = makePad(cv, (pt, prev, start) => {
+    const ctx = pad.ctx;
+    if (stamp) { if (start) { ctx.font = '54px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(stamp, pt[0], pt[1]); tone([880], 0.05); } return; }
+    ctx.strokeStyle = eraser ? '#FFFFFF' : color; ctx.lineWidth = eraser ? 34 : size;
+    ctx.beginPath(); ctx.moveTo(prev[0], prev[1]); ctx.lineTo(pt[0] + 0.01, pt[1]); ctx.stroke();
+  });
+  const tools = app.querySelectorAll('.tool[data-size], .tool[data-stamp], .tool[data-eraser]');
+  const on = el => { tools.forEach(t => t.classList.remove('on')); el.classList.add('on'); };
+  app.querySelectorAll('.sw').forEach(b => b.onclick = () => {
+    app.querySelectorAll('.sw').forEach(x => x.classList.remove('on')); b.classList.add('on');
+    color = b.dataset.c; eraser = false; if (stamp) { stamp = null; on(app.querySelector('.tool[data-size]')); }
+    say(b.dataset.n + '!');
+  });
+  tools.forEach(t => t.onclick = () => {
+    on(t); click();
+    stamp = t.dataset.stamp || null; eraser = !!t.dataset.eraser;
+    if (t.dataset.size) size = +t.dataset.size;
+  });
+  let armed = false;
+  $('#wipe').onclick = () => {
+    if (!armed) { armed = true; $('#wipe').textContent = '❓'; later(() => { armed = false; const w = $('#wipe'); if (w) w.textContent = '🗑️'; }, 2500); return; }
+    armed = false; $('#wipe').textContent = '🗑️'; pad.ctx.clearRect(0, 0, pad.w, pad.h); tone([500, 300], 0.08);
+  };
+}
+
+/* =====================================================================
+   MUSIC: piano, songs, freeze dance
+   ===================================================================== */
+function piano(songKey, back) {
+  const song = songKey ? SONGS[songKey] : null;
+  show(`${bar(back, song ? '<button class="round" id="listen" aria-label="Nghe mẫu">👂</button>' : '')}
+    <div class="talkrow">${buddy()}<div class="bubble">${song ? song.en : 'Play the piano!'}<small>${song ? 'Bé bấm phím có ngôi sao ⭐. Bấm 👂 để nghe mẫu.' : 'Bé bấm các phím màu để chơi nhạc'}</small></div></div>
+    ${song ? '<div class="progress"><i id="pg" style="width:0"></i></div>' : ''}
+    <div class="keys">${NOTES.map((f, k) => `<button class="key" data-k="${k}" style="--kc:${KEYC[k]}" aria-label="Phím ${k + 1}"><span class="star">⭐</span><i></i></button>`).join('')}</div>`, back);
+  const keys = [...app.querySelectorAll('.key')];
+  let pos = 0, auto = false;
+  const hint = () => { keys.forEach(k => k.classList.remove('hint')); if (song && pos < song.n.length) keys[song.n[pos]].classList.add('hint'); };
+  const press = k => { note(NOTES[k]); keys[k].classList.add('down'); setTimeout(() => keys[k].classList.remove('down'), 160); };
+  keys.forEach(el => el.addEventListener('pointerdown', e => {
+    e.preventDefault(); if (auto) return;
+    const k = +el.dataset.k; press(k);
+    if (song && k === song.n[pos]) {
+      pos++; $('#pg').style.width = (pos / song.n.length * 100) + '%';
+      if (pos === song.n.length) {
+        keys.forEach(x => x.classList.remove('hint'));
+        award(2); celebrate('Bravo!');
+        later(() => say(`Bravo! You played ${song.en}!`, () => later(() => { pos = 0; $('#pg').style.width = '0'; hint(); }, 1500)), 600);
+        return;
+      }
+    }
+    hint();
+  }));
+  if (song) {
+    $('#listen').onclick = () => {
+      if (auto) return; auto = true; keys.forEach(x => x.classList.remove('hint'));
+      song.n.forEach((k, j) => later(() => press(k), j * 420));
+      later(() => { auto = false; hint(); }, song.n.length * 420 + 300);
+    };
+    say(`Let's play ${song.en}! Press the star.`);
+  } else say('Play the piano!');
+  hint();
+}
+
+const PENTA = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25];
+function freeze(back) {
+  show(`${bar(back)}
+    <div class="stage">
+      <div class="action"><div class="big" id="fp">💃</div><div class="word"><div class="en" id="fw">Freeze dance!</div><div class="vi" id="fv">Nhạc chạy thì nhảy, nhạc dừng thì ĐỨNG YÊN!</div></div></div>
+      <button class="go" id="fgo">▶ Start</button>
+    </div>`, back);
+  let rounds = 0;
+  $('#fgo').onclick = () => { $('#fgo').remove(); say("When the music stops, freeze!", () => dance()); };
+  function dance() {
+    $('#fp').textContent = pick(['💃', '🕺', '🐻', '🦄', '🐸']); $('#fp').classList.add('dance');
+    $('#fw').textContent = 'Dance!'; $('#fv').textContent = 'Nhảy múa theo nhạc nào!';
+    setTalking(true);
+    let step = 0;
+    const id = every(() => { note(PENTA[(step++ * 3 + rnd(3)) % PENTA.length], 0.3); }, 260);
+    later(() => {
+      clearInterval(id); setTalking(false);
+      $('#fp').classList.remove('dance'); $('#fp').textContent = '🧊'; $('#fw').textContent = 'FREEZE!'; $('#fv').textContent = 'Đứng yên như tượng!';
+      say('Freeze!'); rounds++; if (rounds % 2 === 0) award(1);
+      later(() => say('Dance!', () => dance()), 3200);
+    }, 4000 + rnd(4000));
+  }
+}
+
+/* =====================================================================
+   MOVE: action cards
+   ===================================================================== */
+function move(back) {
+  let done = 0, last = null;
+  next();
+  function next() {
+    let a = pick(ACTIONS); if (a === last) a = pick(ACTIONS); last = a;
+    show(`${bar(back, '<button class="round" id="skip" aria-label="Động tác khác">⏭️</button>')}
+      <div class="stage">
+        <div class="action pop"><div class="big dance">${a[0]}</div><div class="word"><div class="en">${a[1]}</div><div class="vi">${a[2]}</div></div>
+          <div class="timer"><i id="tm"></i></div></div>
+        <div class="talkrow" style="justify-content:center">${buddy()}<div class="bubble">Do it with me!<small>Bé làm theo nhé! Ba mẹ làm cùng bé càng vui.</small></div></div>
+      </div>`, back);
+    $('#skip').onclick = () => { click(); next(); };
+    say(a[3] || `${a[1]} ${a[1]}`, () => {
+      const tm = $('#tm'); tm.style.transition = 'width 7s linear'; requestAnimationFrame(() => { tm.style.width = '0%'; });
+      later(() => { done++; if (done % 3 === 0) award(1); ding(); say(pick(PRAISE), () => later(next, 500)); }, 7000);
+    });
+  }
+}
+
+/* =====================================================================
+   BRAIN GAMES: memory match
+   ===================================================================== */
+let memLvl = 0;
+function memory(back) {
+  const pairs = [3, 4, 6][Math.min(memLvl, 2)];
+  const d = DECKS[pick(['animals', 'cute', 'fruits', 'vehicles', 'fairy', 'food'])];
+  const items = shuffle(d.items.slice()).slice(0, pairs);
+  const cards = shuffle([...items, ...items]);
+  const cols = pairs === 3 ? 3 : 4;
+  show(`${bar(back)}
+    <div class="talkrow">${buddy()}<div class="bubble">Find the <b>pairs</b>!<small>Lật 2 thẻ giống nhau</small></div></div>
+    <div class="mem" style="grid-template-columns:repeat(${cols},1fr)">${cards.map((c, j) => `<button class="mcard" data-j="${j}" aria-label="Thẻ ${j + 1}"><span>❓</span></button>`).join('')}</div>`, back);
+  say('Find the pairs!');
+  let open = [], matched = 0, lock = false;
+  app.querySelectorAll('.mcard').forEach(btn => btn.onclick = () => {
+    if (lock || btn.classList.contains('open') || btn.classList.contains('ok')) return;
+    const c = cards[+btn.dataset.j];
+    btn.classList.add('open'); btn.firstChild.textContent = c.p; say(c.w); tone([600], 0.05);
+    open.push(btn);
+    if (open.length === 2) {
+      const [a, b] = open; open = [];
+      if (cards[+a.dataset.j] === cards[+b.dataset.j]) {
+        a.classList.add('ok'); b.classList.add('ok'); ding(); matched++;
+        if (matched === pairs) {
+          award(2); memLvl++; celebrate(pick(PRAISE));
+          later(() => say('You found all the pairs!', () => later(() => memory(back), 1200)), 900);
+        }
+      } else {
+        lock = true;
+        later(() => { [a, b].forEach(x => { x.classList.remove('open'); x.firstChild.textContent = '❓'; }); lock = false; }, 1000);
+      }
+    }
+  });
+}
+
+/* =====================================================================
+   WATCH: the buddy presents every deck like a video
+   ===================================================================== */
+const WATCH_DECKS = ['animals', 'letters', 'fruits', 'numbers', 'colors', 'shapes', 'cute', 'feelings', 'sounds', 'weather', 'food', 'clothes', 'family', 'vehicles', 'body', 'nature', 'opposites', 'fairy', 'home', 'manners'];
+function watch(di = 0, i = 0) {
+  if (di >= WATCH_DECKS.length) di = 0;
+  const dk = WATCH_DECKS[di], d = DECKS[dk], item = d.items[i], w = item.w;
+  const total = WATCH_DECKS.reduce((s, k) => s + DECKS[k].items.length, 0);
+  const done = WATCH_DECKS.slice(0, di).reduce((s, k) => s + DECKS[k].items.length, 0) + i;
+  const intro = item.intro || (item.pl ? `These are ${w}.` : `This is ${article(w)} ${w}.`);
+  const sayWord = item.name || w;
+  show(`${bar(home, '<button class="round" id="pause" aria-label="Tạm dừng">⏸️</button>')}
+    <div class="stage">
+      <div class="progress"><i style="width:${(done / total * 100).toFixed(1)}%"></i></div>
+      <div class="card pop">${picture(item, true)}</div>
+      <div class="talkrow">${buddy()}<div class="bubble" id="bubble">${intro}<small>${item.vi}</small></div></div>
+    </div>`, home);
+  let paused = false;
+  const next = () => { if (paused) return; let ni = i + 1, nd = di; if (ni >= d.items.length) { ni = 0; nd = di + 1; } watch(nd, ni); };
+  const play = () => {
+    if (paused) return;
+    say(intro, () => later(() => {
+      if (paused) return;
+      $('#bubble').innerHTML = `Say: ${sayWord}!<small>Bé đọc theo nào: ${sayWord}</small>`;
+      say(`${sayWord}! Say: ${sayWord}!`, () => later(next, 1600));
+    }, 350));
+  };
+  $('#pause').onclick = e => {
+    paused = !paused; e.currentTarget.textContent = paused ? '▶️' : '⏸️';
+    if (paused) { if ('speechSynthesis' in window) speechSynthesis.cancel(); clearTimeout(talkTimer); setTalking(false); } else play();
+  };
+  later(play, 300);
+}
+
+/* =====================================================================
+   STICKER BOOK
+   ===================================================================== */
+function stickers() {
+  const have = Math.min(S.stk, STICKERS.length);
+  show(`${bar(home)}
+    <div class="talkrow">${buddy()}<div class="bubble">My stickers: <b>${have}</b><small>Cứ 3 ngôi sao ⭐ bé được 1 sticker mới</small></div></div>
+    <div class="stickers">${STICKERS.map((s, j) => j < have ? `<div class="stk pop">${s}</div>` : '<div class="stk lock">?</div>').join('')}</div>`, home);
+  say(have ? `You have ${have} stickers! Great job!` : 'Play games to get stickers!');
+}
+
+/* =====================================================================
+   PARENTS' CORNER (hold the gear for 2 seconds)
+   ===================================================================== */
+function today() { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; }
+function parents() {
+  const mins = S.usage.d === today() ? Math.round(S.usage.s / 60) : 0;
+  show(`${bar(home)}
+    <div class="panel"><h2>Góc ba mẹ</h2>
+      <div>Hôm nay bé đã chơi <b>${mins} phút</b> · Tổng ⭐ <b>${S.stars}</b> · Sticker <b>${Math.min(S.stk, STICKERS.length)}</b></div></div>
+    <div class="panel"><h2>Giới hạn giờ chơi mỗi ngày</h2>
+      <div class="seg" id="lim">${[[0, 'Không giới hạn'], [15, '15 phút'], [20, '20 phút'], [30, '30 phút'], [45, '45 phút']].map(([v, t]) => `<button data-v="${v}" class="${S.limit === v ? 'on' : ''}">${t}</button>`).join('')}</div>
+      <div style="color:var(--soft)">Hết giờ, app hiện màn hình "Nghỉ ngơi". Ba mẹ giữ nút 3 giây để cho bé chơi thêm 10 phút. WHO khuyên trẻ 3–4 tuổi dùng màn hình không quá 1 giờ mỗi ngày.</div></div>
+    <div class="panel"><h2>Tốc độ đọc</h2>
+      <div class="seg" id="rate">${[['slow', 'Chậm (cho bé mới học)'], ['normal', 'Vừa']].map(([v, t]) => `<button data-v="${v}" class="${S.rate === v ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+    <div class="panel"><h2>Chương trình học (theo khung EYFS, Anh)</h2>
+      ${WORLDS.map(w => `<div class="row"><span>${w.pic} ${w.vi} <small style="color:var(--soft)">· ${w.area}</small></span><span>⭐ ${S.world[w.id] || 0}</span></div>`).join('')}
+      <ul style="color:var(--soft)">
+        <li>Ngồi cùng bé, đọc to theo giọng đọc. Bé học nhanh nhất khi được ba mẹ nói chuyện cùng.</li>
+        <li>Ngoài app: chỉ đồ vật thật trong nhà và hỏi bé "What is this?".</li>
+        <li>Chơi ít mà đều: mỗi ngày 10–15 phút tốt hơn 1 lần thật lâu.</li>
+      </ul></div>
+    <div class="panel"><h2>Xóa tiến độ</h2><button class="danger" id="reset">Xóa sao và sticker</button></div>`, home);
+  app.querySelectorAll('#lim button').forEach(b => b.onclick = () => { S.limit = +b.dataset.v; save(); parents(); });
+  app.querySelectorAll('#rate button').forEach(b => b.onclick = () => { S.rate = b.dataset.v; save(); parents(); say('Hello! This is my reading speed.'); });
+  let armed = false;
+  $('#reset').onclick = () => {
+    if (!armed) { armed = true; $('#reset').textContent = 'Bấm lần nữa để xóa thật'; return; }
+    S.stars = 0; S.world = {}; S.stk = 0; save(); parents();
+  };
+}
+
+/* ---------- daily play-time limit ---------- */
+let resting = false;
+setInterval(() => {
+  if (document.visibilityState !== 'visible' || resting) return;
+  if (S.usage.d !== today()) S.usage = { d: today(), s: 0 };
+  S.usage.s += 15; save();
+  if (S.limit && S.usage.s >= S.limit * 60) rest();
+}, 15000);
+function rest() {
+  resting = true; stopAll();
+  const el = document.createElement('div');
+  el.className = 'rest';
+  el.innerHTML = `<div style="font-size:120px;line-height:1">😴</div><h1>Time for a break!</h1>
+    <p>Hết giờ chơi hôm nay rồi. Bé đi chơi với ba mẹ nhé!</p>
+    <button class="round" id="more" aria-label="Ba mẹ giữ 3 giây để chơi thêm" style="width:auto;padding:0 18px;border-radius:999px;font-size:16px;font-weight:800;color:var(--ink)">Ba mẹ giữ 3 giây: thêm 10 phút</button>`;
+  document.body.appendChild(el);
+  say('Time for a break! See you later!');
+  holdable($('#more'), 3000, () => { S.usage.s = Math.max(0, S.usage.s - 600); save(); el.remove(); resting = false; home(); });
+}
 
 /* ---------- install guide ---------- */
 const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
@@ -577,17 +1279,15 @@ const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platfor
 const SHARE_ICON = '<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#2F6BFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></span>';
 const PLUS_ICON = '<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#1F2A55" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg></span>';
 function installCard() {
-  if (isStandalone) return '';
-  try { if (localStorage.getItem('bhta-install-ok')) return ''; } catch (e) {}
+  if (isStandalone || S.installOk) return '';
   const steps = isIOS
     ? `<li>Bấm nút <b>Chia sẻ</b> ${SHARE_ICON} ở thanh dưới của Safari.</li>
        <li>Kéo xuống, chọn <b>Thêm vào MH chính</b> ${PLUS_ICON}</li>
-       <li>Bấm <b>Thêm</b> ở góc trên. Xong! Biểu tượng gấu ABC sẽ hiện ra ngoài màn hình.</li>`
+       <li>Bấm <b>Thêm</b> ở góc trên. Biểu tượng gấu ABC sẽ hiện ra ngoài màn hình.</li>`
     : `<li>Bấm dấu <b>⋮</b> ở góc trên của Chrome.</li>
        <li>Chọn <b>Thêm vào màn hình chính</b> hoặc <b>Cài đặt ứng dụng</b>.</li>
        <li>Bấm <b>Thêm</b>. Xong!</li>`;
-  return `<div class="install"><h2>Cài app lên điện thoại</h2><ol>${steps}</ol>
-    <button id="install-ok">Đã hiểu</button></div>`;
+  return `<div class="install"><h2>Cài app lên điện thoại</h2><ol>${steps}</ol><button id="install-ok">Đã hiểu</button></div>`;
 }
 
 /* ---------- tap to start (unlocks sound on iPhone) ---------- */
@@ -598,13 +1298,7 @@ function splash() {
     <button class="go" id="go">▶ Bắt đầu</button>
     <p>Bật loa lên nhé. Trên iPhone, gạt nút im lặng bên hông để có tiếng.</p>`;
   document.body.appendChild(el);
-  document.getElementById('go').onclick = () => {
-    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (e) {}
-    pickVoice();
-    say(curBuddy().hi);
-    tone([523, 659, 784], 0.09);
-    el.remove();
-  };
+  $('#go').onclick = () => { audio(); pickVoice(); say(curBuddy().hi); tone([523, 659, 784], 0.09); el.remove(); };
 }
 
 home();
