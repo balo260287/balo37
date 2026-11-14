@@ -152,6 +152,18 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 @keyframes talk { from { transform: scaleY(.2); } to { transform: scaleY(1); } }
 @keyframes blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
 @keyframes bob { from { transform: translateY(0) rotate(-2deg); } to { transform: translateY(-5px) rotate(2deg); } }
+.buddy.emo { display: grid; place-items: center; aspect-ratio: 1; font-size: 72px; line-height: 1; }
+.buddy.emo.lg { font-size: 92px; }
+.buddy.emo span { display: block; }
+.buddy.emo.talking span { animation: chat .3s infinite alternate ease-in-out; }
+@keyframes chat { from { transform: translateY(0) scale(1) rotate(-4deg); } to { transform: translateY(-8px) scale(1.08) rotate(4deg); } }
+.pick { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.pick button {
+  width: 54px; height: 54px; border-radius: 50%; background: var(--card); font-size: 30px;
+  box-shadow: 0 4px 0 var(--sky-deep); display: grid; place-items: center; opacity: .75;
+}
+.pick button.on { opacity: 1; outline: 4px solid var(--berry); outline-offset: 2px; }
+.pick-label { text-align: center; font-size: 14px; color: var(--soft); margin: 0 0 -8px; }
 .talkrow { display: flex; align-items: center; gap: 10px; justify-content: center; width: min(100%, 400px); }
 .bubble {
   background: var(--card); border-radius: 26px; padding: 10px 18px; position: relative;
@@ -188,7 +200,7 @@ button:focus-visible { outline: 4px solid var(--ink); outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .pop, .wiggle, .party .msg { animation: none; }
   .confetti { display: none; }
-  .buddy .eye, .buddy.talking svg { animation: none; }
+  .buddy .eye, .buddy.talking svg, .buddy.emo.talking span { animation: none; }
 }
 </style>
 
@@ -213,6 +225,14 @@ const TOPICS = {
   things: { en: 'Vehicles', vi: 'Xe cộ', color: '#FFB300', pic: '🚗', items: [
     ['🚗','car','xe hơi'], ['🚌','bus','xe buýt'], ['🚆','train','tàu hỏa'], ['✈️','airplane','máy bay'],
     ['⛵','boat','thuyền'], ['🚲','bike','xe đạp'], ['🚒','fire truck','xe cứu hỏa'], ['🚀','rocket','tên lửa'] ] },
+  fairy: { en: 'Fairy Tales', vi: 'Cổ tích', color: '#FF7EB6', pic: '🧜‍♀️', items: [
+    ['🧜‍♀️','mermaid','nàng tiên cá'], ['👸','princess','công chúa'], ['🤴','prince','hoàng tử'], ['🧚','fairy','cô tiên'],
+    ['🦄','unicorn','kỳ lân'], ['🐉','dragon','con rồng'], ['🏰','castle','lâu đài'], ['👑','crown','vương miện'],
+    ['⛄','snowman','người tuyết'], ['❄️','snowflake','bông tuyết'], ['🤖','robot','người máy'], ['🪄','magic wand','đũa thần'] ] },
+  cute: { en: 'Cute Friends', vi: 'Thú dễ thương', color: '#2EBD9A', pic: '🐼', items: [
+    ['🐼','panda','gấu trúc'], ['🐨','koala','gấu túi'], ['🐧','penguin','chim cánh cụt'], ['🦊','fox','con cáo'],
+    ['🐻','bear','con gấu'], ['🐸','frog','con ếch'], ['🐢','turtle','con rùa'], ['🐙','octopus','bạch tuộc'],
+    ['🐬','dolphin','cá heo'], ['🦋','butterfly','con bướm'], ['🐹','hamster','chuột hamster'], ['🦒','giraffe','hươu cao cổ'] ] },
   body: { en: 'My Body', vi: 'Cơ thể', color: '#FF5E7E', pic: '👀', items: [
     ['👀','eyes','đôi mắt'], ['👃','nose','cái mũi'], ['👄','mouth','cái miệng'], ['👂','ear','cái tai'],
     ['✋','hand','bàn tay'], ['🦶','foot','bàn chân'], ['🦷','teeth','hàm răng'], ['💪','arm','cánh tay'] ] },
@@ -254,7 +274,20 @@ function say(text, onDone) {
   u.onend = finish; u.onerror = finish;
   speechSynthesis.speak(u);
 }
+/* Bé chọn bạn đồng hành; bạn đó sẽ đọc và nhún nhảy khi nói */
+const BUDDIES = [
+  { id: 'bear',     pic: '🐻', name: 'Bông',   hi: "Hi! I am Bông the bear. Let's learn English!" },
+  { id: 'mermaid',  pic: '🧜‍♀️', name: 'Marina', hi: "Hello! I am Marina the mermaid. Let's swim and learn!" },
+  { id: 'princess', pic: '👸', name: 'Snowy',  hi: "Hello! I am Princess Snowy. Let's learn together!" },
+  { id: 'robot',    pic: '🤖', name: 'Robo',   hi: "Beep boop! I am Robo the robot. Let's learn English!" },
+  { id: 'panda',    pic: '🐼', name: 'Pandy',  hi: "Hi hi! I am Pandy the panda. Let's play!" },
+  { id: 'unicorn',  pic: '🦄', name: 'Sparkle',hi: "Hello! I am Sparkle the unicorn. Let's learn!" },
+];
+let buddyId = 'bear';
+try { buddyId = localStorage.getItem('bhta-buddy') || 'bear'; } catch (e) {}
+const curBuddy = () => BUDDIES.find(b => b.id === buddyId) || BUDDIES[0];
 function buddy(cls = '') {
+  if (buddyId !== 'bear') return `<div class="buddy emo ${cls}" aria-hidden="true"><span>${curBuddy().pic}</span></div>`;
   return `<div class="buddy ${cls}" aria-hidden="true"><svg viewBox="0 0 120 120">
     <circle cx="22" cy="30" r="15" fill="#FFB23F"/><circle cx="98" cy="30" r="15" fill="#FFB23F"/>
     <circle cx="22" cy="30" r="7" fill="#FF8FA8"/><circle cx="98" cy="30" r="7" fill="#FF8FA8"/>
@@ -313,6 +346,8 @@ function home() {
   app.innerHTML = `
     <div class="bar"><div></div><div class="stars">⭐ ${stars}</div></div>
     <div class="talkrow">${buddy('lg')}<div class="hello" style="text-align:left"><h1>Hello <span>baby!</span></h1><p>Chạm vào hình để nghe tiếng Anh</p></div></div>
+    <p class="pick-label">Chọn bạn học cùng bé:</p>
+    <div class="pick">${BUDDIES.map(b => `<button data-buddy="${b.id}" class="${b.id === buddyId ? 'on' : ''}" aria-label="${b.name}">${b.pic}</button>`).join('')}</div>
     <div class="grid">
       <button class="tile watch" data-watch="1"><span class="pic">📺</span><span><span class="en">Watch!</span><br><span class="vi">Xem video học</span></span></button>
       <button class="tile play" data-play="1"><span class="pic">🎈</span><span><span class="en">Let's play!</span><br><span class="vi">Chơi trò tìm hình</span></span></button>
@@ -325,19 +360,26 @@ function home() {
   app.querySelectorAll('[data-topic]').forEach(b => b.onclick = () => { const t = TOPICS[b.dataset.topic]; say(t.en); learn(b.dataset.topic, 0); });
   app.querySelector('[data-play]').onclick = () => { say("Let's play!"); setTimeout(game, 700); };
   app.querySelector('[data-watch]').onclick = () => watch();
-  app.querySelector('.buddy').onclick = () => say('Hello! I am Bông. Let\'s learn English!');
+  app.querySelector('.buddy').onclick = () => say(curBuddy().hi);
+  app.querySelectorAll('[data-buddy]').forEach(b => b.onclick = () => {
+    buddyId = b.dataset.buddy;
+    try { localStorage.setItem('bhta-buddy', buddyId); } catch (e) {}
+    home(); tone([660, 880], 0.08);
+    say(curBuddy().hi);
+  });
 }
 
 /* ---------- WATCH: the buddy presents every picture, like a video ---------- */
 let watchRun = 0;
-const WATCH_ORDER = ['animals', 'fruits', 'colors', 'numbers', 'things', 'body'];
+const WATCH_ORDER = ['animals', 'fairy', 'fruits', 'cute', 'colors', 'numbers', 'things', 'body'];
 function watch(ti = 0, i = 0, run = ++watchRun) {
   if (run !== watchRun) return;
   if (ti >= WATCH_ORDER.length) ti = 0;
   const key = WATCH_ORDER[ti], t = TOPICS[key], item = t.items[i], w = item[1];
   const total = WATCH_ORDER.reduce((s, k) => s + TOPICS[k].items.length, 0);
   const done = WATCH_ORDER.slice(0, ti).reduce((s, k) => s + TOPICS[k].items.length, 0) + i;
-  const intro = key === 'colors' ? `This is ${w}.` : key === 'numbers' ? `Number ${w}.` : `This is ${/^[aeiou]/.test(w) ? 'an' : 'a'} ${w}.`;
+  const intro = key === 'colors' ? `This is ${w}.` : key === 'numbers' ? `Number ${w}.` : ['grapes', 'eyes', 'teeth'].includes(w) ? `These are ${w}.`
+    : `This is ${/^[aeio]|^u(?!ni)/.test(w) ? 'an' : 'a'} ${w}.`;
   app.innerHTML = `
     ${topBar(`<button class="round" id="pause" aria-label="Tạm dừng">⏸️</button>`)}
     <div class="stage">
