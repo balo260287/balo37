@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| BtcScalpBot.mq5  v1.21                                           |
+//| BtcScalpBot.mq5  v1.22                                           |
 //| Bot luoi (nhoi lenh) BTC CO CHOT LO - CHI CHAY TAI KHOAN DEMO    |
 //| Symbol: BTCUSDm (Exness)   Magic: 280001                         |
 //|                                                                  |
@@ -21,7 +21,7 @@
 //|  - Lai cua RIENG bot (tu luc gan) >= InpTarget -> dung han.      |
 //+------------------------------------------------------------------+
 #property copyright "BtcScalpBot"
-#property version   "1.21"
+#property version   "1.22"
 
 #include <Trade\Trade.mqh>
 
@@ -97,6 +97,7 @@ datetime lastHistCheck = 0;
 double   cachedClosed  = 0;   // lai/lo da chot hom nay
 double   cachedSince   = 0;   // lai/lo da chot tu luc gan bot
 bool     testDone      = false;
+bool     selfClosed    = false; // true = chum vua do chinh bot dong
 
 // Trang thai luu lai qua khi tat/bat MT5 (Global Variables)
 string   gvPrefix;
@@ -205,7 +206,7 @@ int OnInit()
 
    lastCount = -1; // ep dong bo SL chung o tick dau
 
-   Alert(StringFormat("BtcScalpBot v1.21 DA CHAY tren %s | lot %.2f | toi da %d lenh | TP %.2f / SL %.2f USD ... OK",
+   Alert(StringFormat("BtcScalpBot v1.22 DA CHAY tren %s | lot %.2f | toi da %d lenh | TP %.2f / SL %.2f USD ... OK",
                       _Symbol, NormLot(InpLot), InpMaxLayers, InpBasketTP, InpBasketSL));
    return(INIT_SUCCEEDED);
   }
@@ -244,7 +245,7 @@ double NormLot(double lot)
       lot = mn;
    if(mx > 0 && lot > mx)
       lot = mx;
-   int digits = (int)MathMax(0, MathCeil(-MathLog10(st) - 1e-9));
+   int digits = (int)MathMax(0.0, MathCeil(-MathLog10(st) - 1e-9));
    return(NormalizeDouble(lot, digits));
   }
 
@@ -323,6 +324,7 @@ bool CloseAll(string why)
    Print("BtcScalpBot: dong ca chum - ", why, allClosed ? "" : " (CON LENH CHUA DONG, se thu lai)");
    lastHistCheck = 0; // tinh lai lai/lo trong ngay ngay lap tuc
    basketPeak    = 0;
+   selfClosed    = true;
    return(allClosed);
   }
 
@@ -610,7 +612,7 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spreadPct)
   {
    Comment(StringFormat(
-              "BtcScalpBot v1.21 (%s)\n"
+              "BtcScalpBot v1.22 (%s)\n"
               "Trang thai: %s\n"
               "So lenh: %d / %d\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f, lui %.2f | chot lo -%.2f)\n"
@@ -646,7 +648,21 @@ void OnTick()
       if(n > 0)
          SyncBasketSL();
       else
+        {
          basketPeak = 0;
+         // Chum bien mat ma bot khong tu dong (san cat SL khi mat mang, hoac dong tay)
+         // -> coi nhu 1 lan thua: nghi + tinh thua lien tiep, khong vao lai ngay.
+         if(lastCount > 0 && !selfClosed)
+           {
+            cooldownUntil = TimeCurrent() + InpCooldownMin * 60;
+            consecLoss++;
+            if(InpMaxConsecLoss > 0 && consecLoss >= InpMaxConsecLoss)
+               stopDayKey = DayKey(TimeCurrent());
+            SaveState();
+            Print("BtcScalpBot: chum bi dong ben ngoai (SL san / dong tay) -> nghi ", InpCooldownMin, " phut.");
+           }
+        }
+      selfClosed = false;
       lastCount = n;
      }
 
