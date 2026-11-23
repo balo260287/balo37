@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| BtcScalpBot.mq5  v1.22                                           |
+//| BtcScalpBot.mq5  v1.23                                           |
 //| Bot luoi (nhoi lenh) BTC CO CHOT LO - CHI CHAY TAI KHOAN DEMO    |
 //| Symbol: BTCUSDm (Exness)   Magic: 280001                         |
 //|                                                                  |
@@ -21,7 +21,7 @@
 //|  - Lai cua RIENG bot (tu luc gan) >= InpTarget -> dung han.      |
 //+------------------------------------------------------------------+
 #property copyright "BtcScalpBot"
-#property version   "1.22"
+#property version   "1.23"
 
 #include <Trade\Trade.mqh>
 
@@ -98,6 +98,8 @@ double   cachedClosed  = 0;   // lai/lo da chot hom nay
 double   cachedSince   = 0;   // lai/lo da chot tu luc gan bot
 bool     testDone      = false;
 bool     selfClosed    = false; // true = chum vua do chinh bot dong
+bool     initOk        = false; // chi luu trang thai khi khoi dong thanh cong
+long     myChartKey    = 0;     // khoa chong 2 bot cung magic + symbol
 
 // Trang thai luu lai qua khi tat/bat MT5 (Global Variables)
 string   gvPrefix;
@@ -132,6 +134,8 @@ void GvSet(string name, double v)
 
 void SaveState()
   {
+   if(!initOk)
+      return;
    GvSet("cooldown", (double)cooldownUntil);
    GvSet("target",   targetHit ? 1.0 : 0.0);
    GvSet("consec",   consecLoss);
@@ -184,6 +188,22 @@ int OnInit()
 
    // Doc trang thai cu
    gvPrefix      = StringFormat("BSB_%s_%I64d_%I64d_", _Symbol, InpMagic, AccountInfoInteger(ACCOUNT_LOGIN));
+
+   // Chong chay trung: 2 bot cung Magic tren cung symbol se dong lenh cua nhau
+   myChartKey = (long)(ChartID() % 1000000007);
+   if(!MQLInfoInteger(MQL_TESTER) && GlobalVariableCheck(gvPrefix + "lock"))
+     {
+      long     other = (long)GlobalVariableGet(gvPrefix + "lock");
+      datetime hb    = (datetime)(long)GvGet("hb", 0);
+      if(other != myChartKey && TimeLocal() - hb < 60)
+        {
+         Alert(StringFormat("BtcScalpBot: DA CO 1 BOT KHAC dang chay %s voi Magic %I64d tren chart khac. "
+                            "Go bot kia ra, hoac doi InpMagic. -> DA DUNG.", _Symbol, InpMagic));
+         return(INIT_FAILED);
+        }
+     }
+   GvSet("lock", (double)myChartKey);
+   GvSet("hb",   (double)TimeLocal());
    cooldownUntil = (datetime)(long)GvGet("cooldown", 0);
    targetHit     = GvGet("target", 0) > 0.5;
    consecLoss    = (int)GvGet("consec", 0);
@@ -205,8 +225,9 @@ int OnInit()
    lastHistCheck = 0;
 
    lastCount = -1; // ep dong bo SL chung o tick dau
+   initOk    = true;
 
-   Alert(StringFormat("BtcScalpBot v1.22 DA CHAY tren %s | lot %.2f | toi da %d lenh | TP %.2f / SL %.2f USD ... OK",
+   Alert(StringFormat("BtcScalpBot v1.23 DA CHAY tren %s | lot %.2f | toi da %d lenh | TP %.2f / SL %.2f USD ... OK",
                       _Symbol, NormLot(InpLot), InpMaxLayers, InpBasketTP, InpBasketSL));
    return(INIT_SUCCEEDED);
   }
@@ -215,6 +236,12 @@ int OnInit()
 void OnDeinit(const int reason)
   {
    SaveState();
+   if(initOk && GlobalVariableCheck(gvPrefix + "lock") &&
+      (long)GlobalVariableGet(gvPrefix + "lock") == myChartKey)
+     {
+      GlobalVariableDel(gvPrefix + "lock");
+      GlobalVariableDel(gvPrefix + "hb");
+     }
    if(emaFastH != INVALID_HANDLE)
       IndicatorRelease(emaFastH);
    if(emaSlowH != INVALID_HANDLE)
@@ -612,7 +639,7 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spreadPct)
   {
    Comment(StringFormat(
-              "BtcScalpBot v1.22 (%s)\n"
+              "BtcScalpBot v1.23 (%s)\n"
               "Trang thai: %s\n"
               "So lenh: %d / %d\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f, lui %.2f | chot lo -%.2f)\n"
@@ -631,6 +658,7 @@ void Panel(string st, int n, double fl, double dayPL, double spreadPct)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+   GvSet("hb", (double)TimeLocal()); // bao "toi dang chay" cho khoa chong trung
    MqlTick tk;
    if(!SymbolInfoTick(_Symbol, tk) || tk.bid <= 0 || tk.ask <= 0)
       return;
