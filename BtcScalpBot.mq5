@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| BtcScalpBot.mq5  v1.25                                           |
+//| BtcScalpBot.mq5  v1.26                                           |
 //| Bot luoi (nhoi lenh) BTC CO CHOT LO - CHI CHAY TAI KHOAN DEMO    |
 //| Symbol: BTCUSDm (Exness)   Magic: 280001                         |
 //|                                                                  |
@@ -21,7 +21,7 @@
 //|  - Lai cua RIENG bot (tu luc gan) >= InpTarget -> dung han.      |
 //+------------------------------------------------------------------+
 #property copyright "BtcScalpBot"
-#property version   "1.25"
+#property version   "1.26"
 
 #include <Trade\Trade.mqh>
 
@@ -261,7 +261,7 @@ int OnInit()
      }
    initOk    = true;
 
-   Alert(StringFormat("BtcScalpBot v1.25 DA CHAY tren %s | lot %.2f | toi da %d lenh | %s ... OK",
+   Alert(StringFormat("BtcScalpBot v1.26 DA CHAY tren %s | lot %.2f | toi da %d lenh | %s ... OK",
                       _Symbol, NormLot(InpLot), InpMaxLayers,
                       InpFlexExits ? StringFormat("TP/SL co gian ATR, TP = SL x %.2f", InpRR)
                                    : StringFormat("TP %.2f / SL %.2f USD", InpBasketTP, InpBasketSL)));
@@ -719,7 +719,7 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spreadPct)
   {
    Comment(StringFormat(
-              "BtcScalpBot v1.25 (%s)\n"
+              "BtcScalpBot v1.26 (%s)\n"
               "Trang thai: %s\n"
               "So lenh: %d / %d   (lot %.2f)\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f, lui %.2f | chot lo -%.2f)\n"
@@ -1029,10 +1029,10 @@ void OnTick()
         {
          double step = MathMax(mid * InpGridStepPct / 100.0, atr * InpGridAtrMult);
          string num  = IntegerToString(n + 1);
-         if(dir < 0 && tk.ask >= ext + step)
+         if(dir < 0 && tk.bid >= ext + step)
             OpenOrder(-1, "Scalp SELL " + num);
          else
-            if(dir > 0 && tk.bid <= ext - step)
+            if(dir > 0 && tk.ask <= ext - step)
                OpenOrder(1, "Scalp BUY " + num);
          st = StringFormat("Dang giu %d lenh %s, nhoi tiep neu gia nguoc %.0f USD",
                            n, dir < 0 ? "SELL" : "BUY", step);
