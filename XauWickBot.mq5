@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| XauWickBot.mq5  v1.1                                             |
+//| XauWickBot.mq5  v1.2                                             |
 //| Bot scalp VANG M1 theo mo hinh RUT RAU + DCA - CHI CHAY DEMO     |
 //| Symbol: XAUUSDm (Exness)   Magic: 290001                         |
 //|                                                                  |
@@ -19,7 +19,7 @@
 //|  Dung: lo ngay / thua lien tiep / sut von / dat muc tieu.        |
 //+------------------------------------------------------------------+
 #property copyright "XauWickBot"
-#property version   "1.10"
+#property version   "1.20"
 
 #include <Trade\Trade.mqh>
 
@@ -38,7 +38,7 @@ input bool   InpResetStats    = false;  // true = tinh lai tu dau (bat 1 lan roi
 input bool   InpAllowReal     = false;  // Cho phep chay tai khoan THAT (de false)
 
 input group "=== Mo hinh rut rau (M1) ==="
-input double InpMinRange      = 0.40;   // Nen tin hieu phai dai it nhat (USD gia)
+input double InpMinRange      = 0.30;   // Nen tin hieu phai dai it nhat (USD gia)
 input double InpWickRatio     = 0.50;   // Rau nen tin hieu >= % do dai nen (0.5 = 50%)
 input double InpWickBody      = 1.5;    // Rau nen tin hieu >= X lan than nen
 input double InpConfirmRatio  = 0.30;   // Rau nen xac nhan >= % do dai nen
@@ -59,8 +59,8 @@ input double          InpRunGive     = 0.40;      // Khi gong: lui bao nhieu USD
 
 input group "=== Bo loc ==="
 input double InpMaxSpread     = 0.35;   // Spread toi da (USD gia)
-input int    InpStartHour     = 7;      // Gio bat dau mo lenh (gio server) - London
-input int    InpEndHour       = 21;     // Gio ket thuc mo lenh (gio server) - het NY
+input int    InpStartHour     = 1;      // Gio bat dau mo lenh (gio server = gio VN - 7). 1h = 8h sang VN
+input int    InpEndHour       = 21;     // Gio ket thuc mo lenh (gio server). 21h = 4h sang VN, tranh gio chuyen ngay
 input bool   InpNewsFilter    = true;   // Ne tin USD quan trong (lich kinh te MT5)
 input int    InpNewsMin       = 30;     // Nghi truoc/sau tin bao nhieu phut
 input int    InpFridayStop    = 20;     // Thu 6: tu gio nay khong mo lenh moi
@@ -85,6 +85,7 @@ int      lastCount     = -1;
 datetime lastHistCheck = 0;
 double   cachedClosed  = 0;
 double   cachedSince   = 0;
+int      cacheDay      = 0;
 bool     selfClosed    = false;
 bool     initOk        = false;
 long     myChartKey    = 0;
@@ -170,7 +171,7 @@ int OnInit()
    trade.SetDeviationInPoints(30);
    trade.SetTypeFillingBySymbol(_Symbol);
 
-   gvPrefix = StringFormat("XWB_%s_%I64d_%I64d_", _Symbol, InpMagic, AccountInfoInteger(ACCOUNT_LOGIN));
+   gvPrefix = StringFormat("XWB2_%s_%I64d_%I64d_", _Symbol, InpMagic, AccountInfoInteger(ACCOUNT_LOGIN));
 
    // Chong chay trung 2 bot cung Magic + symbol
    myChartKey = (long)(ChartID() % 1000000007);
@@ -211,7 +212,7 @@ int OnInit()
    initOk        = true;
    SaveState();
 
-   Alert(StringFormat("XauWickBot v1.1 DA CHAY tren %s | lot %.2f | TP +%.2f / SL -%.2f USD | DCA %d lenh, cach %.2f ... OK",
+   Alert(StringFormat("XauWickBot v1.2 DA CHAY tren %s | lot %.2f | TP +%.2f / SL -%.2f USD | DCA %d lenh, cach %.2f ... OK",
                       _Symbol, NormLot(InpLot), InpBasketTP, InpBasketSL, InpMaxLayers, InpDcaStep));
    return(INIT_SUCCEEDED);
   }
@@ -325,6 +326,14 @@ bool CloseAll(string why)
 // Lai/lo da chot cua RIENG bot: hom nay va tu luc gan (moi 5 giay)
 void UpdateClosedPL()
   {
+   // Sang ngay moi: bo so lai/lo cua hom qua NGAY, khong de no kich hoat "lo toi da ngay" cua hom nay
+   int dk = DayKey(TimeCurrent());
+   if(dk != cacheDay)
+     {
+      cacheDay      = dk;
+      cachedClosed  = 0;
+      lastHistCheck = 0;
+     }
    if(lastHistCheck != 0 && TimeCurrent() - lastHistCheck < 5)
       return;
    lastHistCheck = TimeCurrent();
@@ -691,7 +700,7 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spread)
   {
    Comment(StringFormat(
-              "XauWickBot v1.1 (%s) - rut rau M1 + DCA\n"
+              "XauWickBot v1.2 (%s) - rut rau M1 + DCA\n"
               "Trang thai: %s\n"
               "So lenh: %d / %d   (nhoi cach %.2f USD)\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f | chot lo -%.2f)\n"
@@ -938,8 +947,8 @@ void OnTick()
                  {
                   int    tr = InpUseTrend ? TrendM5() : 0;
                   string ib = "", isl = "";
-                  bool   sb = (!InpUseTrend || tr > 0) && WickSignal(1, ib);
-                  bool   ss = (!InpUseTrend || tr < 0) && WickSignal(-1, isl);
+                  bool   sb = (!InpUseTrend || tr >= 0) && WickSignal(1, ib);   // tr = 0: chua ro xu huong -> cho ca 2 chieu
+                  bool   ss = (!InpUseTrend || tr <= 0) && WickSignal(-1, isl);
                   if(sb && !ss)
                     {
                      if(OpenOrder(1, "Wick BUY 1"))
@@ -959,10 +968,7 @@ void OnTick()
                        }
                      else
                        {
-                        if(InpUseTrend && tr == 0)
-                           st = "Chua ro xu huong M5, cho...";
-                        else
-                           st = (InpUseTrend ? (tr > 0 ? "[Xu huong TANG - chi BUY] " : "[Xu huong GIAM - chi SELL] ") : "") +
+                        st = (InpUseTrend && tr != 0 ? (tr > 0 ? "[Xu huong TANG - chi BUY] " : "[Xu huong GIAM - chi SELL] ") : "") +
                                 "BUY: " + (ib == "" ? "-" : ib) + " | SELL: " + (isl == "" ? "-" : isl);
                        }
                  }

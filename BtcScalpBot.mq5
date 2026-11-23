@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| BtcScalpBot.mq5  v1.26                                           |
+//| BtcScalpBot.mq5  v1.27                                           |
 //| Bot luoi (nhoi lenh) BTC CO CHOT LO - CHI CHAY TAI KHOAN DEMO    |
 //| Symbol: BTCUSDm (Exness)   Magic: 280001                         |
 //|                                                                  |
@@ -21,7 +21,7 @@
 //|  - Lai cua RIENG bot (tu luc gan) >= InpTarget -> dung han.      |
 //+------------------------------------------------------------------+
 #property copyright "BtcScalpBot"
-#property version   "1.26"
+#property version   "1.27"
 
 #include <Trade\Trade.mqh>
 
@@ -106,6 +106,7 @@ int      lastCount     = -1;
 datetime lastHistCheck = 0;
 double   cachedClosed  = 0;   // lai/lo da chot hom nay
 double   cachedSince   = 0;   // lai/lo da chot tu luc gan bot
+int      cacheDay      = 0;   // ngay cua so lai/lo hom nay dang luu
 bool     testDone      = false;
 bool     selfClosed    = false; // true = chum vua do chinh bot dong
 bool     initOk        = false; // chi luu trang thai khi khoi dong thanh cong
@@ -209,7 +210,7 @@ int OnInit()
    trade.SetTypeFillingBySymbol(_Symbol);
 
    // Doc trang thai cu
-   gvPrefix      = StringFormat("BSB_%s_%I64d_%I64d_", _Symbol, InpMagic, AccountInfoInteger(ACCOUNT_LOGIN));
+   gvPrefix      = StringFormat("BSB3_%s_%I64d_%I64d_", _Symbol, InpMagic, AccountInfoInteger(ACCOUNT_LOGIN));
 
    // Chong chay trung: 2 bot cung Magic tren cung symbol se dong lenh cua nhau
    myChartKey = (long)(ChartID() % 1000000007);
@@ -248,8 +249,8 @@ int OnInit()
 
    lastCount = -1; // ep dong bo SL chung o tick dau
    curLot  = NormLot(InpLot);
-   curSL   = InpBasketSL;
-   curTP   = InpFlexExits ? InpBasketSL * InpRR : InpBasketTP;
+   curSL   = (InpFlexExits && InpRiskUSD > 0) ? InpRiskUSD : InpBasketSL;
+   curTP   = InpFlexExits ? curSL * InpRR : InpBasketTP;
    curGive = InpFlexExits ? curTP * InpTrailPct / 100.0 : InpTrailGive;
    // Dang co chum tu truoc khi tat MT5 -> dung lai TP/SL/lot da tinh luc vao lenh
    if(InpFlexExits && GvGet("cursl", 0) > 0)
@@ -261,7 +262,7 @@ int OnInit()
      }
    initOk    = true;
 
-   Alert(StringFormat("BtcScalpBot v1.26 DA CHAY tren %s | lot %.2f | toi da %d lenh | %s ... OK",
+   Alert(StringFormat("BtcScalpBot v1.27 DA CHAY tren %s | lot %.2f | toi da %d lenh | %s ... OK",
                       _Symbol, NormLot(InpLot), InpMaxLayers,
                       InpFlexExits ? StringFormat("TP/SL co gian ATR, TP = SL x %.2f", InpRR)
                                    : StringFormat("TP %.2f / SL %.2f USD", InpBasketTP, InpBasketSL)));
@@ -396,6 +397,14 @@ bool CloseAll(string why)
 // cachedClosed = hom nay, cachedSince = tu luc gan bot.
 void UpdateClosedPL()
   {
+   // Sang ngay moi: bo so lai/lo cua hom qua NGAY, khong de no kich hoat "lo toi da ngay" cua hom nay
+   int dk = DayKey(TimeCurrent());
+   if(dk != cacheDay)
+     {
+      cacheDay      = dk;
+      cachedClosed  = 0;
+      lastHistCheck = 0;
+     }
    if(lastHistCheck != 0 && TimeCurrent() - lastHistCheck < 5)
       return;
    lastHistCheck = TimeCurrent();
@@ -719,7 +728,7 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spreadPct)
   {
    Comment(StringFormat(
-              "BtcScalpBot v1.26 (%s)\n"
+              "BtcScalpBot v1.27 (%s)\n"
               "Trang thai: %s\n"
               "So lenh: %d / %d   (lot %.2f)\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f, lui %.2f | chot lo -%.2f)\n"
