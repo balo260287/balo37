@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| BtcScalpBot.mq5  v1.24                                           |
+//| BtcScalpBot.mq5  v1.25                                           |
 //| Bot luoi (nhoi lenh) BTC CO CHOT LO - CHI CHAY TAI KHOAN DEMO    |
 //| Symbol: BTCUSDm (Exness)   Magic: 280001                         |
 //|                                                                  |
@@ -21,7 +21,7 @@
 //|  - Lai cua RIENG bot (tu luc gan) >= InpTarget -> dung han.      |
 //+------------------------------------------------------------------+
 #property copyright "BtcScalpBot"
-#property version   "1.24"
+#property version   "1.25"
 
 #include <Trade\Trade.mqh>
 
@@ -29,13 +29,14 @@ enum ENUM_HUONG
   {
    HUONG_TU_DONG = 0, // Tu dong theo EMA
    CHI_SELL      = 1, // Chi Sell
-   CHI_BUY       = 2  // Chi Buy
+   CHI_BUY       = 2, // Chi Buy
+   HAI_CHIEU     = 3  // Ca Buy lan Sell (theo tin hieu)
   };
 
 input group "=== Von & rui ro ==="
 input double InpLot           = 0.01;   // Lot moi lenh
 input int    InpMaxLayers     = 1;      // So lenh toi da cung luc (1 = khong nhoi lenh)
-input double InpBasketSL      = 2.0;    // Chot lo ca chum (USD)
+input double InpBasketSL      = 4.0;    // Lo TOI DA 1 chum (USD). TP/SL co gian vuot muc nay -> bo lenh
 input double InpHardSLMult    = 1.3;    // SL that tren san = BasketSL x he so nay
 input double InpDailyLoss     = 12.0;   // Lo toi da trong ngay (USD)
 input int    InpMaxConsecLoss = 4;      // Thua lien tiep bao nhieu chum thi nghi het ngay (0 = tat)
@@ -45,7 +46,7 @@ input bool   InpResetStats    = false;  // true = tinh lai muc tieu tu dau (bat 
 input bool   InpAllowReal     = false;  // Cho phep chay tai khoan THAT (de false)
 
 input group "=== Vao lenh ==="
-input ENUM_HUONG      InpDirection   = HUONG_TU_DONG; // Huong vao lenh
+input ENUM_HUONG      InpDirection   = HAI_CHIEU;     // Huong vao lenh
 input ENUM_TIMEFRAMES InpTrendTF     = PERIOD_M15;    // Khung xem xu huong
 input int             InpEmaFast     = 20;            // EMA nhanh
 input int             InpEmaSlow     = 50;            // EMA cham
@@ -59,7 +60,7 @@ input int             InpCooldownMin = 15;            // Nghi sau khi chot lo (p
 input bool            InpTestOrder   = false;         // Vao 1 lenh thu (chi demo)
 
 input group "=== Bo loc ky thuat (hop luu) ==="
-input int             InpMinScore    = 3;             // Can it nhat bao nhieu / 4 tin hieu dong thuan
+input int             InpMinScore    = 2;             // Can it nhat bao nhieu / 4 tin hieu dong thuan
 input ENUM_TIMEFRAMES InpHtfTF       = PERIOD_H1;     // Khung lon
 input int             InpHtfEma      = 200;           // EMA khung lon
 input int             InpAdxPeriod   = 14;            // ADX (khung xu huong) - chu ky
@@ -73,8 +74,17 @@ input bool            InpSkipWeekend = true;          // Khong mo chum moi Thu 7
 input int             InpStartHour   = 0;             // Gio bat dau mo chum moi (gio server)
 input int             InpEndHour     = 24;            // Gio ket thuc mo chum moi (gio server)
 
-input group "=== Chot lai ==="
-input double InpBasketTP     = 3.0;    // Chot lai ca chum (USD) - moc bat dau doi lai
+input group "=== TP/SL co gian + lot theo rui ro ==="
+input bool   InpFlexExits    = true;   // true = TP/SL co gian theo ATR (false = dung so USD co dinh ben duoi)
+input double InpSlAtr        = 1.0;    // SL cach = ATR x he so nay
+input double InpRR           = 1.5;    // TP = SL x he so nay (>1 = TP luon lon hon SL)
+input double InpTrailPct     = 20;     // Lui bao nhieu % TP tu dinh thi dong
+input double InpRiskUSD      = 2.0;    // Rui ro moi lenh (USD) -> bot tu tinh lot. 0 = dung InpLot
+input double InpRiskPct      = 0;      // Hoac rui ro % so du (>0 thi dung cai nay thay InpRiskUSD)
+input double InpMaxLot       = 0.05;   // Lot toi da bot duoc tu tinh
+
+input group "=== Chot lai (khi tat co gian) ==="
+input double InpBasketTP     = 3.0;    // Chot lai ca chum (USD) - moc bat dau doi lai (khi tat co gian)
 input double InpTrailGive    = 0.6;    // Lui bao nhieu USD tu dinh thi dong (0 = dong ngay khi dat TP)
 input int    InpMaxHoldMin   = 0;      // Giu chum qua X phut -> dong khi >= hoa von (0 = tat)
 
@@ -100,6 +110,10 @@ bool     testDone      = false;
 bool     selfClosed    = false; // true = chum vua do chinh bot dong
 bool     initOk        = false; // chi luu trang thai khi khoi dong thanh cong
 long     myChartKey    = 0;     // khoa chong 2 bot cung magic + symbol
+double   curSL         = 0;     // chot lo chum hien tai (USD)
+double   curTP         = 0;     // chot lai chum hien tai (USD)
+double   curGive       = 0;     // lui tu dinh (USD)
+double   curLot        = 0;     // lot cua chum hien tai
 
 // Trang thai luu lai qua khi tat/bat MT5 (Global Variables)
 string   gvPrefix;
@@ -142,6 +156,10 @@ void SaveState()
    GvSet("stopday",  stopDayKey);
    GvSet("botpeak",  botPeak);
    GvSet("ddstop",   ddStop ? 1.0 : 0.0);
+   GvSet("cursl",    curSL);
+   GvSet("curtp",    curTP);
+   GvSet("curgive",  curGive);
+   GvSet("curlot",   curLot);
   }
 
 bool IsDemo()
@@ -159,13 +177,15 @@ int OnInit()
      }
    if(InpMaxLayers < 1 || InpLot <= 0 || InpBasketSL <= 0 || InpGridStepPct <= 0 ||
       InpBasketTP <= 0 || InpHardSLMult < 1.0 || InpEmaFast >= InpEmaSlow || InpTrailGive < 0 ||
-      InpMinScore < 0 || InpMinScore > 4 || InpStartHour < 0 || InpEndHour > 24 || InpStartHour >= InpEndHour)
+      InpMinScore < 0 || InpMinScore > 4 || InpSlAtr <= 0 || InpRR <= 0 || InpTrailPct < 0 || InpTrailPct >= 100 || InpStartHour < 0 || InpEndHour > 24 || InpStartHour >= InpEndHour)
      {
       Alert("BtcScalpBot: tham so khong hop le (lot/so lenh/chot lo/chot lai/khoang cach > 0, "
             "EMA nhanh < EMA cham, HardSLMult >= 1, MinScore 0..4, gio 0..24).");
       return(INIT_PARAMETERS_INCORRECT);
      }
-   if(InpBasketTP - InpTrailGive <= InpBasketSL)
+   if(InpFlexExits && InpRR <= 1.0)
+      Print("BtcScalpBot: CANH BAO - InpRR <= 1, TP se khong lon hon SL.");
+   if(!InpFlexExits && InpBasketTP - InpTrailGive <= InpBasketSL)
       Print("BtcScalpBot: CANH BAO - lai toi thieu (TP - TrailGive) khong lon hon chot lo (SL).");
    if(InpTrailGive >= InpBasketTP)
       Print("BtcScalpBot: CANH BAO - InpTrailGive >= InpBasketTP, lai chot ra se rat nho.");
@@ -227,10 +247,24 @@ int OnInit()
    lastHistCheck = 0;
 
    lastCount = -1; // ep dong bo SL chung o tick dau
+   curLot  = NormLot(InpLot);
+   curSL   = InpBasketSL;
+   curTP   = InpFlexExits ? InpBasketSL * InpRR : InpBasketTP;
+   curGive = InpFlexExits ? curTP * InpTrailPct / 100.0 : InpTrailGive;
+   // Dang co chum tu truoc khi tat MT5 -> dung lai TP/SL/lot da tinh luc vao lenh
+   if(InpFlexExits && GvGet("cursl", 0) > 0)
+     {
+      curSL   = GvGet("cursl", curSL);
+      curTP   = GvGet("curtp", curTP);
+      curGive = GvGet("curgive", curGive);
+      curLot  = GvGet("curlot", curLot);
+     }
    initOk    = true;
 
-   Alert(StringFormat("BtcScalpBot v1.24 DA CHAY tren %s | lot %.2f | toi da %d lenh | TP %.2f / SL %.2f USD ... OK",
-                      _Symbol, NormLot(InpLot), InpMaxLayers, InpBasketTP, InpBasketSL));
+   Alert(StringFormat("BtcScalpBot v1.25 DA CHAY tren %s | lot %.2f | toi da %d lenh | %s ... OK",
+                      _Symbol, NormLot(InpLot), InpMaxLayers,
+                      InpFlexExits ? StringFormat("TP/SL co gian ATR, TP = SL x %.2f", InpRR)
+                                   : StringFormat("TP %.2f / SL %.2f USD", InpBasketTP, InpBasketSL)));
    return(INIT_SUCCEEDED);
   }
 
@@ -443,7 +477,7 @@ double AtrNow()
 
 //+------------------------------------------------------------------+
 // Cham diem hop luu cho huong dir (0..4). 'info' de hien tren bang.
-int EntryScore(int dir, string &info)
+int EntryScore(int dir, string &info, bool &timing)
   {
    int score = 0;
    info = "";
@@ -495,6 +529,7 @@ int EntryScore(int dir, string &info)
    if(ok4)
       score++;
    info += ok4 ? "BB+" : "BB-";
+   timing = (ok3 || ok4); // phai co it nhat 1 tin hieu canh diem vao (RSI hoac Bollinger)
    return(score);
   }
 
@@ -552,7 +587,7 @@ void SyncBasketSL()
    double pu  = PerUnit(sumLot, avg);
    if(pu <= 0)
       return;
-   double dist = InpBasketSL * InpHardSLMult / pu;
+   double dist = curSL * InpHardSLMult / pu;
 
    MqlTick tk;
    if(!SymbolInfoTick(_Symbol, tk))
@@ -589,6 +624,49 @@ void SyncBasketSL()
   }
 
 //+------------------------------------------------------------------+
+// Tinh lot + TP/SL (USD) cho chum moi. Tra ve false (kem ly do) neu khong nen vao.
+//  - Co gian: SL cach gia = ATR x InpSlAtr, TP = SL x InpRR -> thi truong manh dat xa, yeu dat gan.
+//  - Lot: rui ro co dinh (USD hoac % so du) / khoang SL. Lot san toi thieu ma van qua rui ro -> bo.
+bool PlanBasket(double price, double atr, string &why)
+  {
+   double riskUsd = (InpRiskPct > 0) ? AccountInfoDouble(ACCOUNT_BALANCE) * InpRiskPct / 100.0 : InpRiskUSD;
+   double pu1 = PerUnit(1.0, price); // USD cua 1 lot khi gia di 1.0
+   if(pu1 <= 0)
+     {
+      why = "Khong tinh duoc gia tri lot";
+      return(false);
+     }
+   if(!InpFlexExits)
+     {
+      curLot  = NormLot(InpLot);
+      curSL   = InpBasketSL;
+      curTP   = InpBasketTP;
+      curGive = InpTrailGive;
+      return(true);
+     }
+   double dist = atr * InpSlAtr;             // khoang SL theo gia
+   if(dist <= 0)
+     {
+      why = "Chua co ATR";
+      return(false);
+     }
+   double lot = NormLot(InpLot);
+   if(riskUsd > 0)
+      lot = NormLot(MathMin(riskUsd / (dist * pu1), InpMaxLot));
+   double slUsd = lot * dist * pu1;           // lo thuc te neu cham SL
+   if(slUsd > InpBasketSL)
+     {
+      why = StringFormat("SL can %.2f USD > toi da %.2f (bien dong lon / lot toi thieu qua to)", slUsd, InpBasketSL);
+      return(false);
+     }
+   curLot  = lot;
+   curSL   = slUsd;
+   curTP   = slUsd * InpRR;
+   curGive = curTP * InpTrailPct / 100.0;
+   return(true);
+  }
+
+//+------------------------------------------------------------------+
 bool OpenOrder(int dir, string cmt)
   {
    if(TimeCurrent() - lastFailTime < 10) // vua loi -> doi 10s, tranh spam lenh
@@ -596,7 +674,7 @@ bool OpenOrder(int dir, string cmt)
    MqlTick tk;
    if(!SymbolInfoTick(_Symbol, tk))
       return(false);
-   double lot   = NormLot(InpLot);
+   double lot   = (curLot > 0) ? curLot : NormLot(InpLot);
    double price = (dir > 0) ? tk.ask : tk.bid;
 
    // Kiem tra ky quy truoc khi vao
@@ -617,7 +695,7 @@ bool OpenOrder(int dir, string cmt)
       lastFailTime = TimeCurrent();
       return(false);
      }
-   double dist    = InpBasketSL * InpHardSLMult / pu;
+   double dist    = curSL * InpHardSLMult / pu;
    double minDist = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * _Point;
    if(dist < minDist * 1.5)
       dist = minDist * 1.5;
@@ -641,9 +719,9 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spreadPct)
   {
    Comment(StringFormat(
-              "BtcScalpBot v1.24 (%s)\n"
+              "BtcScalpBot v1.25 (%s)\n"
               "Trang thai: %s\n"
-              "So lenh: %d / %d\n"
+              "So lenh: %d / %d   (lot %.2f)\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f, lui %.2f | chot lo -%.2f)\n"
               "Dinh lai chum: %.2f USD\n"
               "Lai/lo hom nay: %.2f USD   (dung o -%.2f)\n"
@@ -651,7 +729,7 @@ void Panel(string st, int n, double fl, double dayPL, double spreadPct)
               "Spread: %.3f%%   (toi da %.3f%%)\n"
               "Bot lai tu luc gan: %.2f USD   (muc tieu +%.2f)\n"
               "Sut tu dinh: %.2f USD   (dung han o %.2f)",
-              IsDemo() ? "DEMO" : "THAT", st, n, InpMaxLayers, fl, InpBasketTP, InpTrailGive, InpBasketSL,
+              IsDemo() ? "DEMO" : "THAT", st, n, InpMaxLayers, curLot, fl, curTP, curGive, curSL,
               basketPeak, dayPL, InpDailyLoss, consecLoss, InpMaxConsecLoss, spreadPct, InpMaxSpreadPct,
               cachedSince + fl, InpTarget,
               MathMax(0.0, botPeak - (cachedSince + fl)), InpMaxDrawdown));
@@ -750,7 +828,7 @@ void OnTick()
      }
 
    // 2. Chot lo ca chum
-   if(n > 0 && fl <= -InpBasketSL)
+   if(n > 0 && fl <= -curSL)
      {
       CloseAll(StringFormat("cham chot lo ca chum (%.2f USD)", fl));
       cooldownUntil = TimeCurrent() + InpCooldownMin * 60;
@@ -786,10 +864,10 @@ void OnTick()
      {
       if(fl > basketPeak)
          basketPeak = fl;
-      if(basketPeak >= InpBasketTP)
+      if(basketPeak >= curTP)
         {
-         double lockAt = MathMax(basketPeak - InpTrailGive, InpBasketTP * 0.5);
-         if(InpTrailGive <= 0 || fl <= lockAt)
+         double lockAt = MathMax(basketPeak - curGive, curTP * 0.5);
+         if(curGive <= 0 || fl <= lockAt)
            {
             if(CloseAll(StringFormat("chot lai ca chum (+%.2f USD, dinh %.2f)", fl, basketPeak)))
               {
@@ -888,22 +966,60 @@ void OnTick()
                st = StringFormat("Thi truong qua im (ATR %.2f%% < %.2f%%), cho...", atrPct, InpMinAtrPct);
             else
               {
-               int d = TrendDir();
-               if(d == 0)
-                  st = "Chua ro xu huong (EMA M15), cho...";
+               int    d = 0, sc = 0;
+               string info = "";
+               if(InpDirection == HAI_CHIEU)
+                 {
+                  // Cham diem ca 2 chieu, chon chieu manh hon (phai co tin hieu canh diem vao)
+                  string ib = "", isl = "";
+                  bool   tb = false, ts = false;
+                  int    sb = EntryScore(1, ib, tb), ss = EntryScore(-1, isl, ts);
+                  int    eb = tb ? sb : -1, es = ts ? ss : -1;
+                  if(eb >= InpMinScore && eb > es)
+                    {
+                     d = 1;
+                     sc = sb;
+                     info = ib;
+                    }
+                  else
+                     if(es >= InpMinScore && es > eb)
+                       {
+                        d = -1;
+                        sc = ss;
+                        info = isl;
+                       }
+                     else
+                        st = StringFormat("Cho tin hieu (can %d/4) | BUY %d: %s | SELL %d: %s",
+                                          InpMinScore, sb, ib, ss, isl);
+                 }
                else
                  {
-                  string info;
-                  int sc = EntryScore(d, info);
-                  if(sc < InpMinScore)
-                     st = StringFormat("Xu huong %s, diem %d/%d (can %d): %s",
-                                       d > 0 ? "TANG" : "GIAM", sc, 4, InpMinScore, info);
+                  int td = TrendDir();
+                  bool tm = false;
+                  if(td == 0)
+                     st = "Chua ro xu huong (EMA M15), cho...";
+                  else
+                    {
+                     sc = EntryScore(td, info, tm);
+                     if(tm && sc >= InpMinScore)
+                        d = td;
+                     else
+                        st = StringFormat("Xu huong %s, diem %d/4 (can %d + RSI/BB): %s",
+                                          td > 0 ? "TANG" : "GIAM", sc, InpMinScore, info);
+                    }
+                 }
+               if(d != 0)
+                 {
+                  string pwhy = "";
+                  if(!PlanBasket(d > 0 ? tk.ask : tk.bid, atr, pwhy))
+                     st = pwhy;
                   else
                      if(OpenOrder(d, StringFormat("Scalp %s 1 (%d/4)", d > 0 ? "BUY" : "SELL", sc)))
                        {
                         lastEntryBar = bar;
                         basketPeak   = 0;
-                        st = StringFormat("Da vao lenh dau, diem %d/4: %s", sc, info);
+                        SaveState();
+                        st = StringFormat("Da vao %s, diem %d/4: %s", d > 0 ? "BUY" : "SELL", sc, info);
                        }
                  }
               }
