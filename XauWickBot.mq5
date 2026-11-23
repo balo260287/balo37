@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| XauWickBot.mq5  v1.0                                             |
+//| XauWickBot.mq5  v1.1                                             |
 //| Bot scalp VANG M1 theo mo hinh RUT RAU + DCA - CHI CHAY DEMO     |
 //| Symbol: XAUUSDm (Exness)   Magic: 290001                         |
 //|                                                                  |
@@ -12,12 +12,14 @@
 //|  3. Vao lenh o dau nen tiep theo, theo huong rau.                |
 //|  4. Gia di nguoc InpDcaStep USD -> nhoi them (toi da MaxLayers). |
 //|  5. Ca chum lai >= InpBasketTP -> dong. Lo >= InpBasketSL -> cat.|
+//|     Rieng khi gia DAY MANH pha dinh/day: gong lai toi vung FVG   |
+//|     chua lap gan nhat, khoa san 1 phan lai + doi lai tu dinh.    |
 //|  Loc: gio phien London/NY, gio chuyen ngay, tin USD manh,        |
 //|       spread, toi Thu 6. Co SL that tren san cho ca chum.        |
 //|  Dung: lo ngay / thua lien tiep / sut von / dat muc tieu.        |
 //+------------------------------------------------------------------+
 #property copyright "XauWickBot"
-#property version   "1.00"
+#property version   "1.10"
 
 #include <Trade\Trade.mqh>
 
@@ -44,6 +46,17 @@ input double InpBreakTol      = 0.10;   // Nen xac nhan duoc choc qua day/dinh r
 input bool   InpUseTrend      = true;   // Chi danh rau CUNG xu huong EMA M5 (khuyen bat)
 input int    InpEmaPeriod     = 50;     // EMA M5
 
+input group "=== Song manh: gong lai toi vung FVG ==="
+input bool            InpRunner      = true;      // Dat TP ma gia DAY MANH pha dinh/day -> gong lai, khong chot ngay
+input double          InpPushAtr     = 1.2;       // Nen day manh: than nen >= ATR M1 x he so nay
+input int             InpBreakBars   = 10;        // Pha dinh/day cua bao nhieu nen M1 gan nhat
+input ENUM_TIMEFRAMES InpFvgTF       = PERIOD_M5; // Khung tim vung FVG (khoang trong gia)
+input int             InpFvgLookback = 60;        // Tim FVG trong bao nhieu nen
+input double          InpFvgMin      = 0.30;      // FVG phai rong it nhat (USD gia)
+input double          InpFvgMinDist  = 0.50;      // FVG phai cach gia it nhat (USD gia) moi dang gong
+input double          InpRunLockPct  = 60;        // Khi gong: khoa chac % cua TP goc (60% x 0.5 = 0.3 USD)
+input double          InpRunGive     = 0.40;      // Khi gong: lui bao nhieu USD tu dinh lai thi dong
+
 input group "=== Bo loc ==="
 input double InpMaxSpread     = 0.35;   // Spread toi da (USD gia)
 input int    InpStartHour     = 7;      // Gio bat dau mo lenh (gio server) - London
@@ -60,6 +73,12 @@ input long   InpMagic         = 290001; // Magic number (khac bot BTC)
 
 CTrade   trade;
 int      emaH          = INVALID_HANDLE;
+int      atrM1H        = INVALID_HANDLE;
+double   basketPeak    = 0;     // dinh lai cua chum
+bool     runner        = false; // dang gong lai theo song manh
+double   runTarget     = 0;     // gia muc tieu (vung FVG), 0 = khong co -> chi doi lai
+double   runLock       = 0;     // lai toi thieu da khoa (USD)
+double   slLockSet     = 0;     // muc khoa lai da dat SL tren san
 datetime lastEntryBar  = 0;
 datetime lastFailTime  = 0;
 int      lastCount     = -1;
@@ -139,8 +158,9 @@ int OnInit()
    if(StringFind(_Symbol, "XAU") < 0)
       Print("XauWickBot: CANH BAO - bot viet cho VANG (XAUUSDm), dang gan vao ", _Symbol);
 
-   emaH = iMA(_Symbol, PERIOD_M5, InpEmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
-   if(emaH == INVALID_HANDLE)
+   emaH   = iMA(_Symbol, PERIOD_M5, InpEmaPeriod, 0, MODE_EMA, PRICE_CLOSE);
+   atrM1H = iATR(_Symbol, PERIOD_M1, 14);
+   if(emaH == INVALID_HANDLE || atrM1H == INVALID_HANDLE)
      {
       Alert("XauWickBot: khong tao duoc EMA.");
       return(INIT_FAILED);
@@ -191,7 +211,7 @@ int OnInit()
    initOk        = true;
    SaveState();
 
-   Alert(StringFormat("XauWickBot v1.0 DA CHAY tren %s | lot %.2f | TP +%.2f / SL -%.2f USD | DCA %d lenh, cach %.2f ... OK",
+   Alert(StringFormat("XauWickBot v1.1 DA CHAY tren %s | lot %.2f | TP +%.2f / SL -%.2f USD | DCA %d lenh, cach %.2f ... OK",
                       _Symbol, NormLot(InpLot), InpBasketTP, InpBasketSL, InpMaxLayers, InpDcaStep));
    return(INIT_SUCCEEDED);
   }
@@ -208,6 +228,8 @@ void OnDeinit(const int reason)
      }
    if(emaH != INVALID_HANDLE)
       IndicatorRelease(emaH);
+   if(atrM1H != INVALID_HANDLE)
+      IndicatorRelease(atrM1H);
    Comment("");
   }
 
@@ -500,6 +522,126 @@ void SyncBasketSL()
   }
 
 //+------------------------------------------------------------------+
+// Gia dang DAY MANH theo huong dir va pha dinh/day InpBreakBars nen M1?
+bool StrongPush(int dir)
+  {
+   double a[1];
+   if(CopyBuffer(atrM1H, 0, 1, 1, a) != 1 || a[0] <= 0)
+      return(false);
+   double need = a[0] * InpPushAtr;
+   int    hiIdx = iHighest(_Symbol, PERIOD_M1, MODE_HIGH, InpBreakBars, 2);
+   int    loIdx = iLowest(_Symbol, PERIOD_M1, MODE_LOW, InpBreakBars, 2);
+   if(hiIdx < 0 || loIdx < 0)
+      return(false);
+   double hh = iHigh(_Symbol, PERIOD_M1, hiIdx), ll = iLow(_Symbol, PERIOD_M1, loIdx);
+   double o1 = iOpen(_Symbol, PERIOD_M1, 1), c1 = iClose(_Symbol, PERIOD_M1, 1);
+   double o0 = iOpen(_Symbol, PERIOD_M1, 0), c0 = iClose(_Symbol, PERIOD_M1, 0);
+   if(dir > 0)
+      return((c1 - o1 >= need && c1 > hh) || (c0 - o0 >= need && c0 > hh));
+   return((o1 - c1 >= need && c1 < ll) || (o0 - c0 >= need && c0 < ll));
+  }
+
+// Vung FVG gan nhat CHUA lap theo huong dir. Tra ve gia cham vao vung (0 = khong co).
+// FVG tang: day nen i > dinh nen i+2. FVG giam: dinh nen i < day nen i+2.
+double FvgTarget(int dir, double price)
+  {
+   double best = 0;
+   int    bars = MathMin(InpFvgLookback, iBars(_Symbol, InpFvgTF) - 3);
+   for(int i = 1; i <= bars; i++)
+     {
+      double hA = iHigh(_Symbol, InpFvgTF, i + 2), lA = iLow(_Symbol, InpFvgTF, i + 2);
+      double hC = iHigh(_Symbol, InpFvgTF, i),     lC = iLow(_Symbol, InpFvgTF, i);
+      double bot = 0, top = 0;
+      if(lC > hA)
+        {
+         bot = hA;
+         top = lC;
+        }
+      else
+         if(hC < lA)
+           {
+            bot = hC;
+            top = lA;
+           }
+         else
+            continue;
+      if(top - bot < InpFvgMin)
+         continue;
+      // Gia da di qua vung tu luc hinh thanh den gio?
+      double hiAfter = 0, loAfter = 0;
+      if(i > 1)
+        {
+         int hI = iHighest(_Symbol, InpFvgTF, MODE_HIGH, i, 0);
+         int lI = iLowest(_Symbol, InpFvgTF, MODE_LOW, i, 0);
+         hiAfter = (hI >= 0) ? iHigh(_Symbol, InpFvgTF, hI) : 0;
+         loAfter = (lI >= 0) ? iLow(_Symbol, InpFvgTF, lI) : 0;
+        }
+      else
+        {
+         hiAfter = MathMax(iHigh(_Symbol, InpFvgTF, 0), price);
+         loAfter = MathMin(iLow(_Symbol, InpFvgTF, 0), price);
+        }
+      if(dir > 0)
+        {
+         if(bot <= price || hiAfter >= top)   // phai nam tren gia va chua bi lap het
+            continue;
+         double t = MathMax(bot, hiAfter);
+         if(t - price >= InpFvgMinDist && (best == 0 || t < best))
+            best = t;
+        }
+      else
+        {
+         if(top >= price || (loAfter > 0 && loAfter <= bot))
+            continue;
+         double t = (loAfter > 0) ? MathMin(top, loAfter) : top;
+         if(price - t >= InpFvgMinDist && (best == 0 || t > best))
+            best = t;
+        }
+     }
+   return(best);
+  }
+
+// Keo SL tren san len muc khoa lai (chi keo theo huong co loi)
+void MoveSLToLock(int dir, double lockUsd)
+  {
+   double sumLot = 0, sumLP = 0;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+     {
+      ulong t = PositionGetTicket(i);
+      if(t == 0)
+         continue;
+      if(PositionGetString(POSITION_SYMBOL) != _Symbol || PositionGetInteger(POSITION_MAGIC) != InpMagic)
+         continue;
+      double v = PositionGetDouble(POSITION_VOLUME);
+      sumLot += v;
+      sumLP  += v * PositionGetDouble(POSITION_PRICE_OPEN);
+     }
+   if(sumLot <= 0)
+      return;
+   double avg = sumLP / sumLot;
+   double pu  = PerUnit(sumLot, avg);
+   MqlTick tk;
+   if(pu <= 0 || !SymbolInfoTick(_Symbol, tk))
+      return;
+   double minDist = (double)SymbolInfoInteger(_Symbol, SYMBOL_TRADE_STOPS_LEVEL) * _Point * 1.5 + _Point;
+   double sl = NormalizeDouble(dir > 0 ? avg + lockUsd / pu : avg - lockUsd / pu, _Digits);
+   if((dir > 0 && sl >= tk.bid - minDist) || (dir < 0 && sl <= tk.ask + minDist))
+      return;
+   for(int i = PositionsTotal() - 1; i >= 0; i--)
+     {
+      ulong t = PositionGetTicket(i);
+      if(t == 0)
+         continue;
+      if(PositionGetString(POSITION_SYMBOL) != _Symbol || PositionGetInteger(POSITION_MAGIC) != InpMagic)
+         continue;
+      double cur = PositionGetDouble(POSITION_SL);
+      bool better = (dir > 0) ? (cur == 0 || sl > cur + _Point) : (cur == 0 || sl < cur - _Point);
+      if(better && !trade.PositionModify(t, sl, PositionGetDouble(POSITION_TP)))
+         Print("XauWickBot: keo SL khoa lai loi ", trade.ResultRetcode(), " ", trade.ResultRetcodeDescription());
+     }
+  }
+
+//+------------------------------------------------------------------+
 bool OpenOrder(int dir, string cmt)
   {
    if(TimeCurrent() - lastFailTime < 10)
@@ -549,7 +691,7 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spread)
   {
    Comment(StringFormat(
-              "XauWickBot v1.0 (%s) - rut rau M1 + DCA\n"
+              "XauWickBot v1.1 (%s) - rut rau M1 + DCA\n"
               "Trang thai: %s\n"
               "So lenh: %d / %d   (nhoi cach %.2f USD)\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f | chot lo -%.2f)\n"
@@ -580,10 +722,18 @@ void OnTick()
 
    if(n != lastCount)
      {
+      bool wasRunner = runner; // dang gong ma san cat SL = chot lai, khong phai thua
+      if(n == 0)
+        {
+         runner     = false;
+         runTarget  = 0;
+         basketPeak = 0;
+         slLockSet  = 0;
+        }
       if(n > 0)
          SyncBasketSL();
       else
-         if(lastCount > 0 && !selfClosed)
+         if(lastCount > 0 && !selfClosed && !wasRunner)
            {
             // San cat SL (mat mang) hoac dong tay -> coi nhu thua 1 lan
             cooldownUntil = TimeCurrent() + InpCooldownMin * 60;
@@ -679,9 +829,48 @@ void OnTick()
       return;
      }
 
-   // 5. Chot lai chum
+   // 5. Chot lai chum - co the gong theo song manh toi vung FVG
+   if(n > 0 && fl > basketPeak)
+      basketPeak = fl;
+   if(n > 0 && runner)
+     {
+      double lock = MathMax(runLock, basketPeak - InpRunGive);
+      bool   hit  = (runTarget > 0) && ((dir > 0 && tk.bid >= runTarget) || (dir < 0 && tk.ask <= runTarget));
+      if(hit || fl <= lock)
+        {
+         if(CloseAll(StringFormat("%s (+%.2f USD, dinh %.2f)", hit ? "cham vung FVG" : "song yeu, chot khoa lai", fl, basketPeak)))
+           {
+            consecLoss = 0;
+            SaveState();
+           }
+         Panel("Vua chot lai (gong song)", n, fl, dayPL, spread);
+         return;
+        }
+      if(lock >= slLockSet + 0.05)   // keo SL tren san theo lai da khoa
+        {
+         MoveSLToLock(dir, lock);
+         slLockSet = lock;
+        }
+      Panel(StringFormat("GONG SONG: muc tieu %s | da khoa +%.2f | dinh +%.2f",
+                         runTarget > 0 ? DoubleToString(runTarget, _Digits) : "doi lai", lock, basketPeak),
+            n, fl, dayPL, spread);
+      return;
+     }
    if(n > 0 && fl >= InpBasketTP)
      {
+      MqlTick t2 = tk;
+      if(InpRunner && StrongPush(dir))
+        {
+         runner    = true;
+         runTarget = FvgTarget(dir, dir > 0 ? t2.bid : t2.ask);
+         runLock   = InpBasketTP * InpRunLockPct / 100.0;
+         MoveSLToLock(dir, runLock);
+         slLockSet = runLock;
+         Print("XauWickBot: gia day manh -> gong lai, muc tieu FVG ",
+               runTarget > 0 ? DoubleToString(runTarget, _Digits) : "(khong co, doi lai)");
+         Panel("Day manh -> bat dau gong song", n, fl, dayPL, spread);
+         return;
+        }
       if(CloseAll(StringFormat("chot lai chum (+%.2f USD)", fl)))
         {
          consecLoss = 0;
