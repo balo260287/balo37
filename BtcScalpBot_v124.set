@@ -1,11 +1,11 @@
-; BtcScalpBot v1.23 - bo thong so khuyen nghi (CHI DUNG CHO v1.22)
+; BtcScalpBot v1.24 - bo thong so khuyen nghi (CHI DUNG CHO v1.22)
 ; === Von & rui ro ===
 InpLot=0.01
-InpMaxLayers=2
-InpBasketSL=3.5
+InpMaxLayers=1
+InpBasketSL=2.0
 InpHardSLMult=1.3
 InpDailyLoss=12.0
-InpMaxConsecLoss=3
+InpMaxConsecLoss=4
 InpMaxDrawdown=25.0
 InpTarget=100.0
 InpResetStats=false
@@ -38,8 +38,8 @@ InpSkipWeekend=true
 InpStartHour=0
 InpEndHour=24
 ; === Chot lai ===
-InpBasketTP=1.5
-InpTrailGive=0.4
-InpMaxHoldMin=90
+InpBasketTP=3.0
+InpTrailGive=0.6
+InpMaxHoldMin=0
 ; === Khac ===
 InpMagic=280001

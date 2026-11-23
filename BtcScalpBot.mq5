@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//| BtcScalpBot.mq5  v1.23                                           |
+//| BtcScalpBot.mq5  v1.24                                           |
 //| Bot luoi (nhoi lenh) BTC CO CHOT LO - CHI CHAY TAI KHOAN DEMO    |
 //| Symbol: BTCUSDm (Exness)   Magic: 280001                         |
 //|                                                                  |
@@ -21,7 +21,7 @@
 //|  - Lai cua RIENG bot (tu luc gan) >= InpTarget -> dung han.      |
 //+------------------------------------------------------------------+
 #property copyright "BtcScalpBot"
-#property version   "1.23"
+#property version   "1.24"
 
 #include <Trade\Trade.mqh>
 
@@ -34,11 +34,11 @@ enum ENUM_HUONG
 
 input group "=== Von & rui ro ==="
 input double InpLot           = 0.01;   // Lot moi lenh
-input int    InpMaxLayers     = 2;      // So lenh toi da cung luc
-input double InpBasketSL      = 3.5;    // Chot lo ca chum (USD)
+input int    InpMaxLayers     = 1;      // So lenh toi da cung luc (1 = khong nhoi lenh)
+input double InpBasketSL      = 2.0;    // Chot lo ca chum (USD)
 input double InpHardSLMult    = 1.3;    // SL that tren san = BasketSL x he so nay
 input double InpDailyLoss     = 12.0;   // Lo toi da trong ngay (USD)
-input int    InpMaxConsecLoss = 3;      // Thua lien tiep bao nhieu chum thi nghi het ngay (0 = tat)
+input int    InpMaxConsecLoss = 4;      // Thua lien tiep bao nhieu chum thi nghi het ngay (0 = tat)
 input double InpMaxDrawdown   = 25.0;   // Lai bot tut tu dinh qua X USD -> DUNG HAN (0 = tat)
 input double InpTarget        = 100.0;  // Lai cua bot dat muc nay -> dung (USD)
 input bool   InpResetStats    = false;  // true = tinh lai muc tieu tu dau (bat 1 lan roi tat)
@@ -74,9 +74,9 @@ input int             InpStartHour   = 0;             // Gio bat dau mo chum moi
 input int             InpEndHour     = 24;            // Gio ket thuc mo chum moi (gio server)
 
 input group "=== Chot lai ==="
-input double InpBasketTP     = 1.5;    // Chot lai ca chum (USD) - moc bat dau doi lai
-input double InpTrailGive    = 0.4;    // Lui bao nhieu USD tu dinh thi dong (0 = dong ngay khi dat TP)
-input int    InpMaxHoldMin   = 90;     // Giu chum qua X phut -> dong khi >= hoa von (0 = tat)
+input double InpBasketTP     = 3.0;    // Chot lai ca chum (USD) - moc bat dau doi lai
+input double InpTrailGive    = 0.6;    // Lui bao nhieu USD tu dinh thi dong (0 = dong ngay khi dat TP)
+input int    InpMaxHoldMin   = 0;      // Giu chum qua X phut -> dong khi >= hoa von (0 = tat)
 
 input group "=== Khac ==="
 input long   InpMagic        = 280001; // Magic number
@@ -165,6 +165,8 @@ int OnInit()
             "EMA nhanh < EMA cham, HardSLMult >= 1, MinScore 0..4, gio 0..24).");
       return(INIT_PARAMETERS_INCORRECT);
      }
+   if(InpBasketTP - InpTrailGive <= InpBasketSL)
+      Print("BtcScalpBot: CANH BAO - lai toi thieu (TP - TrailGive) khong lon hon chot lo (SL).");
    if(InpTrailGive >= InpBasketTP)
       Print("BtcScalpBot: CANH BAO - InpTrailGive >= InpBasketTP, lai chot ra se rat nho.");
 
@@ -227,7 +229,7 @@ int OnInit()
    lastCount = -1; // ep dong bo SL chung o tick dau
    initOk    = true;
 
-   Alert(StringFormat("BtcScalpBot v1.23 DA CHAY tren %s | lot %.2f | toi da %d lenh | TP %.2f / SL %.2f USD ... OK",
+   Alert(StringFormat("BtcScalpBot v1.24 DA CHAY tren %s | lot %.2f | toi da %d lenh | TP %.2f / SL %.2f USD ... OK",
                       _Symbol, NormLot(InpLot), InpMaxLayers, InpBasketTP, InpBasketSL));
    return(INIT_SUCCEEDED);
   }
@@ -639,7 +641,7 @@ bool OpenOrder(int dir, string cmt)
 void Panel(string st, int n, double fl, double dayPL, double spreadPct)
   {
    Comment(StringFormat(
-              "BtcScalpBot v1.23 (%s)\n"
+              "BtcScalpBot v1.24 (%s)\n"
               "Trang thai: %s\n"
               "So lenh: %d / %d\n"
               "Lai/lo dang mo: %.2f USD   (chot lai +%.2f, lui %.2f | chot lo -%.2f)\n"
