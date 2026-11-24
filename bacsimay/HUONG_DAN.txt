@@ -1,0 +1,11 @@
+BAC SI MAY - TU NGO MT5 VA BAO CAO
+==================================
+1. Tai thu muc "bacsimay" nay ve, chep vao C:\BacSiMay
+2. Bam dup khong_ngu.bat         -> may khong ngu khi cam sac (bot chay xuyen dem)
+3. Bam dup cai_lich_kiem_tra.bat -> moi 1 gio may tu kiem tra MT5
+4. Xem bao cao: mo C:\BacSiMay\baocao\MOI_NHAT.txt
+   Neu co van de (MT5 tat, mat mang, bot im lang, Algo Trading tat...) se hien bang canh bao.
+5. Muon Claude doc giup: chup anh / dan noi dung MOI_NHAT.txt vao chat.
+
+Go bo: bam dup go_lich_kiem_tra.bat va khoi_phuc_ngu.bat
+Cac script chi DOC thong tin, khong dat lenh, khong sua bot, khong can mat khau.
