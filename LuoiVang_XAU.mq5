@@ -15,6 +15,10 @@
 //| Moi chuoi BUY / SELL co Magic rieng. Khong dat SL/TP tren san    |
 //| (bot tu dong lenh) -> khong bi loi "bad stops".                  |
 //| 1 pip = 0.01 gia vang (500 pip = 5 gia).                          |
+//| v1.20: DCA toi da 3 lenh, KHONG gap lot (moi lenh 0.01),         |
+//|        gia chay nhanh -> nghi 1 tieng roi chay tiep,             |
+//|        lo 20 USD hoac lai 30 USD trong ngay -> dong het, dung     |
+//|        den ngay hom sau.                                         |
 //| v1.10 toi uu:                                                    |
 //|  - Loc xu huong lon EMA200 H1: lenh dau phai thuan ca M1 va H1.  |
 //|  - Khoang luoi tu gian theo bien dong (ATR H1) khi vang chay manh.|
@@ -22,7 +26,7 @@
 //|  - Khoa som hon (20%), cat lo cung 35%, toi da 8 lenh/chuoi.      |
 //+------------------------------------------------------------------+
 #property copyright "LuoiVang_XAU"
-#property version   "1.10"
+#property version   "1.20"
 #property description "Grid XAUUSDm: vao theo EMA50 M1, nhoi luoi gian cach nhan doi, khoa hedge thong minh."
 
 #include <Trade/Trade.mqh>
@@ -56,12 +60,12 @@ input int    InpFridayStop    = 20;      // Thu 6 tu gio nay khong mo chuoi moi 
 //--- LUOI
 input group "=== LUOI (GRID) ==="
 input bool   InpUseGrid        = true;   // Bat luoi (nhoi lenh nguoc gia)
-input double InpGridPips       = 500;    // Khoang cach lenh (pip) = 5 gia
-input double InpGridMult       = 2.0;    // He so nhan khoang cach moi lenh
-input double InpGridATRMult    = 0.5;    // Khoang luoi toi thieu = ATR(H1) x he so (0 = tat)
-input int    InpMaxOrders      = 8;      // So lenh toi da moi chuoi
+input double InpGridPips       = 400;    // Khoang cach lenh (pip) = 4 gia
+input double InpGridMult       = 1.0;    // He so nhan khoang cach moi lenh
+input double InpGridATRMult    = 0.0;    // Khoang luoi toi thieu = ATR(H1) x he so (0 = tat)
+input int    InpMaxOrders      = 3;      // So lenh toi da moi chuoi (DCA)
 input int    InpGridMinMinutes = 0;      // Cach nhau toi thieu giua 2 lenh luoi (phut)
-input double InpLotAdd         = 0.01;   // Lot cong them moi tang
+input double InpLotAdd         = 0.0;    // Lot cong them moi tang (0 = khong gap lot)
 input int    InpOrdersPerLevel = 1;      // So lenh moi tang truoc khi tang lot
 input double InpMaxLot         = 0.10;   // Lot toi da 1 lenh
 
@@ -80,7 +84,7 @@ input double InpATRMaxPips  = 80;        // ATR toi da (pip)
 
 //--- KHOA
 input group "=== KHOA LENH (HEDGE) ==="
-input bool   InpUseLock           = true;   // Bat khoa khi lo nang
+input bool   InpUseLock           = false;  // Bat khoa khi lo nang
 input double InpLockDDPct         = 20.0;   // Lo chuoi cham % so du -> khoa
 input double InpLockCloseResult   = 0.0;    // Tong ket qua de dong ca chuoi bi khoa (USD)
 input int    InpLockMaxHours      = 0;      // Khoa toi da bao nhieu gio roi dong het (0 = khong gioi han)
@@ -93,8 +97,15 @@ input double InpCloseProfitInLock = 1.0;    // Dang khoa: dong lenh chuoi co lai
 //--- AN TOAN
 input group "=== AN TOAN ==="
 input double InpBasketStopPct = 35.0;    // Cat lo cung: tong lo chuoi cham % so du (0 = tat - KHONG nen)
-input double InpDailyGoal     = 0.0;     // Muc tieu lai ngay (USD), 0 = tat
-input double InpDailyMaxLoss  = 0.0;     // Lo toi da ngay (USD), 0 = tat
+input double InpDailyGoal     = 30.0;    // Lai du X USD trong ngay -> dong het, dung den mai (0 = tat)
+input double InpDailyMaxLoss  = 20.0;    // Lo X USD trong ngay (tinh ca lenh dang mo) -> dong het, dung den mai (0 = tat)
+
+//--- GIA CHAY NHANH
+input group "=== NGHI KHI GIA CHAY NHANH ==="
+input bool   InpUseFastPause   = true;   // Bat nghi khi gia chay nhanh
+input double InpFastMovePips   = 500;    // Gia chay qua X pip (= 5 gia) ...
+input int    InpFastMoveMinutes = 15;    // ... trong vong X phut
+input int    InpPauseMinutes   = 60;     // -> nghi vao lenh moi / nhoi lenh X phut
 input string InpCloseAllTime  = "";      // Dong het luc HH:MM (gio may chu), trong = tat
 input bool   InpShowPanel     = true;    // Hien bang thong tin
 
@@ -128,6 +139,7 @@ SideState gBuy, gSell;
 datetime  gLastBar = 0;
 bool      gStoppedToday = false;
 datetime  gStopDay = 0;
+datetime  gPauseUntil = 0;   // nghi do gia chay nhanh
 string    gStatus = "Dang khoi dong...";
 
 void ShowPanel(const double dayPL);
@@ -191,7 +203,7 @@ int OnInit()
    LoadState(gBuy);
    LoadState(gSell);
 
-   Alert("LuoiVang_XAU v1.10 DA CHAY tren ", _Symbol, " - OK");
+   Alert("LuoiVang_XAU v1.20 DA CHAY tren ", _Symbol, " - OK");
    return(INIT_SUCCEEDED);
   }
 
@@ -329,6 +341,28 @@ bool EntryFilterOk(string &why)
   }
 
 //+------------------------------------------------------------------+
+//| Gia chay qua X pip trong Y phut gan nhat -> nghi Z phut           |
+//+------------------------------------------------------------------+
+bool FastMovePause()
+  {
+   if(!InpUseFastPause) return false;
+   if(TimeCurrent() < gPauseUntil) return true;
+   int bars = MathMax(1, InpFastMoveMinutes);
+   int hi = iHighest(_Symbol, PERIOD_M1, MODE_HIGH, bars, 0);
+   int lo = iLowest(_Symbol, PERIOD_M1, MODE_LOW, bars, 0);
+   if(hi < 0 || lo < 0) return false;
+   double range = iHigh(_Symbol, PERIOD_M1, hi) - iLow(_Symbol, PERIOD_M1, lo);
+   if(range >= InpFastMovePips * gPip)
+     {
+      gPauseUntil = TimeCurrent() + InpPauseMinutes * 60;
+      Print("Gia chay nhanh: ", DoubleToString(range, _Digits), " trong ", bars,
+            " phut -> nghi den ", TimeToString(gPauseUntil, TIME_DATE | TIME_MINUTES));
+      return true;
+     }
+   return false;
+  }
+
+//+------------------------------------------------------------------+
 //| Khoang cach luoi co ban: max(GridPips, ATR H1 x he so)            |
 //+------------------------------------------------------------------+
 double GridBase()
@@ -407,7 +441,7 @@ void CloseProfitableInLock(SideState &s)
 //+------------------------------------------------------------------+
 //| Xu ly 1 chuoi (BUY hoac SELL)                                     |
 //+------------------------------------------------------------------+
-void ProcessSide(SideState &s, const int trend, const bool newBar, const bool canEnter)
+void ProcessSide(SideState &s, const int trend, const bool newBar, const bool canEnter, const bool canGrid)
   {
    Basket b, l;
    GetBasket(s.magic, b);
@@ -467,7 +501,7 @@ void ProcessSide(SideState &s, const int trend, const bool newBar, const bool ca
         }
 
       //--- Nhoi luoi
-      if(InpUseGrid && b.count < InpMaxOrders &&
+      if(InpUseGrid && canGrid && b.count < InpMaxOrders &&
          (InpGridMinMinutes <= 0 || TimeCurrent() - b.lastTime >= InpGridMinMinutes * 60))
         {
          int    n    = b.count;   // so lenh hien co -> lenh tiep theo la thu n+1
@@ -535,7 +569,7 @@ void OnTick()
    MqlTick tk;
    if(!SymbolInfoTick(_Symbol, tk) || tk.bid <= 0)
      {
-      if(InpShowPanel) Comment("LuoiVang_XAU v1.10 | ", _Symbol, "\nKhong co gia moi (thi truong dong / mat ket noi)");
+      if(InpShowPanel) Comment("LuoiVang_XAU v1.20 | ", _Symbol, "\nKhong co gia moi (thi truong dong / mat ket noi)");
       return;
      }
 
@@ -574,15 +608,19 @@ void OnTick()
    int  trend    = Trend();
    string fwhy = "";
    bool filterOk = EntryFilterOk(fwhy);
-   bool canEnter = !gStoppedToday && !IsCloseAllTime() && filterOk;
-   ProcessSide(gBuy,  trend, newBar, canEnter);
-   ProcessSide(gSell, trend, newBar, canEnter);
+   bool paused   = FastMovePause();
+   bool canEnter = !gStoppedToday && !IsCloseAllTime() && filterOk && !paused;
+   bool canGrid  = !gStoppedToday && !paused;
+   ProcessSide(gBuy,  trend, newBar, canEnter, canGrid);
+   ProcessSide(gSell, trend, newBar, canEnter, canGrid);
 
    gStatus = gStoppedToday ? "DA DUNG HOM NAY - tu chay lai ngay mai"
              : (trend > 0 ? "Xu huong TANG (tren EMA" : trend < 0 ? "Xu huong GIAM (duoi EMA" : "Dang tai EMA (")
                + IntegerToString(InpEmaPeriod) + ")";
    if(trend == 0 && !gStoppedToday) gStatus = "M1 va H1 nguoc chieu - dung ngoai";
    if(!filterOk && !gStoppedToday) gStatus += " | " + fwhy;
+   if(paused && !gStoppedToday)
+      gStatus = "GIA CHAY NHANH - nghi den " + TimeToString(gPauseUntil, TIME_MINUTES) + " (van quan ly lenh dang mo)";
    if(InpShowPanel) ShowPanel(dayPL);
   }
 
@@ -592,7 +630,7 @@ void ShowPanel(const double dayPL)
    Basket b1, b2, l1, l2;
    GetBasket(gBuy.magic, b1); GetBasket(gSell.magic, b2);
    GetBasket(gBuy.lockMagic, l1); GetBasket(gSell.lockMagic, l2);
-   string s = "LuoiVang_XAU v1.10 | " + _Symbol + "\n";
+   string s = "LuoiVang_XAU v1.20 | " + _Symbol + "\n";
    s += "Trang thai: " + gStatus + "\n";
    s += "BUY : " + IntegerToString(b1.count) + "/" + IntegerToString(InpMaxOrders) + " lenh, "
       + DoubleToString(b1.lots, 2) + " lot, P/L " + DoubleToString(b1.profit, 2)
@@ -605,7 +643,8 @@ void ShowPanel(const double dayPL)
    double bal = AccountInfoDouble(ACCOUNT_BALANCE);
    s += "Khoa khi lo: -" + DoubleToString(bal * InpLockDDPct / 100.0, 2)
       + " | Cat lo cung: " + (InpBasketStopPct > 0 ? "-" + DoubleToString(bal * InpBasketStopPct / 100.0, 2) : "TAT") + "\n";
-   s += "P/L hom nay: " + DoubleToString(dayPL, 2);
+   s += "P/L hom nay: " + DoubleToString(dayPL, 2)
+      + " (dung khi lo -" + DoubleToString(InpDailyMaxLoss, 0) + " / lai +" + DoubleToString(InpDailyGoal, 0) + ")";
    Comment(s);
   }
 //+------------------------------------------------------------------+
