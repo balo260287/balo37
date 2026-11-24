@@ -73,7 +73,7 @@ input int           InpMaxLayers      = 5;         // So lenh toi da moi chieu
 input int           InpOrderDelaySec  = 5;         // Cach nhau toi thieu giua 2 lenh (giay)
 input bool          InpDcaOnBarClose  = true;      // Chi nhoi lenh khi co nen M1 moi
 
-//--- THONG SO BTC
+//--- THONG SO VANG
 input group "=== VANG - tinh theo % gia (gia 3600 -> 0.01% = 0.36) ==="
 input double InpXauGridPct        = 0.10;   // Khoang cach nhoi (%) ~3.6 gia
 input double InpXauTPPct          = 0.08;   // Chot loi tu gia trung binh (%) ~2.9 gia
