@@ -48,11 +48,13 @@ foreach ($d in $dirs) {
     if ($j) {
         $hit = @(Get-Content $j.FullName -Encoding Unicode -Tail 500 |
                  Select-String 'failed|error|disabled|rejected|removed|no connection|connection lost|not enough|invalid' |
+                 Where-Object { $_ -notmatch 'balance management' } |
                  Select-Object -Last 10)
         W "    Journal - loi gan nhat:"
         if ($hit.Count) {
             $hit | ForEach-Object { W "      $_" }
-            if ($hit | Select-String 'disabled|investor') { $canhBao.Add("Journal: Algo Trading bi TAT ($origin)") }
+            if ($hit | Select-String 'automated trading is disabled|disabled by server|investor') { $canhBao.Add("Journal: Algo Trading bi TAT ($origin)") }
+            if ($hit | Select-String 'bad stops|invalid stops') { $canhBao.Add("Journal: bot dat SL/TP qua gan gia (bad stops) ($origin)") }
             if ($hit | Select-String 'removed')           { $canhBao.Add("Journal: bot bi GO khoi chart ($origin)") }
         } else { W "      (khong co loi)" }
     }
